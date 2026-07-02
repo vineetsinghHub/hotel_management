@@ -1,0 +1,134 @@
+{
+  "theme_archetype": "Organic & Earthy / Luxury Hybrid",
+  "theme": "LIGHT",
+  "brand_name": "Aura Hotels",
+  "description": "Enterprise-grade luxury hospitality SaaS platform representing ONE heritage luxury property.",
+  "colors": {
+    "background": "#FAFAF8",
+    "cards": "#FFFFFF",
+    "primary": "#4F46E5",
+    "accent": "#C9A227",
+    "text_primary": "#0F172A",
+    "text_secondary": "#64748B",
+    "border": "#E2E8F0",
+    "success": "#10B981",
+    "error": "#F43F5E"
+  },
+  "typography": {
+    "fonts": {
+      "headings": "'Cormorant Garamond', serif",
+      "body": "'Plus Jakarta Sans', sans-serif",
+      "numbers_prices": "'JetBrains Mono', monospace"
+    },
+    "scale": {
+      "h1": "text-5xl sm:text-6xl tracking-tight leading-none",
+      "h2": "text-4xl sm:text-5xl tracking-tight",
+      "h3": "text-2xl sm:text-3xl",
+      "h4": "text-xl sm:text-2xl",
+      "body": "text-base leading-relaxed",
+      "labels": "text-xs tracking-[0.2em] uppercase font-medium",
+      "prices": "text-lg sm:text-xl font-medium tracking-tight"
+    }
+  },
+  "spacing_and_layout": {
+    "grid": "8pt grid system",
+    "padding": {
+      "section": "py-20 md:py-32",
+      "card": "p-8",
+      "container": "px-4 md:px-8 max-w-7xl mx-auto"
+    },
+    "border_radius": {
+      "default": "20px",
+      "tailwind_class": "rounded-[20px]"
+    },
+    "alignment": "Perfect alignment, editorial grid logic, ample negative space.",
+    "borders": "Minimal, 1px solid #E2E8F0"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#4F46E5] text-white rounded-[20px] px-8 py-3 shadow-[0_4px_14px_rgba(79,70,229,0.3)] hover:-translate-y-0.5 transition-all duration-300",
+      "secondary": "bg-transparent text-[#0F172A] border border-[#E2E8F0] rounded-[20px] px-8 py-3 hover:bg-[#FAFAF8] transition-all duration-300"
+    },
+    "cards": {
+      "style": "bg-[#FFFFFF] rounded-[20px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E2E8F0] overflow-hidden",
+      "hover": "hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-500"
+    },
+    "glassmorphism": {
+      "style": "backdrop-blur-xl bg-white/70 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-[20px]"
+    },
+    "inputs": {
+      "style": "bg-[#FAFAF8] border border-[#E2E8F0] rounded-[12px] px-4 py-3 focus:ring-2 focus:ring-[#4F46E5]/20 focus:border-[#4F46E5] outline-none transition-all text-[#0F172A]"
+    }
+  },
+  "animations": {
+    "hover": "Smooth transform translations and subtle box-shadow expansions.",
+    "transitions": "all 0.3s ease-in-out",
+    "page_load": "Fade in and slight slide up (Framer Motion recommended)."
+  },
+  "images": {
+    "hero_palace": [
+      "https://images.unsplash.com/photo-1523544545175-92e04b96d26b?ixlib=rb-4.1.0&q=85",
+      "https://images.pexels.com/photos/1719173/pexels-photo-1719173.jpeg"
+    ],
+    "suites": [
+      "https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_22346ac129_d75ed854f52a97fc.png",
+      "https://images.unsplash.com/photo-1759223198981-661cadbbff36?ixlib=rb-4.1.0&q=85",
+      "https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_d46332f05e_4efb7595e3f704b0.png"
+    ],
+    "spa": [
+      "https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_02eae1ea9a_87c577a77e08c958.png",
+      "https://images.pexels.com/photos/7031704/pexels-photo-7031704.jpeg"
+    ],
+    "dining": [
+      "https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_d76a1177a3_4114ba837b246c3f.png",
+      "https://images.pexels.com/photos/24433378/pexels-photo-24433378.jpeg"
+    ],
+    "experiences": [
+      "https://storage.googleapis.com/uxpilot-auth.appspot.com/gen_35af14fd65_027e4f8f48960ffc.png",
+      "https://images.pexels.com/photos/33485963/pexels-photo-33485963.jpeg",
+      "https://images.pexels.com/photos/35736416/pexels-photo-35736416.jpeg",
+      "https://images.unsplash.com/photo-1581882508401-cefd5e98dc7d?ixlib=rb-4.1.0&q=85"
+    ],
+    "pool": [
+      "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?ixlib=rb-4.1.0&q=85"
+    ]
+  },
+  "pages_guidelines": {
+    "1_homepage": {
+      "hero": "Cinematic heritage palace photography with dark cinematic overlay (bg-black/30). Editorial heading centered or perfectly left-aligned. 'Book Your Stay' primary CTA.",
+      "booking_widget": "Floating glassmorphism container overlapping the hero section. Contains Date pickers, guests, promo, and search CTA.",
+      "sections": "Property Highlights (bento grid), Featured Rooms (carousel of large cards), Experiences grid, Testimonials, Gallery, Footer."
+    },
+    "2_rooms_suites": {
+      "layout": "Editorial banner followed by an asymmetric or elegant grid of room categories. Full detail cards with rich imagery."
+    },
+    "3_guest_booking": {
+      "layout": "2-column layout. Left: Guest Details Form (use error colors for validation), Upsell Section (cards for Breakfast, Spa, etc.), Booking Policies Accordion. Right: Sticky Booking Summary."
+    },
+    "4_payment": {
+      "layout": "Minimal luxury. Centered payment container. Tabs for methods. Secure badges. Success modal with confetti and QR code."
+    },
+    "5_confirmation": {
+      "layout": "Celebration illustration, Reservation ID prominently displayed (JetBrains Mono), timeline, weather widget."
+    },
+    "6_guest_dashboard": {
+      "layout": "Sidebar navigation (luxury styling, subtle active states). Main area: Upcoming Stay hero card with countdown, booking history table, loyalty points."
+    },
+    "7_experiences": {
+      "layout": "Editorial hero. Large cards for Heritage Walk, Royal Dinner, etc. Modal for details."
+    },
+    "8_dining": {
+      "layout": "Restaurant hero with chef recommendation. Menu categories. Reserve table form."
+    },
+    "9_spa": {
+      "layout": "Tranquil imagery. Treatment cards showing duration, price (JetBrains Mono). Available slots picker."
+    },
+    "10_gallery_contact": {
+      "layout": "Luxury masonry grid for images. Virtual tour section, map, elegant FAQ accordion, newsletter input."
+    }
+  },
+  "accessibility_and_testing": {
+    "data_testid": "MANDATORY: All interactive elements MUST include 'data-testid' (e.g. data-testid='book-now-btn').",
+    "contrast": "Ensure sufficient contrast, especially text over images. Use text-shadow or gradient overlays where necessary."
+  }
+}
