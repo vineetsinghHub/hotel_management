@@ -3,11 +3,26 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { PropertyMark } from "@/components/PropertyMark";
 import { rooms, experiences, spaTreatments } from "@/data/mockData";
+import ConciergeChat from "@/components/guest/ConciergeChat";
+import RoomServiceSection from "@/components/guest/RoomServiceSection";
+import DigitalKey from "@/components/guest/DigitalKey";
+import ReviewPrompt from "@/components/guest/ReviewPrompt";
+import ReferralCard from "@/components/guest/ReferralCard";
+import PhotoDiary from "@/components/guest/PhotoDiary";
+import ItineraryPlanner from "@/components/guest/ItineraryPlanner";
+import GuestCommandPalette from "@/components/guest/GuestCommandPalette";
+import ToastHistoryBell from "@/components/guest/ToastHistory";
+import { useWishlist, useCurrency } from "@/context/AppContext";
 
 const nav = [
   { id: "dashboard", label: "Dashboard", icon: "gauge" },
   { id: "bookings", label: "Bookings", icon: "calendar" },
-  { id: "dining", label: "Dining", icon: "utensils" },
+  { id: "key", label: "Digital Key", icon: "key" },
+  { id: "roomservice", label: "Room Service", icon: "utensils" },
+  { id: "itinerary", label: "Itinerary", icon: "map-location-dot" },
+  { id: "wishlist", label: "Wishlist", icon: "heart" },
+  { id: "referral", label: "Refer & Earn", icon: "gift" },
+  { id: "dining", label: "Dining", icon: "champagne-glasses" },
   { id: "spa", label: "Spa", icon: "spa" },
   { id: "experiences", label: "Experiences", icon: "compass" },
   { id: "invoices", label: "Invoices", icon: "file-invoice" },
@@ -86,6 +101,7 @@ export default function Dashboard() {
   const [addExtrasOpen, setAddExtrasOpen] = useState(false);
   const [fastCheckoutOpen, setFastCheckoutOpen] = useState(false);
   const [checkoutComplete, setCheckoutComplete] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const extrasTotal = extras.reduce((s, e) => s + e.amount, 0);
   const balanceDue = stay.grand - stay.paid + extrasTotal;
@@ -162,6 +178,8 @@ export default function Dashboard() {
     setExtras([]);
     setCheckoutComplete(true);
     toast.success("Charge approved · Ready to check out", { description: `$${settled.toLocaleString()} authorised on Visa •••• 4242. Show the QR at Front Desk.` });
+    // Prompt for review 1.2s after checkout closes
+    setTimeout(() => setReviewOpen(true), 1400);
   };
   const emailFolio = () => toast.success("Folio emailed", { description: `Sent to ${profile.email}` });
   const addExtra = (label, amount) => {
@@ -902,8 +920,42 @@ export default function Dashboard() {
               <button onClick={savePrefs} className="px-6 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="prefs-save">Save preferences</button>
             </section>
           )}
+
+          {active === "key" && (
+            <DigitalKey suite={stay.suite} roomNumber="204" resCode="AH-9F27C1" />
+          )}
+
+          {active === "roomservice" && (
+            <RoomServiceSection onAddToFolio={(label, amount) => addExtra(label, amount)} />
+          )}
+
+          {active === "itinerary" && (
+            <ItineraryPlanner />
+          )}
+
+          {active === "wishlist" && (
+            <WishlistSection />
+          )}
+
+          {active === "referral" && (
+            <ReferralCard />
+          )}
         </main>
       </div>
+
+      {/* Floating widgets */}
+      <ConciergeChat />
+      <GuestCommandPalette />
+
+      {/* Review prompt appears once check-out is complete */}
+      {reviewOpen && (
+        <ReviewPrompt
+          suite={stay.suite}
+          resCode="AH-9F27C1"
+          onClose={() => setReviewOpen(false)}
+          onSubmitted={() => setReviewOpen(false)}
+        />
+      )}
 
       {/* MODIFY MODAL */}
       {modifyOpen && (
@@ -1589,3 +1641,62 @@ const BookDinnerModal = ({ stay, onClose, onConfirm }) => {
     </div>
   );
 };
+
+// Wishlist section — lists all rooms/experiences the guest has hearted.
+const WishlistSection = () => {
+  const { wishlist, toggleWishlist } = useWishlist();
+  const { formatPrice } = useCurrency();
+  const items = useMemo(() => {
+    const out = [];
+    wishlist.forEach((key) => {
+      if (key.startsWith("room-")) {
+        const r = rooms.find((x) => `room-${x.id}` === key);
+        if (r) out.push({ id: key, type: "Suite", name: r.name, image: r.images[0], price: r.price, to: "/rooms" });
+      } else if (key.startsWith("exp-")) {
+        const e = experiences.find((x) => `exp-${x.id}` === key);
+        if (e) out.push({ id: key, type: "Experience", name: e.title, image: e.image, price: e.price, to: "/experiences" });
+      }
+    });
+    return out;
+  }, [wishlist]);
+
+  return (
+    <section className="bg-white rounded-[28px] border border-slate-200 p-8 md:p-10" data-testid="wishlist-section">
+      <p className="text-eyebrow text-[#C9A227]">Saved</p>
+      <h3 className="mt-1 font-serif text-3xl text-slate-900">Your wishlist</h3>
+      <p className="text-sm text-slate-500 mt-1">Suites and experiences you've hearted.</p>
+      {items.length === 0 ? (
+        <div className="mt-8 text-center py-12" data-testid="wishlist-empty">
+          <svg viewBox="0 0 200 160" className="w-40 h-32 mx-auto opacity-80" aria-hidden="true">
+            <path d="M100 132 C 40 92, 40 40, 70 40 C 88 40, 100 56, 100 56 C 100 56, 112 40, 130 40 C 160 40, 160 92, 100 132 Z" fill="#4F46E5" opacity="0.12" stroke="#C9A227" strokeWidth="2" />
+          </svg>
+          <p className="mt-4 font-serif text-2xl text-slate-900">Nothing saved yet</p>
+          <p className="mt-1 text-sm text-slate-500">Tap the heart on any suite or experience to save it here.</p>
+          <Link to="/rooms" className="mt-5 inline-flex px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]">Browse suites</Link>
+        </div>
+      ) : (
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((it) => (
+            <div key={it.id} className="rounded-[18px] overflow-hidden border border-slate-200 bg-white hover-lift" data-testid={`wishlist-item-${it.id}`}>
+              <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+                <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover" />
+              </div>
+              <div className="p-4">
+                <p className="text-[10px] tracking-widest uppercase text-[#C9A227]">{it.type}</p>
+                <p className="mt-1 font-serif text-lg text-slate-900 truncate">{it.name}</p>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="font-mono text-sm text-slate-900">{formatPrice(it.price)}</span>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => toggleWishlist(it.id)} className="w-9 h-9 rounded-full border border-slate-200 hover:bg-slate-50 grid place-items-center text-rose-500" aria-label="Remove" data-testid={`wishlist-remove-${it.id}`}><i className="fa-solid fa-heart text-xs"></i></button>
+                    <Link to={it.to} className="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs">Open</Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+};
+

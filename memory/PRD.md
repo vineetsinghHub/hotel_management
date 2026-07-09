@@ -53,5 +53,47 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
 - Multi-language / currency toggle
 - Loyalty program engine, gift cards, corporate rates
 
+## Frontend Polish Sprints (July 2025)
+
+### Sprint 1 — Foundations
+- Dark mode (attribute-based CSS overrides — no per-file rewrites)
+- Currency switcher (USD / INR / EUR / AED with mock FX)
+- Language switcher (EN / FR / JA / HI) with translated Navbar
+- Skeleton loaders + Empty-state SVG illustrations (reusable components)
+- Global ErrorBoundary with elegant recovery UI
+- Undo toast helper
+- prefers-reduced-motion respected
+- Focus rings + skip-link + basic a11y
+- Micro-interactions (hover-lift, press-scale)
+
+### Sprint 2 — Guest Dashboard super-charged
+- Floating Concierge Chat (scripted AI + quick actions)
+- Room Service order flow (menu, cart, tip, ETA → adds to folio)
+- Digital Key tab (rotating QR + NFC pulse animation)
+- Review prompt on check-out (5 stars + tags, stored in localStorage)
+- Referral card (share/copy code + link)
+- Photo diary (auto-curated album on completed stay)
+- Itinerary planner (dnd-kit drag-drop into time slots + PDF export)
+- Wishlist heart on RoomCard + saved list section
+- Guest command palette (`/` or `⌘K`)
+- Toast history recorder (wraps sonner globally)
+
+### Sprint 3 — Booking flow
+- Live availability calendar (60-day grid with best-price / peak / sold-out bands)
+- Compare suites modal (side-by-side spec table for up to 3 rooms)
+- Currency-aware pricing across RoomCard
+
+### Sprint 4 — Admin Guest 360 + Reservations
+- Guest 360 profile drawer (Overview / Stays / Preferences / Messages / Loyalty tabs, tags, avatar, KPIs)
+- Kanban board view for Reservations (Booked → In-house → Departed → Closed with card-move arrows)
+
+### Sprint 5 — Admin Analytics
+- 90-day Occupancy heatmap (weekend boost, 5-band color scale, hover tooltip)
+
+### Sprint 6 — Admin UX polish
+- Onboarding tour (4-step, dismissable, persisted)
+- Print stylesheet for folio / invoice
+- PWA manifest (installable)
+
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.

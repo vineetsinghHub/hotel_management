@@ -1,7 +1,20 @@
+import { useState } from "react";
 import AdminLayout from "@/admin/components/AdminLayout";
+import Guest360Modal from "@/admin/components/Guest360Modal";
 import { guests } from "@/admin/adminMockData";
+
 const tierColor = (t) => ({ Diamond: "#8B5CF6", Platinum: "#4F46E5", Gold: "#C9A227", Silver: "#94A3B8" }[t] || "#64748B");
+
+const withAvatars = (list) => list.map((g, i) => ({
+  ...g,
+  avatar: g.avatar || `https://i.pravatar.cc/200?img=${(i % 60) + 1}`,
+  phone: g.phone || "+91 98200 12345",
+}));
+
 export default function Guests() {
+  const [open, setOpen] = useState(null);
+  const rows = withAvatars(guests);
+
   return (
     <AdminLayout pageTitle="Guests · CRM">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -13,22 +26,29 @@ export default function Guests() {
       <div className="bg-white rounded-[16px] border border-slate-200 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="text-[10px] tracking-widest uppercase text-slate-400 bg-slate-50">
-            <tr><th className="text-left px-5 py-3 font-medium">Guest</th><th className="text-left font-medium">Tier</th><th className="text-left font-medium">Stays</th><th className="text-left font-medium">Spend</th><th className="text-left font-medium">Country</th><th className="text-left font-medium">Last stay</th></tr>
+            <tr><th className="text-left px-5 py-3 font-medium">Guest</th><th className="text-left font-medium">Tier</th><th className="text-left font-medium">Stays</th><th className="text-left font-medium">Spend</th><th className="text-left font-medium">Country</th><th className="text-left font-medium">Last stay</th><th className="text-right px-5 font-medium">Action</th></tr>
           </thead>
           <tbody>
-            {guests.map((g) => (
+            {rows.map((g) => (
               <tr key={g.id} className="border-t border-slate-100 hover:bg-slate-50" data-testid={`guest-${g.id}`}>
-                <td className="px-5 py-3"><p className="text-slate-900">{g.name}</p><p className="text-[10px] text-slate-500 font-mono">{g.id} · {g.email}</p></td>
+                <td className="px-5 py-3">
+                  <button onClick={() => setOpen(g)} className="text-left hover:underline" data-testid={`open-guest-${g.id}`}>
+                    <p className="text-slate-900">{g.name}</p>
+                    <p className="text-[10px] text-slate-500 font-mono">{g.id} · {g.email}</p>
+                  </button>
+                </td>
                 <td><span className="text-[10px] tracking-widest uppercase px-2.5 py-1 rounded-full text-white" style={{ backgroundColor: tierColor(g.tier) }}>{g.tier}</span></td>
                 <td className="font-mono text-slate-900">{g.stays}</td>
                 <td className="font-mono text-slate-900">₹{(g.spend/1000).toFixed(0)}K</td>
                 <td className="text-slate-600 text-xs">{g.country}</td>
                 <td className="text-slate-500 text-xs">{g.lastStay}</td>
+                <td className="text-right px-5"><button onClick={() => setOpen(g)} className="text-xs text-[#4F46E5] hover:underline" data-testid={`view-guest-${g.id}`}>View 360</button></td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {open && <Guest360Modal guest={open} onClose={() => setOpen(null)} />}
     </AdminLayout>
   );
 }

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { getAdminUser, clearAdminUser, seedUsers } from "@/admin/adminAuth";
 import { hasAccess, roleLabel, roleColor } from "@/admin/roles";
 import { arrivals, roomsInventory, guests, notificationsAdmin } from "@/admin/adminMockData";
+import AdminOnboardingTour from "@/admin/components/AdminOnboardingTour";
 
 const groups = [
   { label: "Operations", items: [
@@ -111,6 +112,7 @@ export const AdminLayout = ({ pageTitle, children }) => {
       {mobileOpen && <div onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 bg-slate-900/40 z-30"></div>}
 
       <TopbarAndMain pageTitle={pageTitle} onOpenMobile={() => setMobileOpen(true)}>{children}</TopbarAndMain>
+      <AdminOnboardingTour />
     </div>
   );
 };

@@ -1,0 +1,20 @@
+// Print stylesheet imported into index.css style guide. Import this file
+// in Dashboard.jsx (as CSS) to hide chrome when the guest triggers window.print().
+@media print {
+  body { background: #ffffff !important; }
+  /* Hide navigation, sidebars, floating chrome */
+  [data-testid="site-navbar"],
+  [data-testid="dashboard-sidebar"],
+  [data-testid="cur-lang-pill-wrap"],
+  header.sticky,
+  aside,
+  nav,
+  .fixed { display: none !important; }
+
+  /* Expand main to full width */
+  main, [data-testid="dashboard-page"] > div:last-child { margin-left: 0 !important; padding: 0 !important; }
+
+  /* Remove shadows, backgrounds */
+  * { box-shadow: none !important; }
+  section, article { break-inside: avoid; page-break-inside: avoid; }
+}

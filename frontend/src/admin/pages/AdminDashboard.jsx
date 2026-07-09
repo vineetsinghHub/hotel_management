@@ -1,4 +1,5 @@
 import AdminLayout from "@/admin/components/AdminLayout";
+import OccupancyHeatmap from "@/admin/components/OccupancyHeatmap";
 import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
 import { stats, revenueTrend, arrivals, activities, channels, statusColor, occupancyTrend } from "@/admin/adminMockData";
 
@@ -212,6 +213,11 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+      </section>
+
+      {/* Occupancy heatmap */}
+      <section className="mt-6">
+        <OccupancyHeatmap />
       </section>
     </AdminLayout>
   );

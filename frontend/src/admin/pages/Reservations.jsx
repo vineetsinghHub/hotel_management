@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import AdminLayout from "@/admin/components/AdminLayout";
+import KanbanReservations from "@/admin/components/KanbanReservations";
 import { arrivals, roomsInventory, statusColor } from "@/admin/adminMockData";
 
 // Convert "Mar 15" to a Date within 2026 (mock year for calendar rendering)
@@ -14,7 +15,7 @@ const daysBetween = (a, b) => Math.round((b - a) / 86400000);
 export default function Reservations() {
   const [f, setF] = useState("all");
   const [q, setQ] = useState("");
-  const [view, setView] = useState("table"); // "table" | "calendar"
+  const [view, setView] = useState("table"); // "table" | "calendar" | "kanban"
   // Anchor date for the calendar
   const [anchor, setAnchor] = useState(new Date(2026, 2, 12)); // Mar 12, 2026
 
@@ -34,6 +35,7 @@ export default function Reservations() {
           <div className="flex items-center bg-slate-100 rounded-full p-1" data-testid="view-toggle">
             <button onClick={() => setView("table")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "table" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="view-table"><i className="fa-solid fa-list text-[10px]"></i>List</button>
             <button onClick={() => setView("calendar")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "calendar" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="view-calendar"><i className="fa-solid fa-calendar-days text-[10px]"></i>Calendar</button>
+            <button onClick={() => setView("kanban")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "kanban" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="view-kanban"><i className="fa-solid fa-columns text-[10px]"></i>Kanban</button>
           </div>
           <button onClick={() => toast.success("New reservation form opened")} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs px-4 py-2 rounded-full" data-testid="new-reservation-btn">+ Reservation</button>
         </div>
@@ -58,8 +60,10 @@ export default function Reservations() {
             </tbody>
           </table>
         </div>
-      ) : (
+      ) : view === "calendar" ? (
         <GanttCalendar rows={rows} anchor={anchor} onShift={(d) => setAnchor(new Date(anchor.getTime() + d * 86400000))} />
+      ) : (
+        <KanbanReservations initial={rows} />
       )}
     </AdminLayout>
   );

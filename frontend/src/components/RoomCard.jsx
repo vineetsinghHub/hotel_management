@@ -1,9 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useWishlist, useCurrency } from "@/context/AppContext";
+import { toast } from "sonner";
 
 export const RoomCard = ({ room, onDetails, index = 0 }) => {
   const nav = useNavigate();
   const [i, setI] = useState(0);
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const { formatPrice } = useCurrency();
+  const saved = isWishlisted(`room-${room.id}`);
+  const handleWishlist = (e) => {
+    e.stopPropagation();
+    toggleWishlist(`room-${room.id}`);
+    toast.success(saved ? "Removed from wishlist" : "Saved to wishlist", { description: room.name });
+  };
   return (
     <article
       className="group bg-white rounded-[24px] overflow-hidden border border-slate-200 shadow-[0_10px_30px_rgba(15,23,42,0.05)] hover:shadow-[0_28px_60px_rgba(15,23,42,0.10)] hover:-translate-y-1 transition-all duration-500 reveal-up"
@@ -14,16 +24,27 @@ export const RoomCard = ({ room, onDetails, index = 0 }) => {
         <img
           src={room.images[i]}
           alt={room.name}
+          loading="lazy"
           className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-[900ms] ease-out"
         />
+        {/* Wishlist heart */}
+        <button
+          onClick={handleWishlist}
+          className={`absolute top-4 right-4 w-10 h-10 rounded-full glass grid place-items-center transition-all press-scale ${saved ? "text-rose-500" : "text-slate-700 hover:text-rose-500"}`}
+          aria-label={saved ? "Remove from wishlist" : "Save to wishlist"}
+          aria-pressed={saved}
+          data-testid={`wishlist-${room.id}`}
+        >
+          <i className={`fa-${saved ? "solid" : "regular"} fa-heart text-sm`}></i>
+        </button>
         {/* Tag */}
         <span className="absolute top-4 left-4 glass-dark text-white text-[10px] tracking-[0.22em] uppercase px-3 py-1.5 rounded-full">
           {room.tag}
         </span>
         {/* Breakfast pill */}
         {room.breakfast && (
-          <span className="absolute top-4 right-4 bg-[#C9A227] text-white text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 rounded-full">
-            Breakfast Included
+          <span className="absolute top-16 right-4 bg-[#C9A227] text-white text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 rounded-full">
+            Breakfast
           </span>
         )}
         {/* Carousel controls */}
@@ -58,7 +79,7 @@ export const RoomCard = ({ room, onDetails, index = 0 }) => {
           </div>
           <div className="text-right">
             <p className="text-[10px] tracking-widest uppercase text-slate-400">From</p>
-            <p className="font-mono text-2xl text-slate-900 leading-none mt-1">${room.price}</p>
+            <p className="font-mono text-2xl text-slate-900 leading-none mt-1">{formatPrice(room.price)}</p>
             <p className="text-[11px] text-slate-500 mt-1">per night</p>
           </div>
         </div>
