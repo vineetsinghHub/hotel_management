@@ -5,11 +5,16 @@ export const stats = {
 };
 
 export const revenueTrend = [
-  { d: "Mar 1", v: 28400 }, { d: "2", v: 31200 }, { d: "3", v: 26800 }, { d: "4", v: 34500 },
-  { d: "5", v: 39100 }, { d: "6", v: 42800 }, { d: "7", v: 38900 }, { d: "8", v: 45600 },
-  { d: "9", v: 41200 }, { d: "10", v: 48900 }, { d: "11", v: 47600 }, { d: "12", v: 52400 },
-  { d: "13", v: 49800 }, { d: "14", v: 54900 }, { d: "15", v: 58200 },
+  { d: "Mar 1", v: 28400 }, { d: "Mar 2", v: 31200 }, { d: "Mar 3", v: 26800 }, { d: "Mar 4", v: 34500 },
+  { d: "Mar 5", v: 39100 }, { d: "Mar 6", v: 42800 }, { d: "Mar 7", v: 38900 }, { d: "Mar 8", v: 45600 },
+  { d: "Mar 9", v: 41200 }, { d: "Mar 10", v: 48900 }, { d: "Mar 11", v: 47600 }, { d: "Mar 12", v: 52400 },
+  { d: "Mar 13", v: 49800 }, { d: "Mar 14", v: 54900 }, { d: "Mar 15", v: 58200 },
 ];
+
+export const occupancyTrend = Array.from({ length: 30 }).map((_, i) => {
+  const h = 40 + Math.abs(Math.sin(i * 0.6)) * 55 + (i > 20 ? 20 : 0);
+  return { d: `${i + 1}`, occ: Math.min(100, Math.round(h)) };
+});
 
 export const activities = [
   { id: "a1", type: "checkin", title: "Check-in completed", body: "Rajesh Sharma checked into Room 101", when: "2m ago", color: "#10B981", icon: "right-to-bracket" },
@@ -20,15 +25,23 @@ export const activities = [
   { id: "a6", type: "reservation", title: "New reservation", body: "ALMA-VLTW/NP2 — Aisha Khan (Platinum), 4 nights", when: "1h ago", color: "#4F46E5", icon: "calendar-plus" },
 ];
 
+// Expanded arrivals: mix of confirmed (arrivals today), checked_in (in-house), checked_out (departures)
 export const arrivals = [
-  { id: "AH-0193A2", guest: "Rajesh Sharma", room: "101", roomType: "Heritage Grand", checkIn: "Mar 15", checkOut: "Mar 18", status: "checked_in", total: 148500 },
-  { id: "AH-0193B3", guest: "Priya Mehta", room: "102", roomType: "Heritage Grand", checkIn: "Mar 15", checkOut: "Mar 18", status: "checked_in", total: 148500 },
-  { id: "AH-0193C4", guest: "James Thornton", room: "105", roomType: "Garden View", checkIn: "Mar 15", checkOut: "Mar 18", status: "checked_in", total: 230100 },
-  { id: "AH-0193D5", guest: "Sophie Laurent", room: "203", roomType: "Royal Terrace", checkIn: "Mar 15", checkOut: "Mar 19", status: "checked_in", total: 259600 },
-  { id: "AH-0193E6", guest: "David Chen", room: "204", roomType: "Royal Terrace", checkIn: "Mar 15", checkOut: "Mar 17", status: "checked_in", total: 129800 },
-  { id: "AH-0193F7", guest: "Meera Nair", room: "205", roomType: "Royal Terrace", checkIn: "Mar 15", checkOut: "Mar 19", status: "confirmed", total: 259600 },
-  { id: "AH-0193G8", guest: "Aisha Khan", room: "301", roomType: "Maharajah Suite", checkIn: "Mar 16", checkOut: "Mar 20", status: "confirmed", total: 480000 },
-  { id: "AH-0193H9", guest: "Marco Rossi", room: "302", roomType: "Lake Pavilion", checkIn: "Mar 16", checkOut: "Mar 19", status: "confirmed", total: 495000 },
+  // Departing today (checked_out)
+  { id: "AH-0192Z1", guest: "Elena Petrova", room: "104", roomType: "Garden View", checkIn: "Mar 12", checkOut: "Mar 15", status: "checked_out", total: 172500, arrivalTime: "—", eta: "11:30" },
+  { id: "AH-0192Z2", guest: "Nikhil Rao", room: "202", roomType: "Royal Terrace", checkIn: "Mar 11", checkOut: "Mar 15", status: "checked_out", total: 259600, arrivalTime: "—", eta: "12:00" },
+  { id: "AH-0192Z3", guest: "Camille Dubois", room: "303", roomType: "Lake Pavilion", checkIn: "Mar 12", checkOut: "Mar 15", status: "checked_out", total: 495000, arrivalTime: "—", eta: "10:45" },
+  // In-house (checked_in)
+  { id: "AH-0193A2", guest: "Rajesh Sharma", room: "101", roomType: "Heritage Grand", checkIn: "Mar 13", checkOut: "Mar 18", status: "checked_in", total: 148500, arrivalTime: "14:30", eta: "—" },
+  { id: "AH-0193B3", guest: "Priya Mehta", room: "102", roomType: "Heritage Grand", checkIn: "Mar 13", checkOut: "Mar 18", status: "checked_in", total: 148500, arrivalTime: "15:00", eta: "—" },
+  { id: "AH-0193C4", guest: "James Thornton", room: "105", roomType: "Garden View", checkIn: "Mar 14", checkOut: "Mar 18", status: "checked_in", total: 230100, arrivalTime: "13:15", eta: "—" },
+  { id: "AH-0193D5", guest: "Sophie Laurent", room: "203", roomType: "Royal Terrace", checkIn: "Mar 14", checkOut: "Mar 19", status: "checked_in", total: 259600, arrivalTime: "16:20", eta: "—" },
+  { id: "AH-0193E6", guest: "David Chen", room: "204", roomType: "Royal Terrace", checkIn: "Mar 14", checkOut: "Mar 17", status: "checked_in", total: 129800, arrivalTime: "12:45", eta: "—" },
+  // Arriving today (confirmed)
+  { id: "AH-0193F7", guest: "Meera Nair", room: "205", roomType: "Royal Terrace", checkIn: "Mar 15", checkOut: "Mar 19", status: "confirmed", total: 259600, arrivalTime: "—", eta: "14:00" },
+  { id: "AH-0193G8", guest: "Aisha Khan", room: "301", roomType: "Maharajah Suite", checkIn: "Mar 15", checkOut: "Mar 20", status: "confirmed", total: 480000, arrivalTime: "—", eta: "15:30" },
+  { id: "AH-0193H9", guest: "Marco Rossi", room: "302", roomType: "Lake Pavilion", checkIn: "Mar 15", checkOut: "Mar 19", status: "confirmed", total: 495000, arrivalTime: "—", eta: "16:00" },
+  { id: "AH-0193I1", guest: "Yuki Tanaka", room: "106", roomType: "Garden View", checkIn: "Mar 15", checkOut: "Mar 17", status: "confirmed", total: 115000, arrivalTime: "—", eta: "17:20" },
 ];
 
 export const channels = [
@@ -65,12 +78,20 @@ export const guests = [
   { id: "G-021109", name: "Aisha Khan", email: "aisha@example.com", tier: "Platinum", stays: 14, spend: 398000, lastStay: "Apr 22, 2025", country: "UAE" },
 ];
 
-export const housekeeping = roomsInventory.map((r) => ({
+export const housekeeping = roomsInventory.map((r, i) => ({
   ...r,
-  attendant: ["Meera K.", "Anjali V.", "Priya S.", "Rohan D."][r.number % 4],
-  eta: ["09:30", "10:00", "10:30", "11:00", "11:30", "12:00"][r.number % 6],
+  attendant: ["Meera K.", "Anjali V.", "Priya S.", "Rohan D."][i % 4],
+  eta: ["09:30", "10:00", "10:30", "11:00", "11:30", "12:00"][i % 6],
   priority: r.status === "occupied" ? "low" : r.status === "dirty" ? "high" : "medium",
 }));
+
+// Housekeeping attendants directory
+export const hkAttendants = [
+  { id: "att-1", name: "Meera K.", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80", shift: "Morning · 07:00 – 15:00" },
+  { id: "att-2", name: "Anjali V.", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&q=80", shift: "Morning · 07:00 – 15:00" },
+  { id: "att-3", name: "Priya S.", avatar: "https://images.unsplash.com/photo-1573497019418-b400bb3ab074?auto=format&fit=crop&w=200&q=80", shift: "Afternoon · 12:00 – 20:00" },
+  { id: "att-4", name: "Rohan D.", avatar: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=200&q=80", shift: "Afternoon · 12:00 – 20:00" },
+];
 
 export const menuItems = [
   { id: "m1", name: "Laal Maas", category: "Lunch", price: 4800, active: true, ingredients: "Lamb, mathania chilli, ghee", cost: 1400 },
@@ -133,6 +154,63 @@ export const notificationsAdmin = [
   { id: "N-5", title: "Campaign 'Diwali Preview' completed", body: "78 bookings · ₹48,20,000 revenue attributed", when: "Yesterday", read: true, kind: "marketing" },
 ];
 
+// Audit log entries (expanded) — actor, action type, target, when
+export const auditLog = [
+  { id: "AL-001", actor: "Anjali Desai", role: "general_manager", action: "role_change", target: "Ravi Menon → Front Desk", when: "2 min ago", ts: "2026-03-15T09:58:00" },
+  { id: "AL-002", actor: "Sunita Rao", role: "accounting", action: "invoice_download", target: "INV-2026-0092", when: "18 min ago", ts: "2026-03-15T09:42:00" },
+  { id: "AL-003", actor: "Meera Kaur", role: "housekeeping", action: "room_inspected", target: "Room 106", when: "24 min ago", ts: "2026-03-15T09:36:00" },
+  { id: "AL-004", actor: "Karan Malhotra", role: "marketing", action: "campaign_sent", target: "Diwali Preview", when: "1 h ago", ts: "2026-03-15T09:00:00" },
+  { id: "AL-005", actor: "Anjali Desai", role: "general_manager", action: "rate_updated", target: "Maharajah Suite → ₹58,000", when: "2 h ago", ts: "2026-03-15T08:00:00" },
+  { id: "AL-006", actor: "Ravi Menon", role: "front_desk", action: "check_in", target: "AH-0193A2 · Rajesh Sharma", when: "3 h ago", ts: "2026-03-15T07:00:00" },
+  { id: "AL-007", actor: "Sunita Rao", role: "accounting", action: "refund_issued", target: "INV-2026-0085 · ₹42,000", when: "4 h ago", ts: "2026-03-15T06:00:00" },
+  { id: "AL-008", actor: "Chef Vikram", role: "fb_manager", action: "menu_updated", target: "Aura Reserve Champagne toggled off", when: "5 h ago", ts: "2026-03-15T05:00:00" },
+  { id: "AL-009", actor: "Priya S.", role: "spa_manager", action: "appointment_created", target: "SA-04 · Isabella Rossi", when: "6 h ago", ts: "2026-03-15T04:00:00" },
+  { id: "AL-010", actor: "Anjali Desai", role: "general_manager", action: "settings_changed", target: "Tax rate 18% → 18%", when: "Yesterday", ts: "2026-03-14T18:00:00" },
+  { id: "AL-011", actor: "Karan Malhotra", role: "marketing", action: "review_replied", target: "R-02 · Eleanor Ross", when: "Yesterday", ts: "2026-03-14T16:00:00" },
+  { id: "AL-012", actor: "Ravi Menon", role: "front_desk", action: "check_out", target: "AH-0192Z2 · Nikhil Rao", when: "Yesterday", ts: "2026-03-14T12:00:00" },
+  { id: "AL-013", actor: "Anjali Desai", role: "general_manager", action: "user_invited", target: "new-staff@aurahotels.com", when: "2 days ago", ts: "2026-03-13T14:00:00" },
+  { id: "AL-014", actor: "Meera Kaur", role: "housekeeping", action: "room_ooo", target: "Room 401 (AC unit)", when: "2 days ago", ts: "2026-03-13T11:00:00" },
+  { id: "AL-015", actor: "Sunita Rao", role: "accounting", action: "invoice_download", target: "INV-2026-0088", when: "3 days ago", ts: "2026-03-12T15:00:00" },
+];
+
+export const AUDIT_ACTION_LABELS = {
+  role_change: "Role change",
+  invoice_download: "Invoice download",
+  room_inspected: "Room inspected",
+  campaign_sent: "Campaign sent",
+  rate_updated: "Rate updated",
+  check_in: "Check-in",
+  check_out: "Check-out",
+  refund_issued: "Refund",
+  menu_updated: "Menu update",
+  appointment_created: "Appointment",
+  settings_changed: "Settings",
+  review_replied: "Review reply",
+  user_invited: "User invited",
+  room_ooo: "Room OOO",
+};
+
+// OTA channel connections for the Rate & Channel Manager
+export const otaChannels = [
+  { id: "ch-direct", name: "Aura Direct", logo: "A", color: "#4F46E5", status: "connected", commission: 0, mapped: 5, total: 5, lastSync: "Just now", desc: "Your own website — full-margin bookings." },
+  { id: "ch-bcom", name: "Booking.com", logo: "B", color: "#003580", status: "connected", commission: 15, mapped: 5, total: 5, lastSync: "2 min ago", desc: "Global OTA · 42% of external bookings." },
+  { id: "ch-expedia", name: "Expedia Group", logo: "E", color: "#EFC132", status: "connected", commission: 18, mapped: 4, total: 5, lastSync: "8 min ago", desc: "Expedia, Hotels.com, VRBO, Trivago." },
+  { id: "ch-agoda", name: "Agoda", logo: "A", color: "#FF5C0F", status: "sync_error", commission: 17, mapped: 3, total: 5, lastSync: "3 h ago", desc: "APAC · sync error — rate parity mismatch." },
+  { id: "ch-airbnb", name: "Airbnb Luxe", logo: "A", color: "#FF5A5F", status: "connected", commission: 12, mapped: 2, total: 5, lastSync: "12 min ago", desc: "Curated luxury listings — private stays." },
+  { id: "ch-mmt", name: "MakeMyTrip", logo: "M", color: "#EB2226", status: "unlinked", commission: 16, mapped: 0, total: 5, lastSync: "—", desc: "India domestic · not yet connected." },
+  { id: "ch-tripcom", name: "Trip.com", logo: "T", color: "#287DFA", status: "unlinked", commission: 15, mapped: 0, total: 5, lastSync: "—", desc: "China & APAC · upgrade to Pro to unlock." },
+  { id: "ch-hyatt", name: "GDS · Sabre", logo: "S", color: "#0F172A", status: "connected", commission: 8, mapped: 5, total: 5, lastSync: "1 h ago", desc: "Corporate travel & agency GDS distribution." },
+];
+
+// Rate Calendar — categories with a base rate; the calendar renders next 14 days
+export const rateCategories = [
+  { id: "cat-hg", label: "Heritage Grand", baseRate: 24000, code: "HGN" },
+  { id: "cat-gv", label: "Garden View", baseRate: 32000, code: "GVR" },
+  { id: "cat-rt", label: "Royal Terrace", baseRate: 48000, code: "RTS" },
+  { id: "cat-lp", label: "Lake Pavilion", baseRate: 92000, code: "LPV" },
+  { id: "cat-ms", label: "Maharajah Suite", baseRate: 148000, code: "MHS" },
+];
+
 export const statusColor = (s) => ({
   clean: { bg: "bg-emerald-50", text: "text-emerald-700", label: "Clean" },
   dirty: { bg: "bg-rose-50", text: "text-rose-700", label: "Dirty" },
@@ -148,4 +226,7 @@ export const statusColor = (s) => ({
   outstanding: { bg: "bg-rose-50", text: "text-rose-700", label: "Outstanding" },
   sent: { bg: "bg-emerald-50", text: "text-emerald-700", label: "Sent" },
   draft: { bg: "bg-slate-100", text: "text-slate-700", label: "Draft" },
+  connected: { bg: "bg-emerald-50", text: "text-emerald-700", label: "Connected" },
+  sync_error: { bg: "bg-rose-50", text: "text-rose-700", label: "Sync Error" },
+  unlinked: { bg: "bg-slate-100", text: "text-slate-600", label: "Unlinked" },
 }[s] || { bg: "bg-slate-100", text: "text-slate-700", label: s });

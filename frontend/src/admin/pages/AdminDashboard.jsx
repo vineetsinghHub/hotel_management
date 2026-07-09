@@ -1,5 +1,6 @@
 import AdminLayout from "@/admin/components/AdminLayout";
-import { stats, revenueTrend, arrivals, activities, channels, statusColor } from "@/admin/adminMockData";
+import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
+import { stats, revenueTrend, arrivals, activities, channels, statusColor, occupancyTrend } from "@/admin/adminMockData";
 
 const KPI = ({ label, value, delta, icon, color }) => (
   <div className="p-5 bg-white rounded-[16px] border border-slate-200">
@@ -12,8 +13,39 @@ const KPI = ({ label, value, delta, icon, color }) => (
   </div>
 );
 
+const RevenueTooltip = ({ active, payload }) => {
+  if (!active || !payload || !payload.length) return null;
+  const p = payload[0].payload;
+  return (
+    <div className="bg-white border border-slate-200 rounded-[10px] shadow-[0_10px_28px_rgba(15,23,42,0.10)] px-3 py-2" data-testid="rev-tooltip">
+      <p className="text-[10px] tracking-widest uppercase text-slate-400">{p.d}</p>
+      <p className="mt-1 font-mono text-sm text-slate-900">₹{(p.v / 1000).toFixed(1)}K</p>
+    </div>
+  );
+};
+
+const OccTooltip = ({ active, payload }) => {
+  if (!active || !payload || !payload.length) return null;
+  const p = payload[0].payload;
+  return (
+    <div className="bg-white border border-slate-200 rounded-[10px] shadow-[0_10px_28px_rgba(15,23,42,0.10)] px-3 py-2" data-testid="occ-tooltip">
+      <p className="text-[10px] tracking-widest uppercase text-slate-400">Day {p.d}</p>
+      <p className="mt-1 font-mono text-sm text-slate-900">{p.occ}%</p>
+    </div>
+  );
+};
+
+const occupancyDonut = [
+  { name: "Occupied", value: 19, color: "#4F46E5" },
+  { name: "Available", value: 3, color: "#10B981" },
+  { name: "Cleaning", value: 2, color: "#C9A227" },
+  { name: "OOO/Maint.", value: 2, color: "#F43F5E" },
+];
+
 export default function AdminDashboard() {
-  const max = Math.max(...revenueTrend.map((x) => x.v));
+  const totalRooms = occupancyDonut.reduce((s, x) => s + x.value, 0);
+  const occPct = Math.round((occupancyDonut[0].value / totalRooms) * 100);
+
   return (
     <AdminLayout pageTitle="Dashboard">
       {/* KPIs */}
@@ -26,64 +58,66 @@ export default function AdminDashboard() {
 
       {/* Revenue + Occupancy */}
       <section className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-white rounded-[16px] border border-slate-200 p-6">
+        <div className="lg:col-span-2 bg-white rounded-[16px] border border-slate-200 p-6" data-testid="revenue-chart-card">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-eyebrow text-[#C9A227]">Revenue Trend</p>
-              <h3 className="mt-1 font-serif text-2xl text-slate-900">Last 60 days · <span className="font-sans text-base text-slate-500">₹1,00Lk</span></h3>
+              <h3 className="mt-1 font-serif text-2xl text-slate-900">Last 15 days · <span className="font-sans text-base text-slate-500">₹6,29,400</span></h3>
             </div>
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-full">
               {["7D", "30D", "90D", "1Y"].map((t) => <button key={t} className={`px-3 py-1 rounded-full text-xs ${t === "30D" ? "bg-[#4F46E5] text-white" : "text-slate-600"}`}>{t}</button>)}
             </div>
           </div>
-          <svg viewBox="0 0 720 220" className="mt-6 w-full h-56">
-            <defs>
-              <linearGradient id="grev" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.28"/>
-                <stop offset="100%" stopColor="#4F46E5" stopOpacity="0"/>
-              </linearGradient>
-            </defs>
-            {(() => {
-              const pts = revenueTrend.map((p, i) => [40 + i * ((720 - 60) / (revenueTrend.length - 1)), 200 - (p.v / max) * 160]);
-              const path = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" ");
-              const area = `${path} L${pts[pts.length - 1][0]},200 L${pts[0][0]},200 Z`;
-              return (<>
-                <path d={area} fill="url(#grev)" />
-                <path d={path} fill="none" stroke="#4F46E5" strokeWidth="2.5" strokeLinecap="round" />
-                {pts.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="3" fill="#4F46E5" />)}
-              </>);
-            })()}
-            {revenueTrend.filter((_, i) => i % 3 === 0).map((p, i) => <text key={i} x={40 + i * 3 * ((720 - 60) / (revenueTrend.length - 1))} y="216" textAnchor="middle" fontSize="10" fill="#94a3b8" fontFamily="JetBrains Mono">{p.d}</text>)}
-          </svg>
+          <div className="mt-6 h-56 w-full" data-testid="revenue-chart">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueTrend} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#4F46E5" stopOpacity={0.32} />
+                    <stop offset="100%" stopColor="#4F46E5" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#E2E8F0" strokeDasharray="4 6" vertical={false} />
+                <XAxis dataKey="d" stroke="#94A3B8" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+                <Tooltip content={<RevenueTooltip />} cursor={{ stroke: "#4F46E5", strokeWidth: 1, strokeDasharray: "3 3" }} />
+                <Area type="monotone" dataKey="v" stroke="#4F46E5" strokeWidth={2.5} fill="url(#revGradient)" activeDot={{ r: 5, fill: "#4F46E5", stroke: "white", strokeWidth: 2 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         <div className="bg-white rounded-[16px] border border-slate-200 p-6" data-testid="live-occupancy">
           <p className="text-eyebrow text-[#C9A227]">Live Occupancy</p>
           <h3 className="mt-1 font-serif text-xl text-slate-900">Real-time room status</h3>
-          <div className="mt-6 flex flex-col items-center">
-            {(() => {
-              const R = 60, C = 2 * Math.PI * R;
-              const pct = 87; const off = C - (pct / 100) * C;
-              return (
-                <svg width="160" height="160" viewBox="0 0 160 160">
-                  <circle cx="80" cy="80" r={R} stroke="#E2E8F0" strokeWidth="14" fill="none" />
-                  <circle cx="80" cy="80" r={R} stroke="#4F46E5" strokeWidth="14" fill="none" strokeDasharray={C} strokeDashoffset={off} strokeLinecap="round" transform="rotate(-90 80 80)" />
-                  <text x="80" y="80" textAnchor="middle" fontSize="28" fill="#0F172A" fontFamily="JetBrains Mono" fontWeight="500">{pct}%</text>
-                  <text x="80" y="98" textAnchor="middle" fontSize="9" fill="#64748B" letterSpacing="2">OCCUPIED</text>
-                </svg>
-              );
-            })()}
+          <div className="mt-4 h-44 relative" data-testid="occupancy-donut">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={occupancyDonut} dataKey="value" nameKey="name" innerRadius={54} outerRadius={72} paddingAngle={2} startAngle={90} endAngle={-270}>
+                  {occupancyDonut.map((entry) => <Cell key={entry.name} fill={entry.color} stroke="none" />)}
+                </Pie>
+                <Tooltip
+                  content={({ active, payload }) => active && payload && payload[0] ? (
+                    <div className="bg-white border border-slate-200 rounded-[10px] shadow-[0_10px_28px_rgba(15,23,42,0.10)] px-3 py-2">
+                      <p className="text-[10px] tracking-widest uppercase text-slate-400">{payload[0].name}</p>
+                      <p className="mt-1 font-mono text-sm text-slate-900">{payload[0].value} rooms</p>
+                    </div>
+                  ) : null}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 grid place-items-center pointer-events-none">
+              <div className="text-center">
+                <p className="font-mono text-3xl text-slate-900">{occPct}%</p>
+                <p className="text-[9px] tracking-widest uppercase text-slate-500">Occupied</p>
+              </div>
+            </div>
           </div>
-          <ul className="mt-5 space-y-2 text-sm">
-            {[
-              { label: "Occupied", v: 19, c: "#4F46E5" },
-              { label: "Available", v: 3, c: "#10B981" },
-              { label: "Cleaning", v: 2, c: "#C9A227" },
-              { label: "OOO/Maint.", v: 2, c: "#F43F5E" },
-            ].map((r) => (
-              <li key={r.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-slate-700"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: r.c }}></span>{r.label}</div>
-                <span className="font-mono text-slate-900">{r.v}</span>
+          <ul className="mt-4 space-y-2 text-sm">
+            {occupancyDonut.map((r) => (
+              <li key={r.name} className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-700"><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: r.color }}></span>{r.name}</div>
+                <span className="font-mono text-slate-900">{r.value}</span>
               </li>
             ))}
           </ul>
@@ -105,7 +139,7 @@ export default function AdminDashboard() {
               <tr><th className="text-left px-5 py-3 font-medium">Guest</th><th className="text-left font-medium">Room</th><th className="text-left font-medium">Dates</th><th className="text-left font-medium">Status</th><th className="text-right px-5 font-medium">Total</th></tr>
             </thead>
             <tbody>
-              {arrivals.slice(0, 6).map((a) => {
+              {arrivals.slice(3, 9).map((a) => {
                 const st = statusColor(a.status);
                 return (
                   <tr key={a.id} className="border-t border-slate-100 hover:bg-slate-50" data-testid={`arrival-${a.id}`}>
@@ -159,16 +193,24 @@ export default function AdminDashboard() {
             ))}
           </ul>
         </div>
-        <div className="bg-white rounded-[16px] border border-slate-200 p-6">
+        <div className="bg-white rounded-[16px] border border-slate-200 p-6" data-testid="occupancy-trend">
           <p className="text-eyebrow text-[#C9A227]">Occupancy Trend</p>
           <p className="mt-1 text-sm text-slate-500">Last 30 days</p>
-          <div className="mt-6 flex items-end gap-1.5 h-40">
-            {Array.from({ length: 30 }).map((_, i) => {
-              const h = 40 + Math.abs(Math.sin(i * 0.6)) * 55 + (i > 20 ? 20 : 0);
-              return <div key={i} className="flex-1 bg-gradient-to-t from-[#4F46E5]/70 to-[#4F46E5] rounded-t-[3px]" style={{ height: `${Math.min(100, h)}%` }} title={`${Math.round(h)}%`}></div>;
-            })}
+          <div className="mt-6 h-44 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={occupancyTrend} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke="#E2E8F0" strokeDasharray="4 6" vertical={false} />
+                <XAxis dataKey="d" stroke="#94A3B8" fontSize={10} tickLine={false} axisLine={false} interval={4} />
+                <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                <Tooltip content={<OccTooltip />} cursor={{ fill: "#4F46E5", opacity: 0.06 }} />
+                <Bar dataKey="occ" radius={[4, 4, 0, 0]}>
+                  {occupancyTrend.map((entry, i) => (
+                    <Cell key={i} fill={entry.occ >= 85 ? "#4F46E5" : entry.occ >= 60 ? "#818CF8" : "#C7D2FE"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400 font-mono"><span>Feb 15</span><span>Mar 01</span><span>Mar 15</span></div>
         </div>
       </section>
     </AdminLayout>
