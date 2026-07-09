@@ -1,0 +1,23 @@
+{
+  "summary": "Frontend-only e2e of Aura Hotels admin portal. All 11 requested flows PASS: login+redirect, role-restricted sidebar (spa_manager sees only Dashboard/Spa/Notifications), direct URL access to /admin/staff redirects to dashboard, super_admin sees all 17 nav items and every page renders with correct page-title, Staff role change/add/toggle-active/remove all work with toasts, Front Desk check-in flip, Reservations search+filter, Rooms (22 cards, R-100 present), Guests (8 rows incl G-092841), Housekeeping (22 rows), Restaurant (6 menu items), Spa (4 appts), Events (3), Inventory (6), Invoices (6 incl INV-2026-0092), Marketing (3 campaigns), Reviews (respond-R-03 flips to Responded with toast), Notifications (5 rows + mark-all), Settings (prop-name save toast, int-stripe toggle disconnects). Mobile 375x800: sidebar off-screen, hamburger opens it.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Reviews.jsx uses mutable module-level `reviews` seed — state resets on remount but not shared; acceptable for mock but note for backend integration.",
+    "Mobile hamburger button previously lacked data-testid (added `hamburger-btn` during test to enable automation). No functional bug."
+  ],
+  "updated_files": ["/app/frontend/src/admin/components/AdminLayout.jsx (added data-testid='hamburger-btn' to mobile menu button)"],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "test_credentials": "gm@aurahotels.com / any (Super Admin); spa@aurahotels.com / any (Spa Manager). Mock auth — any password.",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Only 8 demo cards exist on /admin/login (no separate general_manager demo since seed uses SUPER_ADMIN for GM email). PERMISSIONS map: notifications='*' so all roles see it. Spa Manager sidebar = Dashboard + Spa + Notifications by design. hamburger-btn testid was added by testing agent.",
+  "rca of the issue": "N/A — no failing flows."
+}
