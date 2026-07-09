@@ -112,11 +112,11 @@ user_problem_statement: |
 frontend:
   - task: "Fast Check-out QR modal on Guest Dashboard"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/pages/Dashboard.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
@@ -133,14 +133,39 @@ frontend:
               and "Email folio" (data-testid="fast-checkout-email").
             Approving zeroes balance, clears extras, toggles button to "Balance settled", shows the
             checked-out banner, and fires a toast.
+        - working: true
+          agent: "testing"
+          comment: |
+            ✅ FULLY TESTED - All functionality working correctly:
+            • Folio card renders with all required elements (balance-due: $3,390, pay-balance-btn, add-extras-btn, fast-checkout-btn, email-folio-btn)
+            • Fast Check-out button opens modal successfully
+            • Modal contains all required elements:
+              - Close button (×) ✓
+              - QR code SVG ✓
+              - Reservation code starting with "AH-" (AH-THE-3N-9F27C1) ✓
+              - Balance element showing $3,390 ✓
+              - Extras list ✓
+              - Approve room charge button ✓
+              - Email folio button ✓
+              - Dismiss button with "I'll do it later" text ✓
+            • Email folio action: Toast appears with "Folio emailed" message ✓
+            • Approve room charge action: 
+              - Toast appears with "Charge approved · Ready to check out" ✓
+              - Button changes to "Balance settled" with emerald background ✓
+              - Checkout complete banner appears with "You're checked out" message ✓
+              - Balance updates to $0 ✓
+              - Dismiss button text changes to "Done — close" ✓
+              - Button becomes disabled after approval (correct behavior) ✓
+            • Modal closes successfully and main page balance shows $0 ✓
+            No console errors. All data-testids present and functional.
 
   - task: "Rate & Channel Manager wiring (route + sidebar + permission)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/App.js, /app/frontend/src/admin/components/AdminLayout.jsx, /app/frontend/src/admin/roles.js, /app/frontend/src/admin/pages/Staff.jsx"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
@@ -154,6 +179,31 @@ frontend:
               • Custom-role builder module key updated from "rate-manager" to "rate-channel"
             Verified visually: sidebar shows entry, page loads with OTA Connections + Master Rate
             Calendar tabs.
+        - working: true
+          agent: "testing"
+          comment: |
+            ✅ FULLY TESTED - All functionality working correctly:
+            • Admin login successful with gm@aurahotels.com (any password works - mock auth) ✓
+            • Redirects to /admin/dashboard with welcome toast "Welcome, Anjali Desai" ✓
+            • Sidebar contains "REVENUE" group header ✓
+            • "Rate & Channel" nav item present with data-testid="nav-rate-channel" ✓
+            • Clicking nav item navigates to /admin/rate-channel ✓
+            • Page title shows "Rate & Channel Manager" ✓
+            • Two tabs present: "OTA Connections" and "Master Rate Calendar" ✓
+            • Default tab is "OTA Connections" with:
+              - Stats row showing: Connected (5), Sync errors (1), Unlinked, Avg. commission ✓
+              - 8 OTA channel cards displayed ✓
+              - Found OTA channels: Aura Direct, Booking.com, Expedia, Agoda ✓
+            • Master Rate Calendar tab:
+              - Calendar grid renders with rate categories on left ✓
+              - Dates across the top ✓
+              - Prices shown with currency symbol (₹) ✓
+            • Command palette (Cmd+K):
+              - Opens successfully ✓
+              - Typing "Rate" shows "Rate & Channel" in results ✓
+              - Clicking result navigates to /admin/rate-channel ✓
+            • Regression check: All admin pages load without console errors ✓
+            No console errors detected. All features working as expected.
 
 metadata:
   created_by: "main_agent"
@@ -162,9 +212,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Fast Check-out QR modal on Guest Dashboard"
-    - "Rate & Channel Manager wiring (route + sidebar + permission)"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -180,3 +228,25 @@ agent_communication:
           2. /admin/login (gm@aurahotels.com / anything) → sidebar has "Revenue > Rate & Channel" →
              clicking it loads the Rate & Channel Manager page with both OTA Connections and
              Master Rate Calendar tabs.
+    - agent: "testing"
+      message: |
+        ✅ TESTING COMPLETE - Both features fully tested and working:
+        
+        TEST 1 - Fast Check-out QR Modal (P0): ✅ PASS
+        All functionality verified with comprehensive Playwright tests. Modal opens correctly, displays
+        all required elements (QR code, reservation code, balance, extras list), Email folio action
+        works with toast confirmation, Approve room charge flow works perfectly (balance updates to $0,
+        button changes to "Balance settled", checkout banner appears, dismiss text updates). No issues found.
+        
+        TEST 2 - Rate & Channel Manager (P2): ✅ PASS
+        Complete wiring verified. Admin login works, sidebar shows "Revenue" group with "Rate & Channel"
+        nav item, page loads at /admin/rate-channel with correct title, both tabs (OTA Connections and
+        Master Rate Calendar) render correctly with all expected content (8 channel cards, stats row,
+        calendar grid with rates), command palette integration works. No issues found.
+        
+        REGRESSION CHECK: ✅ PASS
+        All admin pages (/admin/dashboard, /admin/front-desk, /admin/reservations, /admin/housekeeping,
+        /admin/staff, /admin/settings) load without console errors.
+        
+        No console errors detected during any tests. All data-testids present and functional.
+        Both features are production-ready.
