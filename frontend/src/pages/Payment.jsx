@@ -36,7 +36,17 @@ export default function Payment() {
   const [card, setCard] = useState({ number: "4242 4242 4242 4242", name: "AARAV MEHTA", expiry: "08 / 28", cvc: "•••" });
   const [coupon, setCoupon] = useState("AURA24");
 
-  const total = 4460;
+  // Read booking state from Booking page (localStorage)
+  const stored = (() => {
+    try { return JSON.parse(localStorage.getItem("aura_booking") || "null"); } catch (e) { return null; }
+  })();
+
+  const grand = stored?.grand ?? 4460;
+  const plan = stored?.plan ?? "reserve-25";
+  const payNow = stored?.payNow ?? Math.round(grand * 0.25);
+  const balanceLater = stored?.balanceLater ?? grand - payNow;
+  const isFull = plan === "full";
+  const total = payNow;
 
   return (
     <div className="bg-[#FAFAF8] min-h-screen" data-testid="payment-page">
@@ -77,8 +87,10 @@ export default function Payment() {
                 <div className="flex items-baseline justify-between">
                   <div>
                     <p className="text-eyebrow text-[#C9A227]">Step 2</p>
-                    <h2 className="mt-2 font-serif text-3xl text-slate-900">Payment</h2>
-                    <p className="text-slate-500 text-sm mt-1">Encrypted end-to-end · PCI DSS certified</p>
+                    <h2 className="mt-2 font-serif text-3xl text-slate-900">{isFull ? "Payment" : "Reservation Deposit"}</h2>
+                    <p className="text-slate-500 text-sm mt-1">
+                      {isFull ? "Encrypted end-to-end · PCI DSS certified" : `Pay a deposit today · balance of $${balanceLater.toLocaleString()} due at check-out`}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full">
@@ -86,6 +98,20 @@ export default function Payment() {
                     </span>
                   </div>
                 </div>
+
+                {!isFull && (
+                  <div className="mt-6 p-5 rounded-[18px] bg-indigo-50/40 border border-indigo-100 grid grid-cols-2 gap-4" data-testid="payment-split-banner">
+                    <div>
+                      <p className="text-eyebrow text-slate-500">Paying today</p>
+                      <p className="mt-1.5 font-mono text-2xl text-slate-900">${payNow.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-eyebrow text-slate-500">Balance at check-out</p>
+                      <p className="mt-1.5 font-mono text-2xl text-slate-500">${balanceLater.toLocaleString()}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">+ any in-stay extras</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Payment methods */}
                 <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -204,7 +230,7 @@ export default function Payment() {
                   data-testid="pay-securely-btn"
                 >
                   <i className="fa-solid fa-lock text-xs mr-2"></i>
-                  Pay Securely · <span className="font-mono">${total}</span>
+                  {isFull ? "Pay Securely" : "Reserve Now"} · <span className="font-mono">${total.toLocaleString()}</span>
                 </button>
               </div>
             </div>
@@ -225,9 +251,21 @@ export default function Payment() {
                     <div className="flex justify-between text-emerald-600"><span>AURA24</span><span className="font-mono">−$131</span></div>
                   </div>
                   <div className="mt-4 pt-4 border-t border-slate-100 flex items-baseline justify-between">
-                    <span className="text-eyebrow text-slate-500">Total</span>
-                    <span className="font-mono text-3xl text-slate-900">${total}</span>
+                    <span className="text-eyebrow text-slate-500">Grand Total</span>
+                    <span className="font-mono text-2xl text-slate-900">${grand.toLocaleString()}</span>
                   </div>
+                  {!isFull && (
+                    <div className="mt-4 p-4 rounded-[14px] bg-indigo-50/40 border border-indigo-100 space-y-2" data-testid="summary-side-split">
+                      <div className="flex items-baseline justify-between text-sm">
+                        <span className="text-slate-700">Paying today</span>
+                        <span className="font-mono text-slate-900 font-medium">${payNow.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-baseline justify-between text-xs">
+                        <span className="text-slate-500">Balance at check-out</span>
+                        <span className="font-mono text-slate-500">${balanceLater.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </aside>

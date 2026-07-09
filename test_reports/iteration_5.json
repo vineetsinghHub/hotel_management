@@ -1,0 +1,32 @@
+{
+  "summary": "Iteration 5 frontend verification of Booking payment plan, Payment page persistence, and Dashboard modals (Modify Booking, Early Check-in, Book Spa/Dinner nav, Outstanding Balance/Folio, Add Extras, Remove Extra, Pay Balance) plus regression. 69/71 assertions passed at 1440x900. One real bug found in Pay Balance handler causing negative balance after settlement.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Dashboard – payBalance handler (Dashboard.jsx:145-150)",
+        "issue": "After clicking Pay Balance Confirm, data-testid='balance-due' becomes NEGATIVE (e.g. $-120) instead of $0 when extras are present. RCA: handler does setStay(paid = grand + extrasTotal) then setExtras([]). Because balance formula is (grand - paid + extras), the extrasTotal is added into paid AND then removed from extras, effectively double-crediting. Result: balance = grand - (grand + extras) + 0 = -extras. Repro: on /dashboard (fresh, default reserve-25), click Add Extras → Champagne ($120), close modal, click Pay Balance → Confirm. balance-due shows $-120 instead of $0. Fix: replace line 146 with `setStay((s) => ({ ...s, paid: s.paid + balanceDue }));` (or equivalently `paid: s.grand + extrasTotal - 0` only if extras are NOT cleared — but simpler to accumulate paid by the current balanceDue).",
+        "selector": "[data-testid='balance-due']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix Dashboard.jsx payBalance() logic: change `setStay((s) => ({ ...s, paid: s.grand + extrasTotal }))` to `setStay((s) => ({ ...s, paid: s.paid + balanceDue }))` so balance-due settles to exactly $0 (currently overshoots to negative by extrasTotal amount)."
+  ],
+  "critical_code_review_comments": [
+    "Dashboard.jsx is 1194 lines — should be split into smaller modules (modals, folio card, sections) for maintainability.",
+    "payBalance handler has an off-by-extras bug (see ui_bugs).",
+    "extrasTotal referenced inside setStay updater closure could go stale if user rapidly adds/removes extras; safer to compute inside the state setter using latest extras state."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "97%"},
+  "seed_data_creation": "None. Booking flow relies on localStorage['aura_booking']; cleared before each test.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 3 payment plan options work; persistence to /payment works; Modify Booking, Early Check-in, Book Spa/Dinner nav all work; Folio card + Add Extras (all 8 items present) + Remove Extra all work correctly. Only Pay Balance flow overpays by extrasTotal → balance-due goes negative. After fix, re-run the Pay Balance test at fresh /dashboard (localStorage cleared) with an added extra to confirm balance-due=$0.",
+  "rca_of_the_issue": "Dashboard.jsx line 146: `setStay((s) => ({ ...s, paid: s.grand + extrasTotal }))` sets paid to grand+extras, then line 147 clears extras. Since balanceDue = grand - paid + extras, after these updates: balanceDue = grand - (grand + extrasTotal_before) + 0 = -extrasTotal_before. Correct fix: `paid: s.paid + balanceDue` (accumulate current outstanding into paid) before clearing extras. Alternatively keep extras and set paid = grand + extras, but the current combination produces the negative balance."
+}

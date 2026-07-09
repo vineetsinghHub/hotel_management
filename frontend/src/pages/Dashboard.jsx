@@ -64,6 +64,28 @@ export default function Dashboard() {
   const [query, setQuery] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
+  // Reservation state (may be updated by Modify Booking) — read from Booking page's localStorage
+  const stored = (() => { try { return JSON.parse(localStorage.getItem("aura_booking") || "null"); } catch (e) { return null; } })();
+  const [stay, setStay] = useState({
+    suite: stored?.roomName || "The Maharajah Suite",
+    checkIn: stored?.checkIn || "2025-11-12",
+    checkOut: stored?.checkOut || "2025-11-15",
+    guests: `${stored?.adults || 2} Adults · ${stored?.roomsCount || 1} Suite`,
+    grand: stored?.grand ?? 4460,
+    paid: stored?.payNow ?? Math.round((stored?.grand ?? 4460) * 0.25),
+    plan: stored?.plan || "reserve-25",
+  });
+  const [extras, setExtras] = useState([
+    { id: "x1", label: "Room service · Continental breakfast", when: "Nov 12, 09:00", amount: 45 },
+  ]);
+  const [payBalanceOpen, setPayBalanceOpen] = useState(false);
+  const [addExtrasOpen, setAddExtrasOpen] = useState(false);
+
+  const extrasTotal = extras.reduce((s, e) => s + e.amount, 0);
+  const balanceDue = stay.grand - stay.paid + extrasTotal;
+  const isFullyPaid = balanceDue <= 0;
+  const isFullPlan = stay.plan === "full" && extras.length === 0;
+
   // Profile state
   const [profile, setProfile] = useState({
     firstName: "Aarav", lastName: "Mehta", email: "aarav@example.com",
@@ -118,6 +140,27 @@ export default function Dashboard() {
     if (kind === "experience") setUpcomingExps(updater);
     toast.success(`${kind === "spa" ? "Appointment" : kind === "dining" ? "Reservation" : "Experience"} rescheduled`, { description: `New time: ${newWhen}` });
     setRescheduleItem(null);
+  };
+
+  const payBalance = () => {
+    setStay((s) => ({ ...s, paid: s.grand + extrasTotal }));
+    setExtras([]);
+    toast.success("Balance settled", { description: `$${balanceDue.toLocaleString()} charged to Visa •••• 4242` });
+    setPayBalanceOpen(false);
+  };
+  const addExtra = (label, amount) => {
+    setExtras((s) => [...s, { id: `x${Date.now()}`, label, when: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }), amount }]);
+    toast.success(`${label} added`, { description: `$${amount} added to your folio` });
+  };
+  const removeExtra = (id) => setExtras((s) => s.filter((e) => e.id !== id));
+  const applyModify = ({ checkIn, checkOut, suite }) => {
+    setStay((s) => ({ ...s, checkIn, checkOut, suite }));
+    toast.success("Booking modified", { description: `${suite} · ${checkIn} → ${checkOut}` });
+    setModifyOpen(false);
+  };
+  const applyEarlyCheckin = (slot) => {
+    toast.success("Early check-in confirmed", { description: `Arrival at ${slot} on ${new Date(stay.checkIn).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` });
+    setEarlyOpen(false);
   };
 
   const searchResults = useMemo(() => {
@@ -256,8 +299,10 @@ export default function Dashboard() {
                 <div className="relative p-10 md:p-14 grid grid-cols-1 md:grid-cols-3 gap-10">
                   <div className="md:col-span-2">
                     <p className="text-eyebrow text-[#E6C868]">Your Next Stay</p>
-                    <h2 className="mt-3 font-serif text-4xl md:text-5xl leading-tight">The Maharajah Suite</h2>
-                    <p className="text-white/80 mt-2 text-sm">Nov 12 → Nov 15 · 3 nights · 2 guests</p>
+                    <h2 className="mt-3 font-serif text-4xl md:text-5xl leading-tight" data-testid="stay-suite">{stay.suite}</h2>
+                    <p className="text-white/80 mt-2 text-sm" data-testid="stay-dates">
+                      {new Date(stay.checkIn).toLocaleDateString("en-US", { month: "short", day: "numeric" })} → {new Date(stay.checkOut).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {Math.max(1, Math.round((new Date(stay.checkOut) - new Date(stay.checkIn)) / 86400000))} nights · {stay.guests}
+                    </p>
 
                     <div className="mt-8 grid grid-cols-4 gap-3 max-w-md">
                       {["Days", "Hours", "Minutes", "Seconds"].map((l, i) => {
@@ -308,6 +353,89 @@ export default function Dashboard() {
                   </div>
                 </div>
               </section>
+
+              {/* Outstanding Balance / Folio */}
+              {!isFullPlan && (
+                <section className="bg-white rounded-[28px] border border-slate-200 p-8 md:p-10" data-testid="folio-card">
+                  <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
+                    <div>
+                      <p className="text-eyebrow text-[#C9A227]">Your Folio</p>
+                      <h3 className="mt-2 font-serif text-3xl text-slate-900">Outstanding Balance</h3>
+                      <p className="mt-2 text-sm text-slate-500">Deposit paid at booking. Remaining balance plus in-stay extras is settled at check-out.</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-eyebrow text-slate-500">Due at check-out</p>
+                      <p className="mt-1 font-mono text-4xl text-slate-900" data-testid="balance-due">${balanceDue.toLocaleString()}</p>
+                      {isFullyPaid && <p className="text-xs text-emerald-600 mt-1">Paid in full · nothing due</p>}
+                    </div>
+                  </div>
+
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-5 rounded-[16px] bg-[#FAFAF8] border border-slate-100">
+                      <p className="text-eyebrow text-slate-500">Grand Total</p>
+                      <p className="mt-2 font-mono text-2xl text-slate-900">${stay.grand.toLocaleString()}</p>
+                    </div>
+                    <div className="p-5 rounded-[16px] bg-emerald-50/40 border border-emerald-100">
+                      <p className="text-eyebrow text-emerald-700">Paid</p>
+                      <p className="mt-2 font-mono text-2xl text-emerald-700" data-testid="balance-paid">${stay.paid.toLocaleString()}</p>
+                    </div>
+                    <div className="p-5 rounded-[16px] bg-indigo-50/40 border border-indigo-100">
+                      <p className="text-eyebrow text-indigo-700">In-stay extras</p>
+                      <p className="mt-2 font-mono text-2xl text-indigo-700" data-testid="balance-extras">${extrasTotal.toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {extras.length > 0 && (
+                    <div className="mt-6" data-testid="folio-extras-list">
+                      <p className="text-eyebrow text-slate-500 mb-3">Charges added to your folio</p>
+                      <div className="divide-y divide-slate-100 border border-slate-100 rounded-[16px]">
+                        {extras.map((e) => (
+                          <div key={e.id} className="p-4 flex items-center justify-between" data-testid={`folio-item-${e.id}`}>
+                            <div className="flex items-center gap-3">
+                              <i className="fa-solid fa-receipt text-[#C9A227]"></i>
+                              <div>
+                                <p className="text-sm text-slate-900">{e.label}</p>
+                                <p className="text-xs text-slate-500">{e.when}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="font-mono text-sm text-slate-900">+${e.amount}</span>
+                              <button onClick={() => removeExtra(e.id)} className="text-slate-400 hover:text-rose-500" data-testid={`folio-remove-${e.id}`}>
+                                <i className="fa-solid fa-xmark text-xs"></i>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-8 flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => setPayBalanceOpen(true)}
+                      disabled={isFullyPaid}
+                      className="px-6 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]"
+                      data-testid="pay-balance-btn"
+                    >
+                      Pay Balance · <span className="font-mono">${balanceDue.toLocaleString()}</span>
+                    </button>
+                    <button
+                      onClick={() => setAddExtrasOpen(true)}
+                      className="px-6 py-3 rounded-full border border-slate-200 hover:bg-slate-50 text-sm text-slate-900"
+                      data-testid="add-extras-btn"
+                    >
+                      <i className="fa-solid fa-plus mr-1.5 text-[#C9A227]"></i>Add extras
+                    </button>
+                    <button
+                      onClick={() => toast.success("Folio emailed", { description: `Sent to ${profile.email}` })}
+                      className="px-6 py-3 rounded-full border border-slate-200 hover:bg-slate-50 text-sm text-slate-700"
+                      data-testid="email-folio-btn"
+                    >
+                      <i className="fa-regular fa-envelope mr-1.5"></i>Email folio
+                    </button>
+                  </div>
+                </section>
+              )}
 
               {/* Stats */}
               <section className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="stats-row">
@@ -736,40 +864,22 @@ export default function Dashboard() {
 
       {/* MODIFY MODAL */}
       {modifyOpen && (
-        <ModalShell title="Modify Booking" onClose={() => setModifyOpen(false)} testid="modify-modal">
-          <p className="text-sm text-slate-600 leading-relaxed">
-            Send a modification request to our concierge. Free of charge up to 48 hours before arrival.
-          </p>
-          <div className="mt-5 grid grid-cols-2 gap-4">
-            <FieldSm label="New check-in" value="2025-11-13" onChange={() => {}} testid="mod-checkin" type="date" />
-            <FieldSm label="New check-out" value="2025-11-16" onChange={() => {}} testid="mod-checkout" type="date" />
-          </div>
-          <div className="mt-4">
-            <label className="text-eyebrow text-slate-500">Notes for concierge</label>
-            <textarea rows={3} defaultValue="Would love to extend by one night." className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" />
-          </div>
-          <div className="mt-6 flex items-center gap-3 justify-end">
-            <button onClick={() => setModifyOpen(false)} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
-            <button onClick={() => { toast.success("Modification request sent"); setModifyOpen(false); }} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="mod-submit">Send request</button>
-          </div>
-        </ModalShell>
+        <ModifyBookingModal stay={stay} onClose={() => setModifyOpen(false)} onApply={applyModify} />
       )}
 
       {/* EARLY CHECK-IN MODAL */}
       {earlyOpen && (
-        <ModalShell title="Request Early Check-in" onClose={() => setEarlyOpen(false)} testid="early-modal">
-          <p className="text-sm text-slate-600">Preferred arrival window on Nov 12:</p>
-          <div className="mt-4 grid grid-cols-4 gap-2">
-            {["09:00", "10:30", "11:00", "12:00", "12:30", "13:00", "13:30", "14:00"].map((t) => (
-              <button key={t} className="py-2.5 rounded-[10px] text-xs font-mono bg-[#FAFAF8] hover:bg-slate-100" data-testid={`early-slot-${t}`}>{t}</button>
-            ))}
-          </div>
-          <p className="mt-4 text-xs text-slate-500">Complimentary early check-in is subject to housekeeping. Guaranteed 4-hour early check-in from $90.</p>
-          <div className="mt-6 flex items-center gap-3 justify-end">
-            <button onClick={() => setEarlyOpen(false)} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
-            <button onClick={() => { toast.success("Early check-in request sent"); setEarlyOpen(false); }} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="early-submit">Request</button>
-          </div>
-        </ModalShell>
+        <EarlyCheckinModal onClose={() => setEarlyOpen(false)} onApply={applyEarlyCheckin} />
+      )}
+
+      {/* PAY BALANCE MODAL */}
+      {payBalanceOpen && (
+        <PayBalanceModal amount={balanceDue} onClose={() => setPayBalanceOpen(false)} onConfirm={payBalance} />
+      )}
+
+      {/* ADD EXTRAS MODAL */}
+      {addExtrasOpen && (
+        <AddExtrasModal onClose={() => setAddExtrasOpen(false)} onAdd={addExtra} />
       )}
 
       {/* CANCEL MODAL */}
@@ -917,6 +1027,165 @@ const RescheduleModal = ({ item, onClose, onConfirm }) => {
             className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm"
             data-testid="reschedule-confirm"
           >Confirm reschedule</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ModifyBookingModal = ({ stay, onClose, onApply }) => {
+  const [suite, setSuite] = useState(stay.suite);
+  const [checkIn, setCheckIn] = useState(stay.checkIn);
+  const [checkOut, setCheckOut] = useState(stay.checkOut);
+  const [notes, setNotes] = useState("Would love to extend by one night.");
+  const err = new Date(checkOut) <= new Date(checkIn);
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="modify-modal">
+      <div className="bg-white w-full max-w-lg rounded-t-[24px] md:rounded-[24px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative">
+        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="modify-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
+        <p className="text-eyebrow text-[#C9A227]">Reservation</p>
+        <h3 className="mt-1 font-serif text-2xl text-slate-900">Modify Booking</h3>
+        <p className="text-sm text-slate-500 mt-1">Free of charge up to 48 hours before arrival.</p>
+
+        <div className="mt-5 space-y-4">
+          <div>
+            <label className="text-eyebrow text-slate-500">Suite</label>
+            <select value={suite} onChange={(e) => setSuite(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" data-testid="mod-suite">
+              {rooms.map((r) => <option key={r.id}>{r.name}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-eyebrow text-slate-500">New check-in</label>
+              <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="mod-checkin" />
+            </div>
+            <div>
+              <label className="text-eyebrow text-slate-500">New check-out</label>
+              <input type="date" value={checkOut} min={checkIn} onChange={(e) => setCheckOut(e.target.value)} className={`mt-2 w-full bg-[#FAFAF8] border rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono ${err ? "border-rose-400" : "border-slate-200"}`} data-testid="mod-checkout" />
+            </div>
+          </div>
+          <div>
+            <label className="text-eyebrow text-slate-500">Notes for concierge</label>
+            <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" data-testid="mod-notes" />
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center gap-3 justify-end">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
+          <button
+            onClick={() => onApply({ suite, checkIn, checkOut })}
+            disabled={err}
+            className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-40 text-white text-sm"
+            data-testid="mod-submit"
+          >Save changes</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const EarlyCheckinModal = ({ onClose, onApply }) => {
+  const [slot, setSlot] = useState("12:00");
+  const slots = ["09:00", "10:30", "11:00", "12:00", "12:30", "13:00", "13:30", "14:00"];
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="early-modal">
+      <div className="bg-white w-full max-w-lg rounded-t-[24px] md:rounded-[24px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative">
+        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="early-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
+        <p className="text-eyebrow text-[#C9A227]">Arrival</p>
+        <h3 className="mt-1 font-serif text-2xl text-slate-900">Request Early Check-in</h3>
+        <p className="text-sm text-slate-500 mt-1">Preferred arrival window:</p>
+
+        <div className="mt-5 grid grid-cols-4 gap-2">
+          {slots.map((t) => (
+            <button
+              key={t}
+              onClick={() => setSlot(t)}
+              className={`py-2.5 rounded-[10px] text-xs font-mono transition-all ${slot === t ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`}
+              data-testid={`early-slot-${t}`}
+            >{t}</button>
+          ))}
+        </div>
+        <p className="mt-4 text-xs text-slate-500">Complimentary early check-in is subject to housekeeping. Guaranteed 4-hour early check-in from $90.</p>
+        <div className="mt-6 flex items-center gap-3 justify-end">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
+          <button onClick={() => onApply(slot)} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="early-submit">Confirm {slot}</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PayBalanceModal = ({ amount, onClose, onConfirm }) => (
+  <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="pay-balance-modal">
+    <div className="bg-white w-full max-w-md rounded-t-[24px] md:rounded-[24px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative">
+      <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="pay-balance-close">
+        <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+      </button>
+      <p className="text-eyebrow text-[#C9A227]">Settle balance</p>
+      <h3 className="mt-1 font-serif text-2xl text-slate-900">Pay outstanding</h3>
+      <p className="text-sm text-slate-500 mt-2">Charge to your card on file. This clears the remaining balance and all in-stay extras.</p>
+      <div className="mt-6 p-5 rounded-[16px] bg-[#FAFAF8] border border-slate-100 flex items-baseline justify-between">
+        <div>
+          <p className="text-eyebrow text-slate-500">Amount</p>
+          <p className="text-xs text-slate-500 mt-1">Visa •••• 4242</p>
+        </div>
+        <p className="font-mono text-3xl text-slate-900">${amount.toLocaleString()}</p>
+      </div>
+      <div className="mt-6 flex items-center gap-3 justify-end">
+        <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
+        <button onClick={onConfirm} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="pay-balance-confirm">
+          <i className="fa-solid fa-lock text-[10px] mr-1.5"></i>Pay ${amount.toLocaleString()}
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+const AddExtrasModal = ({ onClose, onAdd }) => {
+  const catalog = [
+    { label: "Room Service · Continental Breakfast", amount: 45, icon: "mug-hot" },
+    { label: "Room Service · À la carte lunch", amount: 68, icon: "utensils" },
+    { label: "Mini-bar · Champagne", amount: 120, icon: "champagne-glasses" },
+    { label: "Laundry & Pressing", amount: 40, icon: "shirt" },
+    { label: "Late Check-out · 4pm", amount: 90, icon: "clock" },
+    { label: "Airport Transfer · Return", amount: 120, icon: "car" },
+    { label: "Private Yoga Session", amount: 85, icon: "person-praying" },
+    { label: "In-suite Photographer", amount: 180, icon: "camera" },
+  ];
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="add-extras-modal">
+      <div className="bg-white w-full max-w-2xl rounded-t-[24px] md:rounded-[24px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative max-h-[90vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="add-extras-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
+        <p className="text-eyebrow text-[#C9A227]">In-stay extras</p>
+        <h3 className="mt-1 font-serif text-2xl text-slate-900">Add to your folio</h3>
+        <p className="text-sm text-slate-500 mt-1">Charged to your suite. Settled at check-out.</p>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+          {catalog.map((c) => (
+            <button
+              key={c.label}
+              onClick={() => onAdd(c.label, c.amount)}
+              className="text-left p-4 rounded-[14px] bg-[#FAFAF8] hover:bg-white border border-transparent hover:border-slate-200 transition-all flex items-center gap-4"
+              data-testid={`extra-${c.icon}`}
+            >
+              <span className="w-10 h-10 rounded-full bg-[#C9A227]/10 text-[#C9A227] grid place-items-center">
+                <i className={`fa-solid fa-${c.icon} text-sm`}></i>
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-slate-900 truncate">{c.label}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Add to folio</p>
+              </div>
+              <span className="font-mono text-sm text-slate-900">${c.amount}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Done</button>
         </div>
       </div>
     </div>

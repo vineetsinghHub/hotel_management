@@ -43,6 +43,7 @@ export default function Booking() {
   const [terms, setTerms] = useState(true);
   const [openAccordion, setOpenAccordion] = useState("policies");
   const [promoCode, setPromoCode] = useState("AURA24");
+  const [plan, setPlan] = useState("reserve-25"); // full | reserve-25 | reserve-50
 
   const toggle = (id) => setSelectedUpsells((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
@@ -55,6 +56,10 @@ export default function Booking() {
   const taxes = Math.round((roomTotal + addOnsTotal) * 0.18);
   const discount = promoCode === "AURA24" ? Math.round(roomTotal * 0.12) : 0;
   const grand = roomTotal + addOnsTotal + taxes - discount;
+
+  const depositPct = plan === "full" ? 1 : plan === "reserve-50" ? 0.5 : 0.25;
+  const payNow = Math.round(grand * depositPct);
+  const balanceLater = grand - payNow;
 
   const overCapacity = adults + children > room.guests * roomsCount;
   const dateError = outDate <= inDate;
@@ -318,6 +323,53 @@ export default function Booking() {
                 />
                 <span>I have read and accept the booking policies, terms and privacy notice.</span>
               </label>
+
+              {/* Payment plan */}
+              <div className="bg-white rounded-[24px] border border-slate-200 p-8" data-testid="payment-plan-card">
+                <div>
+                  <p className="text-eyebrow text-[#C9A227]">Payment Plan</p>
+                  <h2 className="mt-2 font-serif text-3xl text-slate-900">How would you like to pay?</h2>
+                  <p className="mt-2 text-sm text-slate-500">Reserve your suite now with a deposit and settle the balance — plus any in-stay extras — at check-out.</p>
+                </div>
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { id: "full", title: "Pay in Full", sub: "Complete payment today", pct: 100 },
+                    { id: "reserve-25", title: "Reserve 25%", sub: "Deposit today · balance at check-out", pct: 25 },
+                    { id: "reserve-50", title: "Reserve 50%", sub: "Half today · balance at check-out", pct: 50 },
+                  ].map((p) => {
+                    const isOn = plan === p.id;
+                    const amt = Math.round(grand * (p.pct / 100));
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => setPlan(p.id)}
+                        className={`text-left rounded-[18px] border p-5 transition-all ${
+                          isOn ? "border-[#4F46E5] ring-2 ring-[#4F46E5]/15 bg-indigo-50/30" : "border-slate-200 hover:border-slate-300 bg-white"
+                        }`}
+                        data-testid={`plan-${p.id}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <p className="font-serif text-lg text-slate-900">{p.title}</p>
+                          <span className={`w-5 h-5 rounded-full grid place-items-center ${isOn ? "bg-[#4F46E5]" : "border border-slate-300"}`}>
+                            {isOn && <i className="fa-solid fa-check text-white text-[9px]"></i>}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-slate-500">{p.sub}</p>
+                        <p className="mt-3 font-mono text-2xl text-slate-900">${amt.toLocaleString()}</p>
+                        <p className="text-[11px] text-slate-500">{p.pct === 100 ? "one-time" : `${100 - p.pct}% due at check-out`}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+                {plan !== "full" && (
+                  <div className="mt-5 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-start gap-3" data-testid="plan-balance-note">
+                    <i className="fa-solid fa-circle-info text-[#C9A227] mt-0.5"></i>
+                    <div className="text-sm text-slate-700">
+                      Balance of <span className="font-mono text-slate-900">${balanceLater.toLocaleString()}</span> plus any in-stay extras (dining, spa, mini-bar, laundry) will be settled at check-out. A card is held on file — nothing is charged until departure.
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* RIGHT — Sticky booking summary */}
@@ -381,16 +433,37 @@ export default function Booking() {
                       <p className="text-eyebrow text-slate-500">Grand Total</p>
                       <p className="text-[10px] text-slate-400 mt-1">inclusive of taxes</p>
                     </div>
-                    <p className="font-mono text-3xl text-slate-900">${grand}</p>
+                    <p className="font-mono text-3xl text-slate-900" data-testid="summary-grand">${grand}</p>
                   </div>
 
+                  {plan !== "full" && (
+                    <div className="mt-4 p-4 rounded-[14px] bg-indigo-50/40 border border-indigo-100" data-testid="summary-split">
+                      <div className="flex items-baseline justify-between text-sm">
+                        <span className="text-slate-700">Pay today</span>
+                        <span className="font-mono text-slate-900 font-medium">${payNow.toLocaleString()}</span>
+                      </div>
+                      <div className="mt-1.5 flex items-baseline justify-between text-sm">
+                        <span className="text-slate-500">Balance at check-out</span>
+                        <span className="font-mono text-slate-500">${balanceLater.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+
                   <button
-                    onClick={() => nav("/payment")}
+                    onClick={() => {
+                      const bookingState = {
+                        roomId, roomName: room.name, roomImage: room.images[0],
+                        checkIn, checkOut, nights, adults, children, roomsCount,
+                        grand, payNow, balanceLater, plan, addOns: selectedUpsells,
+                      };
+                      try { localStorage.setItem("aura_booking", JSON.stringify(bookingState)); } catch (e) { /* ignore quota errors */ }
+                      nav("/payment");
+                    }}
                     disabled={!terms || lastNameError || overCapacity || dateError}
                     className="mt-6 w-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm py-4 rounded-full shadow-[0_10px_28px_rgba(79,70,229,0.32)]"
                     data-testid="book-now-btn"
                   >
-                    Book Now · Secure Payment
+                    {plan === "full" ? `Book Now · Pay $${grand.toLocaleString()}` : `Reserve · Pay $${payNow.toLocaleString()} now`}
                   </button>
                   <p className="text-[11px] text-slate-500 text-center mt-3">
                     <i className="fa-solid fa-lock text-[9px]"></i> Encrypted end-to-end · PCI DSS
