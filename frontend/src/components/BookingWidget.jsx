@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const monthName = (d) => d.toLocaleString("en-US", { month: "long", year: "numeric" });
 const fmtShort = (d) => d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
 
 // A luxury glassmorphism booking widget with an OPEN calendar popover, guest selector, promo field.
-export const BookingWidget = ({ variant = "floating", showOpenStates = true }) => {
+export const BookingWidget = ({ variant = "floating", showOpenStates = true, onChange }) => {
   const nav = useNavigate();
   const today = new Date();
   const inTwo = new Date(); inTwo.setDate(today.getDate() + 2);
@@ -22,6 +22,11 @@ export const BookingWidget = ({ variant = "floating", showOpenStates = true }) =
   const [promo, setPromo] = useState("AURA24");
 
   const [viewMonth, setViewMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+
+  // Notify parent of state changes for filtering
+  useEffect(() => {
+    if (onChange) onChange({ checkIn, checkOut, adults, children, rooms, promo });
+  }, [checkIn, checkOut, adults, children, rooms, promo, onChange]);
 
   const days = (() => {
     const first = new Date(viewMonth);
@@ -110,7 +115,7 @@ export const BookingWidget = ({ variant = "floating", showOpenStates = true }) =
       </div>
 
       {/* OPEN popovers row */}
-      {showOpenStates && (
+      {(openCal || openGuests || openPromo) && (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 mt-3">
           {/* Calendar OPEN */}
           {openCal && (
