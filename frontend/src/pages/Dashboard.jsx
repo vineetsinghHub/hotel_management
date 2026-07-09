@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { PropertyMark } from "@/components/PropertyMark";
 import { rooms, experiences, spaTreatments } from "@/data/mockData";
@@ -47,9 +47,8 @@ const initialExperiences = [
 ];
 
 export default function Dashboard() {
-  const goto = useNavigate();
   const [active, setActive] = useState("dashboard");
-  const [countdown, setCountdown] = useState({ d: 6, h: 14, m: 22, s: 11 });
+  const [countdown, setCountdown] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [notifs, setNotifs] = useState(initialNotifications);
   const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -63,13 +62,18 @@ export default function Dashboard() {
   const [upcomingExps, setUpcomingExps] = useState(initialExperiences);
   const [query, setQuery] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [bookSpaOpen, setBookSpaOpen] = useState(false);
+  const [bookDinnerOpen, setBookDinnerOpen] = useState(false);
 
   // Reservation state (may be updated by Modify Booking) — read from Booking page's localStorage
   const stored = (() => { try { return JSON.parse(localStorage.getItem("aura_booking") || "null"); } catch (e) { return null; } })();
+  const defaultIn = new Date(); defaultIn.setDate(defaultIn.getDate() + 6);
+  const defaultOut = new Date(); defaultOut.setDate(defaultOut.getDate() + 9);
+  const toISO = (d) => d.toISOString().slice(0, 10);
   const [stay, setStay] = useState({
     suite: stored?.roomName || "The Maharajah Suite",
-    checkIn: stored?.checkIn || "2025-11-12",
-    checkOut: stored?.checkOut || "2025-11-15",
+    checkIn: stored?.checkIn || toISO(defaultIn),
+    checkOut: stored?.checkOut || toISO(defaultOut),
     guests: `${stored?.adults || 2} Adults · ${stored?.roomsCount || 1} Suite`,
     grand: stored?.grand ?? 4460,
     paid: stored?.payNow ?? Math.round((stored?.grand ?? 4460) * 0.25),
@@ -99,19 +103,20 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setCountdown((c) => {
-        let { d, h, m, s } = c;
-        s -= 1;
-        if (s < 0) { s = 59; m -= 1; }
-        if (m < 0) { m = 59; h -= 1; }
-        if (h < 0) { h = 23; d -= 1; }
-        if (d < 0) d = 0;
-        return { d, h, m, s };
-      });
-    }, 1000);
+    const target = new Date(`${stay.checkIn}T14:00:00`);
+    const tick = () => {
+      const now = new Date();
+      const diff = Math.max(0, target - now);
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown({ d, h, m, s });
+    };
+    tick();
+    const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [stay.checkIn]);
 
   const unreadCount = notifs.filter((n) => !n.read).length;
   const markAllRead = () => { setNotifs((s) => s.map((n) => ({ ...n, read: true }))); toast.success("All notifications marked as read"); };
@@ -162,6 +167,26 @@ export default function Dashboard() {
   const applyEarlyCheckin = (slot) => {
     toast.success("Early check-in confirmed", { description: `Arrival at ${slot} on ${new Date(stay.checkIn).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` });
     setEarlyOpen(false);
+  };
+
+  const confirmBookSpa = ({ treatmentId, date, time }) => {
+    const t = spaTreatments.find((x) => x.id === treatmentId);
+    if (!t) return;
+    const label = `${new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+    setSpa((s) => [...s, { id: `s${Date.now()}`, name: t.name, when: label, therapist: t.therapist, duration: t.duration }]);
+    setExtras((s) => [...s, { id: `x${Date.now()}`, label: `Spa · ${t.name}`, when: label, amount: t.price }]);
+    toast.success("Spa treatment booked", { description: `${t.name} · ${label} · $${t.price} added to folio` });
+    setBookSpaOpen(false);
+  };
+
+  const confirmBookDinner = ({ restaurant, date, time, guests }) => {
+    const label = `${new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+    const priceMap = { "Chef's Table Tasting": 240, "The Palace Table · Royal Thali": 92, "Rooftop Grill": 68, "Garden Breakfast": 26 };
+    const amount = priceMap[restaurant] * guests;
+    setDining((s) => [...s, { id: `d${Date.now()}`, name: restaurant, when: label, guests, restaurant }]);
+    setExtras((s) => [...s, { id: `x${Date.now()}`, label: `Dining · ${restaurant} · ${guests} guests`, when: label, amount }]);
+    toast.success("Dining table reserved", { description: `${restaurant} · ${label} · $${amount} added to folio` });
+    setBookDinnerOpen(false);
   };
 
   const searchResults = useMemo(() => {
@@ -320,8 +345,8 @@ export default function Dashboard() {
                     <div className="mt-8 flex flex-wrap items-center gap-3">
                       <button onClick={() => setModifyOpen(true)} className="px-5 py-2.5 rounded-full bg-[#C9A227] hover:bg-[#B08D1E] text-slate-900 text-sm font-medium" data-testid="modify-booking-btn">Modify Booking</button>
                       <button onClick={() => setEarlyOpen(true)} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="early-checkin-btn">Request Early Check-in</button>
-                      <button onClick={() => goto("/spa")} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="book-spa-btn">Book Spa</button>
-                      <button onClick={() => goto("/dining")} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="book-dinner-btn">Book Dinner</button>
+                      <button onClick={() => setBookSpaOpen(true)} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="book-spa-btn">Book Spa</button>
+                      <button onClick={() => setBookDinnerOpen(true)} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="book-dinner-btn">Book Dinner</button>
                     </div>
                   </div>
 
@@ -883,6 +908,16 @@ export default function Dashboard() {
         <AddExtrasModal onClose={() => setAddExtrasOpen(false)} onAdd={addExtra} />
       )}
 
+      {/* BOOK SPA MODAL */}
+      {bookSpaOpen && (
+        <BookSpaModal stay={stay} onClose={() => setBookSpaOpen(false)} onConfirm={confirmBookSpa} />
+      )}
+
+      {/* BOOK DINNER MODAL */}
+      {bookDinnerOpen && (
+        <BookDinnerModal stay={stay} onClose={() => setBookDinnerOpen(false)} onConfirm={confirmBookDinner} />
+      )}
+
       {/* CANCEL MODAL */}
       {cancelOpen && (
         <ModalShell title="Cancel Reservation" onClose={() => setCancelOpen(null)} testid="cancel-modal">
@@ -1187,6 +1222,166 @@ const AddExtrasModal = ({ onClose, onAdd }) => {
         </div>
         <div className="mt-6 flex justify-end">
           <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Done</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const BookSpaModal = ({ stay, onClose, onConfirm }) => {
+  const [treatmentId, setTreatmentId] = useState(spaTreatments[0].id);
+  const [date, setDate] = useState(stay.checkIn);
+  const [time, setTime] = useState("15:00");
+  const slots = ["09:00", "10:30", "12:00", "13:30", "15:00", "16:30", "18:00", "19:30"];
+  const t = spaTreatments.find((x) => x.id === treatmentId);
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="book-spa-modal">
+      <div className="bg-white w-full max-w-2xl rounded-t-[24px] md:rounded-[24px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative max-h-[92vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="book-spa-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
+        <p className="text-eyebrow text-[#C9A227]">Book from your stay</p>
+        <h3 className="mt-1 font-serif text-2xl text-slate-900">Book Spa Treatment</h3>
+        <p className="text-sm text-slate-500 mt-1">Charged to your folio · settled at check-out.</p>
+
+        <div className="mt-5">
+          <label className="text-eyebrow text-slate-500">Treatment</label>
+          <div className="mt-3 space-y-2">
+            {spaTreatments.map((x) => {
+              const on = x.id === treatmentId;
+              return (
+                <button
+                  key={x.id}
+                  onClick={() => setTreatmentId(x.id)}
+                  className={`w-full text-left p-4 rounded-[14px] border flex items-center gap-4 transition-all ${on ? "border-[#4F46E5] bg-indigo-50/30 ring-2 ring-[#4F46E5]/10" : "border-slate-200 hover:border-slate-300 bg-white"}`}
+                  data-testid={`spa-pick-${x.id}`}
+                >
+                  <span className="w-10 h-10 rounded-full bg-[#C9A227]/10 text-[#C9A227] grid place-items-center flex-shrink-0"><i className="fa-solid fa-spa text-sm"></i></span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-900">{x.name}</p>
+                    <p className="text-xs text-slate-500">{x.duration} · with {x.therapist}</p>
+                  </div>
+                  <span className="font-mono text-sm text-slate-900">${x.price}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-eyebrow text-slate-500">Date</label>
+            <input type="date" value={date} min={stay.checkIn} max={stay.checkOut} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="spa-date" />
+          </div>
+          <div>
+            <label className="text-eyebrow text-slate-500">Time</label>
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              {slots.map((s) => (
+                <button key={s} onClick={() => setTime(s)} className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === s ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`} data-testid={`spa-slot-${s}`}>{s}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-baseline justify-between">
+          <div>
+            <p className="text-eyebrow text-slate-500">Charged to folio</p>
+            <p className="text-xs text-slate-500 mt-1">{t.name} · {t.duration}</p>
+          </div>
+          <p className="font-mono text-2xl text-slate-900">${t.price}</p>
+        </div>
+
+        <div className="mt-6 flex items-center gap-3 justify-end">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
+          <button onClick={() => onConfirm({ treatmentId, date, time })} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="spa-confirm">Confirm booking</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const BookDinnerModal = ({ stay, onClose, onConfirm }) => {
+  const restaurants = [
+    { name: "Chef's Table Tasting", desc: "10 courses in the palace kitchen", price: 240 },
+    { name: "The Palace Table · Royal Thali", desc: "12-course brass thali", price: 92 },
+    { name: "Rooftop Grill", desc: "Tandoor selections under the stars", price: 68 },
+    { name: "Garden Breakfast", desc: "In the Mughal gardens", price: 26 },
+  ];
+  const [restaurant, setRestaurant] = useState(restaurants[0].name);
+  const [date, setDate] = useState(stay.checkIn);
+  const [time, setTime] = useState("20:00");
+  const [guests, setGuests] = useState(2);
+  const slots = ["12:30", "13:30", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00"];
+  const price = restaurants.find((r) => r.name === restaurant)?.price || 0;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="book-dinner-modal">
+      <div className="bg-white w-full max-w-2xl rounded-t-[24px] md:rounded-[24px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative max-h-[92vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="book-dinner-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
+        <p className="text-eyebrow text-[#C9A227]">Book from your stay</p>
+        <h3 className="mt-1 font-serif text-2xl text-slate-900">Reserve a Table</h3>
+        <p className="text-sm text-slate-500 mt-1">Charged to your folio · settled at check-out.</p>
+
+        <div className="mt-5">
+          <label className="text-eyebrow text-slate-500">Restaurant</label>
+          <div className="mt-3 space-y-2">
+            {restaurants.map((r) => {
+              const on = r.name === restaurant;
+              return (
+                <button
+                  key={r.name}
+                  onClick={() => setRestaurant(r.name)}
+                  className={`w-full text-left p-4 rounded-[14px] border flex items-center gap-4 transition-all ${on ? "border-[#4F46E5] bg-indigo-50/30 ring-2 ring-[#4F46E5]/10" : "border-slate-200 hover:border-slate-300 bg-white"}`}
+                  data-testid={`dinner-pick-${r.name.split(" ")[0].toLowerCase()}`}
+                >
+                  <span className="w-10 h-10 rounded-full bg-[#C9A227]/10 text-[#C9A227] grid place-items-center flex-shrink-0"><i className="fa-solid fa-utensils text-sm"></i></span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-slate-900">{r.name}</p>
+                    <p className="text-xs text-slate-500">{r.desc}</p>
+                  </div>
+                  <span className="font-mono text-sm text-slate-900">${r.price}<span className="text-xs text-slate-500"> / pp</span></span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-eyebrow text-slate-500">Date</label>
+            <input type="date" value={date} min={stay.checkIn} max={stay.checkOut} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="dinner-date" />
+          </div>
+          <div>
+            <label className="text-eyebrow text-slate-500">Time</label>
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              {slots.map((s) => (
+                <button key={s} onClick={() => setTime(s)} className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === s ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`} data-testid={`dinner-slot-${s}`}>{s}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <label className="text-eyebrow text-slate-500">Guests</label>
+          <div className="mt-2 flex items-center justify-between p-3 bg-[#FAFAF8] rounded-[14px] border border-slate-100 max-w-xs">
+            <button onClick={() => setGuests(Math.max(1, guests - 1))} className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-700" data-testid="dinner-guests-minus">−</button>
+            <span className="font-mono" data-testid="dinner-guests-value">{guests} guest{guests > 1 ? "s" : ""}</span>
+            <button onClick={() => setGuests(guests + 1)} className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-700" data-testid="dinner-guests-plus">+</button>
+          </div>
+        </div>
+
+        <div className="mt-5 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-baseline justify-between">
+          <div>
+            <p className="text-eyebrow text-slate-500">Charged to folio</p>
+            <p className="text-xs text-slate-500 mt-1">{restaurant} · {guests} guest{guests > 1 ? "s" : ""}</p>
+          </div>
+          <p className="font-mono text-2xl text-slate-900">${(price * guests).toLocaleString()}</p>
+        </div>
+
+        <div className="mt-6 flex items-center gap-3 justify-end">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
+          <button onClick={() => onConfirm({ restaurant, date, time, guests })} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="dinner-confirm">Reserve table</button>
         </div>
       </div>
     </div>
