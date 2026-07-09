@@ -1,5 +1,6 @@
 import AdminLayout from "@/admin/components/AdminLayout";
 import OccupancyHeatmap from "@/admin/components/OccupancyHeatmap";
+import AdminExtraAnalytics from "@/admin/components/AdminExtraAnalytics";
 import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
 import { stats, revenueTrend, arrivals, activities, channels, statusColor, occupancyTrend } from "@/admin/adminMockData";
 
@@ -216,8 +217,32 @@ export default function AdminDashboard() {
       </section>
 
       {/* Occupancy heatmap */}
-      <section className="mt-6">
+      <section className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <OccupancyHeatmap />
+        <div className="p-5 rounded-[16px] bg-gradient-to-br from-[#4F46E5] to-slate-900 text-white" data-testid="quick-metrics">
+          <p className="text-eyebrow text-[#E6C868]">Today at a glance</p>
+          <h4 className="font-serif text-lg mt-1">Real-time pulse</h4>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {[
+              { l: "Arrivals", v: "12", i: "plane-arrival" },
+              { l: "Departures", v: "9", i: "plane-departure" },
+              { l: "In-house", v: "38", i: "users" },
+              { l: "OOO rooms", v: "2", i: "wrench" },
+              { l: "Complaints", v: "1", i: "triangle-exclamation" },
+              { l: "VIP guests", v: "4", i: "crown" },
+            ].map((k) => (
+              <div key={k.l} className="p-3 rounded-[12px] bg-white/10 backdrop-blur">
+                <div className="flex items-center gap-2 text-[10px] tracking-widest uppercase text-white/60"><i className={`fa-solid fa-${k.i} text-[10px] text-[#E6C868]`}></i>{k.l}</div>
+                <p className="mt-1.5 font-mono text-2xl">{k.v}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Extra analytics */}
+      <section className="mt-6">
+        <AdminExtraAnalytics />
       </section>
     </AdminLayout>
   );

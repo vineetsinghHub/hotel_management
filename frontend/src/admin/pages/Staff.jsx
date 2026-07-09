@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import AdminLayout from "@/admin/components/AdminLayout";
+import StaffShifts from "@/admin/components/StaffShifts";
 import { seedUsers } from "@/admin/adminAuth";
 import { ROLES, roleColor, roleLabel } from "@/admin/roles";
 
@@ -40,6 +41,7 @@ export default function Staff() {
   const [editUser, setEditUser] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
+  const [tab, setTab] = useState("members");
   const [form, setForm] = useState({ name: "", email: "", title: "", role: ROLES[3].key });
 
   const allRoles = [...ROLES, ...customRoles];
@@ -80,6 +82,18 @@ export default function Staff() {
         </div>
       </div>
 
+      <div className="mb-4 inline-flex bg-slate-100 rounded-full p-1 gap-1" role="tablist" data-testid="staff-tabs">
+        {[["members", "Members", "users"], ["shifts", "Shifts", "calendar-week"], ["custom", "Custom Roles", "shield-halved"]].map(([k, l, i]) => (
+          <button key={k} onClick={() => setTab(k)} className={`px-4 py-1.5 rounded-full text-xs transition-all flex items-center gap-1.5 ${tab === k ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-900"}`} data-testid={`staff-tab-${k}`} role="tab" aria-selected={tab === k}>
+            <i className={`fa-solid fa-${i} text-[10px]`}></i>{l}
+          </button>
+        ))}
+      </div>
+
+      {tab === "shifts" ? (
+        <StaffShifts staff={users.map((u) => ({ id: u.id, name: u.name, role: allRoles.find((r) => r.key === u.role)?.label || roleLabel(u.role) }))} />
+      ) : (
+      <>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" data-testid="role-cards">
         {allRoles.slice(0, 4).map((r) => {
           const n = users.filter((u) => u.role === r.key).length;
@@ -207,6 +221,9 @@ export default function Staff() {
             </div>
           </div>
         </div>
+      )}
+
+      </>
       )}
 
       {builderOpen && (

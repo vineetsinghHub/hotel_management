@@ -8,6 +8,7 @@ import RoomDetailModal from "@/components/RoomDetailModal";
 import VideoHero from "@/components/VideoHero";
 import EditorialSection from "@/components/EditorialSection";
 import { property, highlights, rooms, testimonials, galleryImages, experiences } from "@/data/mockData";
+import { useApp } from "@/context/AppContext";
 
 const heroImage =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2200&q=90";
@@ -18,6 +19,7 @@ const heroSources = [
 export default function Home() {
   const [modalRoom, setModalRoom] = useState(null);
   const [testimIndex, setTestimIndex] = useState(0);
+  const { t } = useApp();
 
   return (
     <div className="bg-[#FAFAF8]" data-testid="home-page">
@@ -29,15 +31,13 @@ export default function Home() {
           <div className="max-w-3xl reveal-up">
             <p className="text-eyebrow text-[#E6C868] flex items-center gap-3">
               <span className="w-8 h-px bg-[#E6C868]"></span>
-              Est. {property.established} · {property.location}
+              {t("home.hero.eyebrow")}
             </p>
-            <h1 className="mt-6 font-serif text-white text-5xl sm:text-6xl md:text-[84px] leading-[1.02] tracking-tight">
-              Experience <em className="text-[#E6C868] not-italic font-light">Timeless</em>
-              <br />
-              Heritage <span className="italic font-light">&</span> Luxury
+            <h1 className="mt-6 font-serif text-white text-5xl sm:text-6xl md:text-[84px] leading-[1.02] tracking-tight" data-testid="hero-title">
+              {t("home.hero.title")}
             </h1>
             <p className="mt-8 text-white/80 text-lg max-w-xl leading-relaxed">
-              A living heritage retreat on the shores of Lake Pichola, where two-and-a-half centuries of Rajput craftsmanship meet the quiet mastery of modern hospitality.
+              {t("home.hero.subtitle")}
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <Link
@@ -45,7 +45,7 @@ export default function Home() {
                 className="inline-flex items-center gap-3 bg-[#4F46E5] hover:bg-[#4338CA] text-white px-8 py-4 rounded-full shadow-[0_14px_36px_rgba(79,70,229,0.45)] hover:-translate-y-0.5 transition-all"
                 data-testid="hero-book-cta"
               >
-                Book Your Stay
+                {t("home.hero.cta_book")}
                 <i className="fa-solid fa-arrow-right text-xs"></i>
               </Link>
               <Link
@@ -53,7 +53,7 @@ export default function Home() {
                 className="inline-flex items-center gap-3 glass text-slate-900 px-8 py-4 rounded-full hover:bg-white transition-all"
                 data-testid="hero-explore-cta"
               >
-                Explore Rooms
+                {t("home.hero.cta_explore")}
               </Link>
             </div>
 

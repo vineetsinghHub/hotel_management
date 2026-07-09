@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 // 90-day occupancy heatmap. Deterministic mock values based on date.
-const DAYS = 90;
+const DAYS = 60;
 const pct = (d) => {
   const doy = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
   const dow = d.getDay();
@@ -43,16 +43,16 @@ export const OccupancyHeatmap = () => {
   const [hover, setHover] = useState(null);
 
   return (
-    <div className="p-5 rounded-[16px] bg-white border border-slate-200" data-testid="occupancy-heatmap">
+    <div className="p-5 rounded-[16px] bg-white border border-slate-200 max-w-2xl" data-testid="occupancy-heatmap">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-eyebrow text-[#C9A227]">Occupancy — next 90 days</p>
-          <p className="font-serif text-xl text-slate-900 mt-0.5">Avg <span className="font-mono">{avg}%</span></p>
+          <p className="text-eyebrow text-[#C9A227]">Occupancy — next 60 days</p>
+          <p className="font-serif text-lg text-slate-900 mt-0.5">Avg <span className="font-mono">{avg}%</span></p>
         </div>
-        <div className="flex items-center gap-2 text-[10px] tracking-widest uppercase text-slate-500">
-          <span className="w-3 h-3 rounded bg-rose-300"></span>Low
-          <span className="w-3 h-3 rounded bg-[#C9A227]"></span>Med
-          <span className="w-3 h-3 rounded bg-emerald-600"></span>High
+        <div className="flex items-center gap-2 text-[9px] tracking-widest uppercase text-slate-500">
+          <span className="w-2.5 h-2.5 rounded bg-rose-300"></span>Low
+          <span className="w-2.5 h-2.5 rounded bg-[#C9A227]"></span>Med
+          <span className="w-2.5 h-2.5 rounded bg-emerald-600"></span>High
         </div>
       </div>
 

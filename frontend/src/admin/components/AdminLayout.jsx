@@ -5,6 +5,8 @@ import { getAdminUser, clearAdminUser, seedUsers } from "@/admin/adminAuth";
 import { hasAccess, roleLabel, roleColor } from "@/admin/roles";
 import { arrivals, roomsInventory, guests, notificationsAdmin } from "@/admin/adminMockData";
 import AdminOnboardingTour from "@/admin/components/AdminOnboardingTour";
+import AdminQuickCreateModal from "@/admin/components/AdminQuickCreateModal";
+import AdminFloatingActions from "@/admin/components/AdminFloatingActions";
 
 const groups = [
   { label: "Operations", items: [
@@ -124,6 +126,7 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
   const [helpOpen, setHelpOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
+  const [quickEntity, setQuickEntity] = useState(null);
   const [notifs, setNotifs] = useState(notificationsAdmin);
   const unread = notifs.filter((n) => !n.read).length;
 
@@ -179,15 +182,15 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
             {newOpen && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200 rounded-[16px] shadow-[0_20px_50px_rgba(15,23,42,0.10)] py-2 z-40" data-testid="new-menu">
                 {[
-                  { l: "New Reservation", i: "calendar-plus", to: "/admin/reservations" },
-                  { l: "New Guest", i: "user-plus", to: "/admin/guests" },
-                  { l: "New Staff", i: "id-badge", to: "/admin/staff" },
-                  { l: "New Invoice", i: "file-invoice-dollar", to: "/admin/invoices" },
-                  { l: "New Event", i: "calendar-heart", to: "/admin/events" },
-                  { l: "New Menu Item", i: "utensils", to: "/admin/restaurant" },
-                  { l: "New Campaign", i: "bullhorn", to: "/admin/marketing" },
+                  { l: "New Reservation", i: "calendar-plus", entity: "reservation" },
+                  { l: "New Guest", i: "user-plus", entity: "guest" },
+                  { l: "New Staff", i: "id-badge", entity: "staff" },
+                  { l: "New Invoice", i: "file-invoice-dollar", entity: "invoice" },
+                  { l: "New Event", i: "calendar-heart", entity: "event" },
+                  { l: "New Menu Item", i: "utensils", entity: "menu" },
+                  { l: "New Campaign", i: "bullhorn", entity: "campaign" },
                 ].map((it) => (
-                  <button key={it.l} onClick={() => { setNewOpen(false); nav(it.to); toast.success(`${it.l} opened`); }} className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3" data-testid={`new-${it.i}`}>
+                  <button key={it.l} onClick={() => { setNewOpen(false); setQuickEntity(it.entity); }} className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3" data-testid={`new-${it.entity}`}>
                     <span className="w-7 h-7 rounded-full bg-[#C9A227]/12 text-[#C9A227] grid place-items-center"><i className={`fa-solid fa-${it.i} text-[11px]`}></i></span>
                     {it.l}
                   </button>
@@ -201,6 +204,8 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
 
       {searchOpen && <SearchPalette onClose={() => setSearchOpen(false)} />}
       {helpOpen && <HelpDrawer onClose={() => setHelpOpen(false)} />}
+      {quickEntity && <AdminQuickCreateModal entity={quickEntity} onClose={() => setQuickEntity(null)} />}
+      <AdminFloatingActions />
     </div>
   );
 };
