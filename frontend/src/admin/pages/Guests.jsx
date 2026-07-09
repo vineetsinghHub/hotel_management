@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AdminLayout from "@/admin/components/AdminLayout";
 import Guest360Modal from "@/admin/components/Guest360Modal";
+import BulkCsvImport from "@/admin/components/BulkCsvImport";
 import { guests } from "@/admin/adminMockData";
 
 const tierColor = (t) => ({ Diamond: "#8B5CF6", Platinum: "#4F46E5", Gold: "#C9A227", Silver: "#94A3B8" }[t] || "#64748B");
@@ -13,10 +14,18 @@ const withAvatars = (list) => list.map((g, i) => ({
 
 export default function Guests() {
   const [open, setOpen] = useState(null);
+  const [importOpen, setImportOpen] = useState(false);
   const rows = withAvatars(guests);
 
   return (
     <AdminLayout pageTitle="Guests · CRM">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-eyebrow text-[#C9A227]">Customers</p>
+          <h2 className="mt-1 font-serif text-2xl text-slate-900">Guest CRM</h2>
+        </div>
+        <button onClick={() => setImportOpen(true)} className="px-4 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs" data-testid="import-open"><i className="fa-solid fa-upload text-[10px] mr-1.5"></i>Bulk import CSV</button>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="p-4 bg-white rounded-[14px] border border-slate-200"><p className="text-[10px] tracking-widest uppercase text-slate-500">Total Guests</p><p className="mt-2 font-mono text-3xl text-slate-900">{guests.length * 152}</p></div>
         <div className="p-4 bg-white rounded-[14px] border border-slate-200"><p className="text-[10px] tracking-widest uppercase text-slate-500">Platinum+ Members</p><p className="mt-2 font-mono text-3xl text-[#4F46E5]">142</p></div>
@@ -49,6 +58,7 @@ export default function Guests() {
         </table>
       </div>
       {open && <Guest360Modal guest={open} onClose={() => setOpen(null)} />}
+      <BulkCsvImport open={importOpen} onClose={() => setImportOpen(false)} entity="Guests" onCommit={(data) => console.log("imported", data.length)} />
     </AdminLayout>
   );
 }

@@ -3,10 +3,11 @@ import { toast } from "sonner";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, useDraggable, useDroppable } from "@dnd-kit/core";
 import AdminLayout from "@/admin/components/AdminLayout";
 import { housekeeping, hkAttendants, statusColor } from "@/admin/adminMockData";
+import FloorPlanBoard from "@/admin/components/FloorPlanBoard";
 
 export default function Housekeeping() {
   const [rows, setRows] = useState(housekeeping);
-  const [view, setView] = useState("board"); // "table" | "board"
+  const [view, setView] = useState("board"); // "table" | "board" | "floor"
   const [dragging, setDragging] = useState(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
@@ -41,6 +42,7 @@ export default function Housekeeping() {
         </div>
         <div className="flex items-center bg-slate-100 rounded-full p-1" data-testid="hk-view-toggle">
           <button onClick={() => setView("board")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "board" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="hk-view-board"><i className="fa-solid fa-columns text-[10px]"></i>Assign board</button>
+          <button onClick={() => setView("floor")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "floor" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="hk-view-floor"><i className="fa-solid fa-map text-[10px]"></i>Floor plan</button>
           <button onClick={() => setView("table")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "table" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="hk-view-table"><i className="fa-solid fa-list text-[10px]"></i>Room list</button>
         </div>
       </div>
@@ -67,7 +69,7 @@ export default function Housekeeping() {
             </tbody>
           </table>
         </div>
-      ) : (
+      ) : view === "board" ? (
         <DndContext sensors={sensors} onDragStart={(e) => setDragging(e.active.id)} onDragEnd={handleDragEnd} onDragCancel={() => setDragging(null)}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" data-testid="hk-board">
             {hkAttendants.map((a) => (
@@ -81,6 +83,8 @@ export default function Housekeeping() {
 
           <p className="mt-6 text-xs text-slate-500"><i className="fa-solid fa-hand text-[#C9A227] mr-1.5"></i>Drag a room to reassign it to another attendant.</p>
         </DndContext>
+      ) : (
+        <FloorPlanBoard />
       )}
     </AdminLayout>
   );

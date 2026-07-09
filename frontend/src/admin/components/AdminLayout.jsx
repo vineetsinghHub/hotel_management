@@ -25,6 +25,7 @@ const groups = [
     { k: "staff", to: "/admin/staff", label: "Staff", icon: "id-badge" },
     { k: "invoices", to: "/admin/invoices", label: "Invoices", icon: "file-invoice-dollar" },
     { k: "marketing", to: "/admin/marketing", label: "Marketing", icon: "bullhorn" },
+    { k: "messages", to: "/admin/messages", label: "Messages", icon: "comments" },
     { k: "reviews", to: "/admin/reviews", label: "Reviews", icon: "star" },
   ]},
   { label: "Revenue", items: [

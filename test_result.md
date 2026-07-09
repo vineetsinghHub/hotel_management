@@ -220,14 +220,67 @@ test_plan:
 agent_communication:
     - agent: "main"
       message: |
-        Two remaining backlog items done. No backend changes were needed (fully frontend). Please
-        run the frontend testing agent focused on:
-          1. /dashboard — click "Fast Check-out" button → modal appears → QR + folio summary render →
-             click "Approve room charge" → balance becomes $0 and button shows "Balance settled" +
-             "You're checked out" banner appears + toast fires. Also verify "Email folio" button toast.
-          2. /admin/login (gm@aurahotels.com / anything) → sidebar has "Revenue > Rate & Channel" →
-             clicking it loads the Rate & Channel Manager page with both OTA Connections and
-             Master Rate Calendar tabs.
+        Massive frontend polish rollup (Sprints 1-6) + additional deferred items now shipped.
+        Please run the frontend testing agent to comprehensively validate. No backend touched.
+
+        Please test the following:
+
+        GUEST APP (no auth required):
+        1. Home page (/): Video hero (poster fallback if video errors), booking widget, room cards,
+           experiences, testimonials, Instagram gallery, and NEW **editorial magazine section**
+           ([data-testid="editorial-section"]) with 3 article cards + press mentions carousel.
+        2. Floating **currency + language + theme pill** ([data-testid="cur-lang-pill"]):
+           - Opens panel showing 4 currencies (USD/INR/EUR/AED), 4 languages (EN/FR/JA/HI),
+             3 themes (light/dark/system).
+           - Switching currency updates all $ symbols on room cards.
+           - Switching language translates Navbar items.
+           - Switching theme flips light/dark.
+        3. Rooms page (/rooms): Heart on any room card to wishlist ([data-testid="wishlist-{id}"]).
+           Existing Compare feature. Prices reflect currency.
+        4. Dashboard (/dashboard) new sections in sidebar:
+           - side-key: Digital Key with rotating QR + NFC pulse ([data-testid="digital-key"], "digital-key-qr", "digital-key-unlock")
+           - side-roomservice: Room Service menu ([data-testid="room-service-section"], "menu-tab-breakfast",
+             "menu-add-b1", "menu-inc-b1", "room-service-cart", "tip-10", "room-service-send")
+           - side-itinerary: Drag-drop Itinerary Planner ([data-testid="itinerary-planner"],
+             "itin-cat-e1", "itin-slot-morning", "itin-save", "itin-clear")
+           - side-wishlist: WishlistSection ([data-testid="wishlist-section"])
+           - side-referral: ReferralCard ([data-testid="referral-card"], "referral-copy-code")
+        5. Floating **Concierge Chat** button ([data-testid="concierge-open"]) at bottom-right.
+           Opens drawer with quick actions (quick-broom, quick-car etc.). Sending "more towels"
+           should yield a scripted bot reply within 2 seconds.
+        6. Guest **command palette**: press "/" or Cmd+K to open ([data-testid="guest-palette"]).
+           Type "spa" to see results, click one to navigate.
+        7. Fast Check-out modal ([data-testid="fast-checkout-btn"]) still works. After clicking
+           "Approve room charge", a **review prompt** ([data-testid="review-prompt"]) should
+           appear ~1.4s later with 5 stars.
+
+        ADMIN APP (login gm@aurahotels.com / any password):
+        8. First-time **onboarding tour** ([data-testid="admin-tour"]) — has Next / Skip buttons.
+        9. Admin Dashboard has an **occupancy heatmap** at the bottom ([data-testid="occupancy-heatmap"]) —
+           90 days, weekly grid, hover cell to see date + %.
+        10. Guests page: click any guest to open **Guest 360 modal** ([data-testid="guest-360"]) with
+            5 tabs (overview, stays, prefs, messages, loyalty). Also has "Bulk import CSV" button that
+            opens the [data-testid="bulk-import"] modal.
+        11. Reservations page: 3 views — List, Calendar, and new **Kanban** ([data-testid="view-kanban"]) with
+            4 columns (Booked / In-house / Departed / Closed). Cards have arrow buttons to move states.
+        12. Housekeeping: 3 views — Assign board, **Floor plan** ([data-testid="hk-view-floor"] → "floor-plan"
+            SVG-style room grid), Room list.
+        13. Messages page (sidebar → Messages, [data-testid="nav-messages"]): 3-column MessageCenter with
+            thread list, conversation, guest sidebar. Templates ([data-testid="template-tpl-arrival"])
+            populate the composer when clicked. Broadcast button opens a modal.
+        14. Reports page (sidebar → Reports): 3 tabs (Report Builder / Overview / Night Audit).
+            Builder has preset chips ([data-testid="preset-revenue"]), field toggles, range dropdown,
+            Export CSV button.
+        15. Rate & Channel Manager sidebar entry works (Sprint 0).
+
+        REGRESSIONS: Fast Check-out modal, Front Desk arrivals/departures split, Reservations Gantt
+        calendar, Housekeeping assign board (dnd-kit), Custom Role Builder in Staff, Recharts in Admin
+        Dashboard, Audit-log search in Settings.
+
+        Test credentials in /app/memory/test_credentials.md.
+
+        Report per feature: pass/fail with data-testid evidence, screenshots for key moments,
+        console errors, visual issues.
     - agent: "testing"
       message: |
         ✅ TESTING COMPLETE - Both features fully tested and working:
@@ -250,3 +303,79 @@ agent_communication:
         
         No console errors detected during any tests. All data-testids present and functional.
         Both features are production-ready.
+    - agent: "testing"
+      message: |
+        🔍 COMPREHENSIVE TESTING COMPLETE (Sprints 1-6 + Additional Features)
+        
+        Tested comprehensive review request covering all guest and admin features. Found several critical
+        issues that need fixing before production:
+        
+        ❌ CRITICAL ISSUES FOUND:
+        
+        1. **Admin Onboarding Tour Blocking All Interactions** (BLOCKER)
+           - File: /app/frontend/src/admin/components/AdminOnboardingTour.jsx
+           - Issue: Tour modal (data-testid="admin-tour") intercepts ALL clicks on admin pages
+           - Impact: Cannot test ANY admin features (Guests, Reservations Kanban, Housekeeping Floor Plan,
+             Messages, Rate & Channel navigation) because tour overlay blocks all interactions
+           - Root Cause: Tour modal has z-index [120] and backdrop that prevents clicks from reaching
+             underlying elements
+           - Fix Needed: Tour must be dismissible OR should not block interactions OR should auto-dismiss
+             after first visit (localStorage persistence not working correctly)
+        
+        2. **VideoHero Component Not Accepting data-testid Prop** (HIGH)
+           - File: /app/frontend/src/components/VideoHero.jsx
+           - Issue: Home.jsx passes data-testid="hero-section" but VideoHero doesn't accept/spread props
+           - Impact: Cannot locate hero section in tests
+           - Fix: Add {...props} or specifically accept data-testid in VideoHero component
+        
+        3. **Editorial Section Not Rendering** (HIGH)
+           - File: /app/frontend/src/components/EditorialSection.jsx
+           - Issue: data-testid="editorial-section" not found on home page
+           - Impact: Cannot verify editorial magazine feature
+           - Need to verify: Is EditorialSection properly imported and rendered in Home.jsx?
+        
+        4. **Wishlist Heart Button Click Intercepted** (MEDIUM)
+           - File: /app/frontend/src/pages/Rooms.jsx or RoomCard component
+           - Issue: Compare toggle button overlays wishlist heart, preventing clicks
+           - Impact: Cannot test wishlist functionality on rooms page
+           - Fix: Adjust z-index or positioning of compare button vs wishlist heart
+        
+        5. **Language Selector (Hindi) Not Clickable** (MEDIUM)
+           - File: /app/frontend/src/components/CurrencyLanguagePill.jsx
+           - Issue: locale-hi button times out when trying to click after panel reopens
+           - Impact: Cannot fully test language switching
+           - Possible cause: Panel animation or state issue when reopening
+        
+        ✅ WORKING FEATURES:
+        
+        GUEST APP:
+        • Currency switching (USD → INR) ✓ with toast and ₹ symbol display
+        • Theme switching (Light → Dark) ✓ with html class toggle
+        • Dashboard sidebar with all required items (Digital Key, Room Service, Itinerary, Wishlist, Referral) ✓
+        • Digital Key section with rotating QR code ✓
+        • Currency/Language/Theme pill renders and opens ✓
+        
+        ADMIN APP:
+        • Admin login successful ✓
+        • Occupancy heatmap renders at bottom of dashboard ✓
+        • Reports page with Report Builder ✓
+        • Admin dashboard KPIs and charts ✓
+        
+        ⚠️ UNABLE TO TEST (Due to Tour Blocking):
+        • Guest 360 modal
+        • Reservations Kanban view
+        • Housekeeping Floor Plan
+        • Messages Center
+        • Rate & Channel Manager navigation
+        • All admin navigation after initial login
+        
+        📊 CONSOLE ERRORS:
+        • 2 network failures: Video file 404 (https://cdn.pixabay.com/video/2020/07/14/44093-441382541_large.mp4)
+          - This is expected if video source is unavailable; poster fallback should work
+        
+        🎯 PRIORITY FIXES NEEDED:
+        1. Fix AdminOnboardingTour to not block interactions (CRITICAL - blocks all admin testing)
+        2. Fix VideoHero to accept data-testid prop
+        3. Verify EditorialSection is rendering on home page
+        4. Fix wishlist heart button click interception on rooms page
+        5. Fix language selector click issue in CurrencyLanguagePill

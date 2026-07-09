@@ -5,10 +5,15 @@ import Footer from "@/components/Footer";
 import BookingWidget from "@/components/BookingWidget";
 import RoomCard from "@/components/RoomCard";
 import RoomDetailModal from "@/components/RoomDetailModal";
+import VideoHero from "@/components/VideoHero";
+import EditorialSection from "@/components/EditorialSection";
 import { property, highlights, rooms, testimonials, galleryImages, experiences } from "@/data/mockData";
 
 const heroImage =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2200&q=90";
+const heroSources = [
+  { src: "https://cdn.pixabay.com/video/2020/07/14/44093-441382541_large.mp4", type: "video/mp4" },
+];
 
 export default function Home() {
   const [modalRoom, setModalRoom] = useState(null);
@@ -19,10 +24,7 @@ export default function Home() {
       <Navbar transparent />
 
       {/* HERO */}
-      <section className="relative min-h-[100vh] w-full overflow-hidden" data-testid="hero-section">
-        <img src={heroImage} alt="Heritage Palace at sunrise" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 hero-overlay"></div>
-
+      <VideoHero poster={heroImage} sources={heroSources} className="" data-testid="hero-section">
         <div className="relative max-w-7xl mx-auto px-6 md:px-10 pt-40 md:pt-48 pb-32">
           <div className="max-w-3xl reveal-up">
             <p className="text-eyebrow text-[#E6C868] flex items-center gap-3">
@@ -76,7 +78,7 @@ export default function Home() {
           <span>Scroll</span>
           <span className="w-px h-10 bg-white/40"></span>
         </div>
-      </section>
+      </VideoHero>
 
       {/* FLOATING BOOKING WIDGET */}
       <section className="relative -mt-24 md:-mt-28 z-20 px-4 md:px-8 pb-16">
@@ -237,7 +239,11 @@ export default function Home() {
         </div>
       </section>
 
+      <EditorialSection />
+
       <Footer />
+
+      {/* Modal */}
 
       <RoomDetailModal open={!!modalRoom} onClose={() => setModalRoom(null)} room={modalRoom || rooms[0]} />
     </div>

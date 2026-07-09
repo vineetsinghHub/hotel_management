@@ -34,6 +34,7 @@ import Staff from "@/admin/pages/Staff";
 import Invoices from "@/admin/pages/Invoices";
 import RateChannel from "@/admin/pages/RateChannel";
 import Marketing from "@/admin/pages/Marketing";
+import MessageCenter from "@/admin/pages/MessageCenter";
 import Reviews from "@/admin/pages/Reviews";
 import Reports from "@/admin/pages/Reports";
 import Notifications from "@/admin/pages/Notifications";
@@ -83,6 +84,7 @@ function App() {
                 <Route path="/admin/invoices" element={guarded("invoices", Invoices)} />
                 <Route path="/admin/rate-channel" element={guarded("rate-channel", RateChannel)} />
                 <Route path="/admin/marketing" element={guarded("marketing", Marketing)} />
+                <Route path="/admin/messages" element={guarded("messages", MessageCenter)} />
                 <Route path="/admin/reviews" element={guarded("reviews", Reviews)} />
                 <Route path="/admin/reports" element={guarded("reports", Reports)} />
                 <Route path="/admin/notifications" element={guarded("notifications", Notifications)} />
