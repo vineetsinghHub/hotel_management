@@ -26,6 +26,9 @@ const groups = [
     { k: "marketing", to: "/admin/marketing", label: "Marketing", icon: "bullhorn" },
     { k: "reviews", to: "/admin/reviews", label: "Reviews", icon: "star" },
   ]},
+  { label: "Revenue", items: [
+    { k: "rate-channel", to: "/admin/rate-channel", label: "Rate & Channel", icon: "money-bill-trend-up" },
+  ]},
   { label: "Insights", items: [
     { k: "reports", to: "/admin/reports", label: "Reports", icon: "chart-line" },
     { k: "notifications", to: "/admin/notifications", label: "Notifications", icon: "bell" },
@@ -209,6 +212,7 @@ const SearchPalette = ({ onClose }) => {
     { l: "Restaurant", to: "/admin/restaurant" }, { l: "Spa", to: "/admin/spa" },
     { l: "Events", to: "/admin/events" }, { l: "Inventory", to: "/admin/inventory" },
     { l: "Staff", to: "/admin/staff" }, { l: "Invoices", to: "/admin/invoices" },
+    { l: "Rate & Channel", to: "/admin/rate-channel" },
     { l: "Marketing", to: "/admin/marketing" }, { l: "Reviews", to: "/admin/reviews" },
     { l: "Reports", to: "/admin/reports" }, { l: "Notifications", to: "/admin/notifications" },
     { l: "Settings", to: "/admin/settings" },

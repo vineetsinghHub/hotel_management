@@ -16,7 +16,7 @@ const MODULE_GROUPS = [
     { k: "events", label: "Events" }, { k: "inventory", label: "Inventory" },
   ]},
   { label: "Revenue", items: [
-    { k: "rate-manager", label: "Rate & Channel Manager" },
+    { k: "rate-channel", label: "Rate & Channel Manager" },
   ]},
   { label: "Business", items: [
     { k: "staff", label: "Staff" }, { k: "invoices", label: "Invoices" },

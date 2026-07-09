@@ -84,6 +84,8 @@ export default function Dashboard() {
   ]);
   const [payBalanceOpen, setPayBalanceOpen] = useState(false);
   const [addExtrasOpen, setAddExtrasOpen] = useState(false);
+  const [fastCheckoutOpen, setFastCheckoutOpen] = useState(false);
+  const [checkoutComplete, setCheckoutComplete] = useState(false);
 
   const extrasTotal = extras.reduce((s, e) => s + e.amount, 0);
   const balanceDue = stay.grand - stay.paid + extrasTotal;
@@ -154,6 +156,14 @@ export default function Dashboard() {
     toast.success("Balance settled", { description: `$${settled.toLocaleString()} charged to Visa •••• 4242` });
     setPayBalanceOpen(false);
   };
+  const approveRoomCharge = () => {
+    const settled = balanceDue;
+    setStay((s) => ({ ...s, paid: s.grand }));
+    setExtras([]);
+    setCheckoutComplete(true);
+    toast.success("Charge approved · Ready to check out", { description: `$${settled.toLocaleString()} authorised on Visa •••• 4242. Show the QR at Front Desk.` });
+  };
+  const emailFolio = () => toast.success("Folio emailed", { description: `Sent to ${profile.email}` });
   const addExtra = (label, amount) => {
     setExtras((s) => [...s, { id: `x${Date.now()}`, label, when: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }), amount }]);
     toast.success(`${label} added`, { description: `$${amount} added to your folio` });
@@ -453,7 +463,14 @@ export default function Dashboard() {
                       <i className="fa-solid fa-plus mr-1.5 text-[#C9A227]"></i>Add extras
                     </button>
                     <button
-                      onClick={() => toast.success("Folio emailed", { description: `Sent to ${profile.email}` })}
+                      onClick={() => setFastCheckoutOpen(true)}
+                      className="px-6 py-3 rounded-full bg-[#0F172A] hover:bg-slate-800 text-white text-sm shadow-[0_10px_28px_rgba(15,23,42,0.28)]"
+                      data-testid="fast-checkout-btn"
+                    >
+                      <i className="fa-solid fa-qrcode mr-1.5 text-[#E6C868]"></i>Fast Check-out
+                    </button>
+                    <button
+                      onClick={emailFolio}
                       className="px-6 py-3 rounded-full border border-slate-200 hover:bg-slate-50 text-sm text-slate-700"
                       data-testid="email-folio-btn"
                     >
@@ -903,6 +920,21 @@ export default function Dashboard() {
         <PayBalanceModal amount={balanceDue} onClose={() => setPayBalanceOpen(false)} onConfirm={payBalance} />
       )}
 
+      {/* FAST CHECK-OUT MODAL */}
+      {fastCheckoutOpen && (
+        <FastCheckoutModal
+          stay={stay}
+          extras={extras}
+          extrasTotal={extrasTotal}
+          balanceDue={balanceDue}
+          isFullyPaid={isFullyPaid}
+          checkoutComplete={checkoutComplete}
+          onClose={() => setFastCheckoutOpen(false)}
+          onEmailFolio={emailFolio}
+          onApproveCharge={approveRoomCharge}
+        />
+      )}
+
       {/* ADD EXTRAS MODAL */}
       {addExtrasOpen && (
         <AddExtrasModal onClose={() => setAddExtrasOpen(false)} onAdd={addExtra} />
@@ -1180,6 +1212,176 @@ const PayBalanceModal = ({ amount, onClose, onConfirm }) => (
     </div>
   </div>
 );
+
+// Deterministic QR-like pattern (visual only — replace with real QR when backend arrives)
+const FastCheckoutQR = ({ code }) => {
+  // Build a stable 21x21 pattern from the reservation code
+  const size = 21;
+  const cells = [];
+  let seed = 0;
+  for (let i = 0; i < code.length; i++) seed = (seed * 31 + code.charCodeAt(i)) >>> 0;
+  const rand = (i) => {
+    seed = (seed * 1103515245 + 12345 + i) >>> 0;
+    return (seed % 100) / 100;
+  };
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      // Reserve corner finder positions
+      const inTL = x < 7 && y < 7;
+      const inTR = x >= size - 7 && y < 7;
+      const inBL = x < 7 && y >= size - 7;
+      if (inTL || inTR || inBL) continue;
+      if (rand(y * size + x) > 0.52) cells.push({ x, y });
+    }
+  }
+  const finder = (ox, oy) => (
+    <g key={`f-${ox}-${oy}`}>
+      <rect x={ox} y={oy} width="7" height="7" fill="#0F172A" />
+      <rect x={ox + 1} y={oy + 1} width="5" height="5" fill="#FFFFFF" />
+      <rect x={ox + 2} y={oy + 2} width="3" height="3" fill="#0F172A" />
+    </g>
+  );
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} className="w-56 h-56 md:w-64 md:h-64" data-testid="fast-checkout-qr">
+      <rect x="0" y="0" width={size} height={size} fill="#FFFFFF" />
+      {finder(0, 0)}
+      {finder(size - 7, 0)}
+      {finder(0, size - 7)}
+      {cells.map((c, i) => <rect key={i} x={c.x} y={c.y} width="1" height="1" fill="#0F172A" />)}
+    </svg>
+  );
+};
+
+const FastCheckoutModal = ({ stay, extras, extrasTotal, balanceDue, isFullyPaid, checkoutComplete, onClose, onEmailFolio, onApproveCharge }) => {
+  const nights = Math.max(1, Math.round((new Date(stay.checkOut) - new Date(stay.checkIn)) / 86400000));
+  // Deterministic reservation code per stay
+  const resCode = `AH-${(stay.suite || "STAY").replace(/[^A-Z0-9]/gi, "").slice(0, 3).toUpperCase()}-${nights}N-9F27C1`;
+  const chargesSettled = isFullyPaid || checkoutComplete;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="fast-checkout-modal">
+      <div className="bg-white w-full max-w-4xl rounded-t-[24px] md:rounded-[24px] shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative max-h-[92vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center z-10" data-testid="fast-checkout-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
+
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          {/* LEFT — QR panel */}
+          <div className="bg-[#0F172A] text-white p-8 md:p-10 md:rounded-l-[24px] flex flex-col">
+            <p className="text-eyebrow text-[#E6C868]">Fast Check-out</p>
+            <h3 className="mt-1 font-serif text-3xl">Scan at Front Desk</h3>
+            <p className="text-sm text-white/70 mt-2">
+              Show this code at the concierge desk. Zero queue, zero paperwork &mdash; your keys go back and your folio closes instantly.
+            </p>
+
+            <div className="mt-6 bg-white rounded-[20px] p-5 md:p-6 mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+              <FastCheckoutQR code={resCode} />
+              <p className="mt-3 text-center font-mono text-xs text-slate-700 tracking-widest" data-testid="fast-checkout-code">{resCode}</p>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
+              <div className="glass-dark p-3 rounded-[12px]">
+                <p className="text-[10px] tracking-widest uppercase text-[#E6C868]">Suite</p>
+                <p className="mt-1 text-white/90">{stay.suite}</p>
+              </div>
+              <div className="glass-dark p-3 rounded-[12px]">
+                <p className="text-[10px] tracking-widest uppercase text-[#E6C868]">Departure</p>
+                <p className="mt-1 text-white/90 font-mono">{new Date(stay.checkOut).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · 12:00</p>
+              </div>
+            </div>
+
+            {checkoutComplete && (
+              <div className="mt-6 p-4 rounded-[14px] bg-emerald-500/20 border border-emerald-400/40 flex items-center gap-3" data-testid="checkout-complete-banner">
+                <i className="fa-solid fa-circle-check text-emerald-300 text-lg"></i>
+                <div>
+                  <p className="text-sm text-white">You&rsquo;re checked out</p>
+                  <p className="text-xs text-white/70 mt-0.5">Safe travels, {stay.suite.split(" ")[1] || "guest"}. Come back soon.</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT — Folio summary + actions */}
+          <div className="p-8 md:p-10">
+            <p className="text-eyebrow text-[#C9A227]">Folio summary</p>
+            <h3 className="mt-1 font-serif text-2xl text-slate-900">Your final bill</h3>
+            <p className="text-sm text-slate-500 mt-1">{nights} {nights === 1 ? "night" : "nights"} &middot; {stay.guests}</p>
+
+            <div className="mt-6 space-y-3">
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm text-slate-600">Grand total</span>
+                <span className="font-mono text-sm text-slate-900">${stay.grand.toLocaleString()}</span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm text-slate-600">Deposit paid</span>
+                <span className="font-mono text-sm text-emerald-700">&minus; ${stay.paid.toLocaleString()}</span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm text-slate-600">In-stay extras</span>
+                <span className="font-mono text-sm text-indigo-700">+ ${extrasTotal.toLocaleString()}</span>
+              </div>
+              <div className="border-t border-slate-200 pt-3 flex items-baseline justify-between">
+                <span className="text-eyebrow text-slate-500">Balance due</span>
+                <span className="font-mono text-3xl text-slate-900" data-testid="fast-checkout-balance">${balanceDue.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {extras.length > 0 && (
+              <div className="mt-5 max-h-40 overflow-y-auto rounded-[14px] border border-slate-100 divide-y divide-slate-100" data-testid="fast-checkout-extras">
+                {extras.map((e) => (
+                  <div key={e.id} className="p-3 flex items-center justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-900 truncate">{e.label}</p>
+                      <p className="text-[10px] text-slate-500">{e.when}</p>
+                    </div>
+                    <span className="font-mono text-xs text-slate-900">+${e.amount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-6 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-center gap-3">
+              <i className="fa-solid fa-shield-halved text-[#4F46E5]"></i>
+              <div className="text-xs text-slate-600 leading-relaxed">
+                Charging <span className="font-mono text-slate-900">Visa &bull;&bull;&bull;&bull; 4242</span> on file. You can review the folio at Front Desk before you leave.
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={onApproveCharge}
+                disabled={chargesSettled}
+                className="flex-1 px-5 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:bg-emerald-600 disabled:opacity-100 text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]"
+                data-testid="approve-room-charge-btn"
+              >
+                {chargesSettled ? (
+                  <><i className="fa-solid fa-circle-check text-[11px] mr-1.5"></i>Balance settled</>
+                ) : (
+                  <><i className="fa-solid fa-lock text-[10px] mr-1.5"></i>Approve room charge &middot; <span className="font-mono">${balanceDue.toLocaleString()}</span></>
+                )}
+              </button>
+              <button
+                onClick={onEmailFolio}
+                className="px-5 py-3 rounded-full border border-slate-200 hover:bg-slate-50 text-sm text-slate-700"
+                data-testid="fast-checkout-email"
+              >
+                <i className="fa-regular fa-envelope mr-1.5"></i>Email folio
+              </button>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="mt-3 w-full text-center text-xs text-slate-500 hover:text-slate-900 py-2"
+              data-testid="fast-checkout-dismiss"
+            >
+              {chargesSettled ? "Done — close" : "I'll do it later"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AddExtrasModal = ({ onClose, onAdd }) => {
   const catalog = [

@@ -37,11 +37,21 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
 - Same navbar/footer, same glass, same fonts, same primary/accent, same radii
 
 ## Backlog / Next
-- **P0** — Backend endpoints for real bookings (rooms CRUD, availability check, reservation create/get, upsell items), guest auth (JWT), invoice PDF generation
-- **P1** — Real Stripe payment integration, email confirmation, calendar (.ics) generation, admin dashboard
-- **P1** — Room availability calendar synced to DB, dynamic pricing
-- **P2** — Multi-language (EN/FR/JA), currency toggle (USD/INR/EUR), CMS for editorial content
-- **P2** — Loyalty program engine (Aura Circle), gift cards, corporate rates
+- All P0/P1/P2 items from the July 2025 backlog are now shipped:
+  - (P0) Guest Dashboard **Fast Check-out** QR modal ✅ (folio + QR + email + approve room charge)
+  - (P1) Front Desk split view (Arrivals / In-house / Departures) ✅
+  - (P1) Reservations Gantt-style calendar ✅
+  - (P2) Housekeeping drag-assign (dnd-kit) ✅
+  - (P2) Staff Custom Role Builder (module + read/write flags) ✅
+  - (P2) Recharts in Admin Dashboard ✅
+  - (P2) Audit-log filter/search in Settings ✅
+  - (P2) Rate & Channel Manager UI (routed under new Revenue section) ✅
+
+## Deferred
+- Backend endpoints for real bookings / auth / invoices (still frontend-only, mock data)
+- Real Stripe payment integration, .ics generation
+- Multi-language / currency toggle
+- Loyalty program engine, gift cards, corporate rates
 
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.

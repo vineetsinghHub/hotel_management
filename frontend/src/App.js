@@ -27,6 +27,7 @@ import Events from "@/admin/pages/Events";
 import Inventory from "@/admin/pages/Inventory";
 import Staff from "@/admin/pages/Staff";
 import Invoices from "@/admin/pages/Invoices";
+import RateChannel from "@/admin/pages/RateChannel";
 import Marketing from "@/admin/pages/Marketing";
 import Reviews from "@/admin/pages/Reviews";
 import Reports from "@/admin/pages/Reports";
@@ -71,6 +72,7 @@ function App() {
           <Route path="/admin/inventory" element={guarded("inventory", Inventory)} />
           <Route path="/admin/staff" element={guarded("staff", Staff)} />
           <Route path="/admin/invoices" element={guarded("invoices", Invoices)} />
+          <Route path="/admin/rate-channel" element={guarded("rate-channel", RateChannel)} />
           <Route path="/admin/marketing" element={guarded("marketing", Marketing)} />
           <Route path="/admin/reviews" element={guarded("reviews", Reviews)} />
           <Route path="/admin/reports" element={guarded("reports", Reports)} />
