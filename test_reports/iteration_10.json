@@ -1,0 +1,22 @@
+{
+  "summary": "Iteration 10 frontend testing at 1440x900. Validated all 4 top-bar controls (Search palette with ⌘K + Esc, Help drawer, Notifications dropdown + mark-all + dismiss, +New menu with 7 items) and the new Check-out flow (bill clearance gating, extras removal, add-payment partial, settle-balance auto-charge, complete-checkout state transition). Regression on public site (/, /rooms, /booking, /dashboard) and Staff & Roles admin page — all load cleanly.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Top bar notif badge", "issues": ["Badge count (3) does not persist as 0 across route navigations after clicking topbar-mark-all — appears to be per-page render. Functional on same page but resets on navigation. Minor."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": ["Notif mark-all state is component-local; consider hoisting to context/store so badge stays 0 across route changes."],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "test_credentials": "gm@aurahotels.com / demo-super_admin quick button on /admin/login",
+  "seed_data_creation": "None (client-side seed extras in FrontDesk.jsx)",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All iteration-10 features verified: Search palette results for 'maharajah' and 'AH-0193A2' work, Ctrl+K opens, Esc closes. Help drawer has 'Keyboard shortcuts' + 'Guides'. Notif dropdown has mark-all + per-item dismiss (topbar-dismiss-N-1). +New menu has all 7 items and new-calendar-plus routes to /admin/reservations with toast. Checkout flow: initial balance ₹172,175 (AH-0193A2), complete-btn disabled with text 'Balance ₹172,175 due', settle-balance-btn zeros balance and enables complete-checkout, row status pill flips to 'Checked out'. Remove extra e2 correctly decreases balance by ₹38,000. Add-payment ₹10,000 decreases by ₹10,000 and keeps complete-btn disabled while balance > 0. Balance uses text-emerald-600 when 0. Everything works.",
+  "rca of the issue": "n/a"
+}

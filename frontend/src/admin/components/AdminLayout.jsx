@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { getAdminUser, clearAdminUser } from "@/admin/adminAuth";
+import { getAdminUser, clearAdminUser, seedUsers } from "@/admin/adminAuth";
 import { hasAccess, roleLabel, roleColor } from "@/admin/roles";
+import { arrivals, roomsInventory, guests, notificationsAdmin } from "@/admin/adminMockData";
 
 const groups = [
   { label: "Operations", items: [
@@ -106,37 +107,186 @@ export const AdminLayout = ({ pageTitle, children }) => {
       </aside>
       {mobileOpen && <div onClick={() => setMobileOpen(false)} className="lg:hidden fixed inset-0 bg-slate-900/40 z-30"></div>}
 
-      {/* Main */}
-      <div className="flex-1 lg:ml-64">
-        <header className="sticky top-0 z-30 bg-[#FAFAF8]/80 backdrop-blur-xl border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setMobileOpen(true)} data-testid="hamburger-btn" aria-label="Open menu" className="lg:hidden w-9 h-9 rounded-full border border-slate-200 grid place-items-center">
-              <i className="fa-solid fa-bars text-xs text-slate-600"></i>
-            </button>
-            <h1 className="font-serif text-xl text-slate-900" data-testid="page-title">{pageTitle}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 w-96 max-w-full">
-              <i className="fa-solid fa-magnifying-glass text-xs text-slate-400"></i>
-              <input placeholder="Search or jump to..." className="flex-1 text-sm outline-none bg-transparent" />
-              <kbd className="text-[10px] text-slate-400 border border-slate-200 rounded px-1.5">⌘K</kbd>
-            </div>
-            <button className="w-9 h-9 rounded-full border border-slate-200 hover:bg-white grid place-items-center" title="Help">
-              <i className="fa-regular fa-circle-question text-xs text-slate-600"></i>
-            </button>
-            <button className="w-9 h-9 rounded-full border border-slate-200 hover:bg-white grid place-items-center relative">
+      <TopbarAndMain pageTitle={pageTitle} onOpenMobile={() => setMobileOpen(true)}>{children}</TopbarAndMain>
+    </div>
+  );
+};
+
+const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
+  const nav = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [newOpen, setNewOpen] = useState(false);
+  const [notifs, setNotifs] = useState(notificationsAdmin);
+  const unread = notifs.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearchOpen(true); }
+      if (e.key === "Escape") { setSearchOpen(false); setHelpOpen(false); setNotifOpen(false); setNewOpen(false); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  return (
+    <div className="flex-1 lg:ml-64">
+      <header className="sticky top-0 z-30 bg-[#FAFAF8]/80 backdrop-blur-xl border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={onOpenMobile} data-testid="hamburger-btn" aria-label="Open menu" className="lg:hidden w-9 h-9 rounded-full border border-slate-200 grid place-items-center"><i className="fa-solid fa-bars text-xs text-slate-600"></i></button>
+          <h1 className="font-serif text-xl text-slate-900" data-testid="page-title">{pageTitle}</h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setSearchOpen(true)} className="hidden md:flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 w-96 text-left" data-testid="search-toggle">
+            <i className="fa-solid fa-magnifying-glass text-xs text-slate-400"></i>
+            <span className="flex-1 text-sm text-slate-400">Search or jump to...</span>
+            <kbd className="text-[10px] text-slate-400 border border-slate-200 rounded px-1.5">⌘K</kbd>
+          </button>
+          <button onClick={() => setHelpOpen(true)} className="w-9 h-9 rounded-full border border-slate-200 hover:bg-white grid place-items-center" data-testid="help-toggle"><i className="fa-regular fa-circle-question text-xs text-slate-600"></i></button>
+          <div className="relative">
+            <button onClick={() => setNotifOpen((v) => !v)} className="w-9 h-9 rounded-full border border-slate-200 hover:bg-white grid place-items-center relative" data-testid="notif-toggle">
               <i className="fa-regular fa-bell text-xs text-slate-600"></i>
-              <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-mono grid place-items-center">3</span>
+              {unread > 0 && <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-mono grid place-items-center">{unread}</span>}
             </button>
-            <button onClick={() => toast.info("Choose an action from the module")} className="inline-flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm px-4 py-2 rounded-full shadow-[0_6px_20px_rgba(79,70,229,0.28)]" data-testid="new-btn">
-              <i className="fa-solid fa-plus text-[10px]"></i>New
-            </button>
+            {notifOpen && (
+              <div className="absolute right-0 top-full mt-2 w-96 bg-white border border-slate-200 rounded-[16px] shadow-[0_20px_50px_rgba(15,23,42,0.10)] p-4 z-40" data-testid="notif-dropdown">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-serif text-lg text-slate-900">Notifications</p>
+                  <button onClick={() => { setNotifs((s) => s.map((n) => ({ ...n, read: true }))); toast.success("All read"); }} className="text-xs text-[#4F46E5] hover:underline" data-testid="topbar-mark-all">Mark all read</button>
+                </div>
+                <ul className="space-y-2 max-h-80 overflow-y-auto">
+                  {notifs.slice(0, 5).map((n) => (
+                    <li key={n.id} className={`p-3 rounded-[12px] flex items-start gap-3 ${!n.read ? "bg-indigo-50/40" : ""}`}>
+                      <span className="w-8 h-8 rounded-full bg-[#4F46E5]/12 text-[#4F46E5] grid place-items-center"><i className="fa-solid fa-bell text-[11px]"></i></span>
+                      <div className="flex-1"><p className="text-sm text-slate-900">{n.title}</p><p className="text-xs text-slate-500 mt-0.5">{n.body}</p><p className="text-[10px] text-slate-400 mt-0.5">{n.when}</p></div>
+                      <button onClick={() => setNotifs((s) => s.filter((x) => x.id !== n.id))} className="text-slate-400 hover:text-rose-500 text-xs" data-testid={`topbar-dismiss-${n.id}`}><i className="fa-solid fa-xmark"></i></button>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/admin/notifications" onClick={() => setNotifOpen(false)} className="mt-3 block text-center text-xs text-[#4F46E5] hover:underline">Open notifications center →</Link>
+              </div>
+            )}
           </div>
-        </header>
-        <main className="p-6 md:p-8">{children}</main>
+          <div className="relative">
+            <button onClick={() => setNewOpen((v) => !v)} className="inline-flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm px-4 py-2 rounded-full shadow-[0_6px_20px_rgba(79,70,229,0.28)]" data-testid="new-btn"><i className="fa-solid fa-plus text-[10px]"></i>New</button>
+            {newOpen && (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200 rounded-[16px] shadow-[0_20px_50px_rgba(15,23,42,0.10)] py-2 z-40" data-testid="new-menu">
+                {[
+                  { l: "New Reservation", i: "calendar-plus", to: "/admin/reservations" },
+                  { l: "New Guest", i: "user-plus", to: "/admin/guests" },
+                  { l: "New Staff", i: "id-badge", to: "/admin/staff" },
+                  { l: "New Invoice", i: "file-invoice-dollar", to: "/admin/invoices" },
+                  { l: "New Event", i: "calendar-heart", to: "/admin/events" },
+                  { l: "New Menu Item", i: "utensils", to: "/admin/restaurant" },
+                  { l: "New Campaign", i: "bullhorn", to: "/admin/marketing" },
+                ].map((it) => (
+                  <button key={it.l} onClick={() => { setNewOpen(false); nav(it.to); toast.success(`${it.l} opened`); }} className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3" data-testid={`new-${it.i}`}>
+                    <span className="w-7 h-7 rounded-full bg-[#C9A227]/12 text-[#C9A227] grid place-items-center"><i className={`fa-solid fa-${it.i} text-[11px]`}></i></span>
+                    {it.l}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+      <main className="p-6 md:p-8">{children}</main>
+
+      {searchOpen && <SearchPalette onClose={() => setSearchOpen(false)} />}
+      {helpOpen && <HelpDrawer onClose={() => setHelpOpen(false)} />}
+    </div>
+  );
+};
+
+const SearchPalette = ({ onClose }) => {
+  const [q, setQ] = useState("");
+  const nav = useNavigate();
+  const pages = [
+    { l: "Dashboard", to: "/admin/dashboard" }, { l: "Front Desk", to: "/admin/front-desk" },
+    { l: "Reservations", to: "/admin/reservations" }, { l: "Rooms", to: "/admin/rooms" },
+    { l: "Guests", to: "/admin/guests" }, { l: "Housekeeping", to: "/admin/housekeeping" },
+    { l: "Restaurant", to: "/admin/restaurant" }, { l: "Spa", to: "/admin/spa" },
+    { l: "Events", to: "/admin/events" }, { l: "Inventory", to: "/admin/inventory" },
+    { l: "Staff", to: "/admin/staff" }, { l: "Invoices", to: "/admin/invoices" },
+    { l: "Marketing", to: "/admin/marketing" }, { l: "Reviews", to: "/admin/reviews" },
+    { l: "Reports", to: "/admin/reports" }, { l: "Notifications", to: "/admin/notifications" },
+    { l: "Settings", to: "/admin/settings" },
+  ];
+  const results = useMemo(() => {
+    if (!q.trim()) return [];
+    const s = q.toLowerCase(); const out = [];
+    pages.forEach((p) => { if (p.l.toLowerCase().includes(s)) out.push({ type: "Page", l: p.l, to: p.to }); });
+    arrivals.forEach((a) => { if (a.id.toLowerCase().includes(s) || a.guest.toLowerCase().includes(s)) out.push({ type: "Reservation", l: `${a.guest} · ${a.id}`, to: "/admin/reservations" }); });
+    guests.forEach((g) => { if (g.name.toLowerCase().includes(s) || g.id.toLowerCase().includes(s)) out.push({ type: "Guest", l: `${g.name} · ${g.id}`, to: "/admin/guests" }); });
+    roomsInventory.forEach((r) => { if (r.number.includes(s) || r.type.toLowerCase().includes(s)) out.push({ type: "Room", l: `Room ${r.number} · ${r.type}`, to: "/admin/rooms" }); });
+    seedUsers.forEach((u) => { if (u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s)) out.push({ type: "Staff", l: `${u.name} · ${u.email}`, to: "/admin/staff" }); });
+    return out.slice(0, 12);
+  }, [q]);
+  return (
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-24 p-4 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} data-testid="search-palette">
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-xl bg-white rounded-[20px] shadow-[0_40px_100px_rgba(15,23,42,0.35)] overflow-hidden">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+          <i className="fa-solid fa-magnifying-glass text-slate-400"></i>
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type to search reservations, guests, rooms, staff, pages..." className="flex-1 text-sm outline-none" data-testid="search-input" />
+          <kbd className="text-[10px] text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">esc</kbd>
+        </div>
+        <div className="max-h-96 overflow-y-auto">
+          {!q.trim() ? (
+            <div className="p-6 text-sm text-slate-500">
+              <p className="text-eyebrow text-slate-400 mb-3">Quick access</p>
+              <div className="grid grid-cols-2 gap-2">
+                {pages.slice(0, 8).map((p) => (
+                  <button key={p.to} onClick={() => { nav(p.to); onClose(); }} className="text-left px-3 py-2 rounded-[10px] hover:bg-slate-50 text-slate-700">{p.l}</button>
+                ))}
+              </div>
+            </div>
+          ) : results.length === 0 ? (
+            <p className="p-6 text-sm text-slate-500 text-center">No results for &ldquo;{q}&rdquo;</p>
+          ) : (
+            <ul>
+              {results.map((r, i) => (
+                <li key={i}>
+                  <button onClick={() => { nav(r.to); onClose(); }} className="w-full text-left px-5 py-3 hover:bg-[#FAFAF8] flex items-center gap-3 border-t border-slate-100" data-testid={`search-result-${i}`}>
+                    <span className="text-[10px] tracking-widest uppercase text-[#C9A227] w-24">{r.type}</span>
+                    <span className="text-sm text-slate-900 flex-1">{r.l}</span>
+                    <i className="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
 };
+
+const HelpDrawer = ({ onClose }) => (
+  <div className="fixed inset-0 z-[100] flex items-stretch justify-end bg-slate-900/60 backdrop-blur-sm" onClick={onClose} data-testid="help-drawer">
+    <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-white h-full overflow-y-auto p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)]">
+      <div className="flex items-center justify-between">
+        <div><p className="text-eyebrow text-[#C9A227]">Help</p><h3 className="mt-1 font-serif text-2xl text-slate-900">Shortcuts & Docs</h3></div>
+        <button onClick={onClose} className="w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="help-close"><i className="fa-solid fa-xmark text-slate-500 text-sm"></i></button>
+      </div>
+      <p className="text-eyebrow text-slate-500 mt-8">Keyboard shortcuts</p>
+      <ul className="mt-3 space-y-2 text-sm">
+        {[["Open command palette", "⌘K"], ["Go to Dashboard", "G D"], ["Go to Reservations", "G R"], ["Go to Rooms", "G O"], ["Go to Guests", "G U"], ["New reservation", "N R"], ["Close modal / dropdown", "Esc"]].map(([l, k]) => (
+          <li key={l} className="flex items-center justify-between py-2 border-b border-slate-100"><span className="text-slate-700">{l}</span><kbd className="text-[10px] text-slate-500 border border-slate-200 rounded px-2 py-0.5 font-mono">{k}</kbd></li>
+        ))}
+      </ul>
+      <p className="text-eyebrow text-slate-500 mt-8">Guides</p>
+      <ul className="mt-3 space-y-2 text-sm">
+        {["Front desk daily flow", "How role permissions work", "Managing the folio & extras", "Setting up rate plans", "Responding to reviews"].map((g) => (
+          <li key={g}><a href="#" className="flex items-center justify-between py-2 text-slate-700 hover:text-slate-900"><span>{g}</span><i className="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i></a></li>
+        ))}
+      </ul>
+      <div className="mt-8 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100">
+        <p className="text-sm text-slate-900">Still need help?</p>
+        <p className="text-xs text-slate-500 mt-1">Ping the Aura ops channel or email <span className="font-mono">ops@aurahotels.com</span></p>
+      </div>
+    </div>
+  </div>
+);
 
 export default AdminLayout;
