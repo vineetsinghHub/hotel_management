@@ -144,7 +144,7 @@ export default function Rooms() {
                   <RoomCard room={r} index={i} onDetails={(room) => { setModalRoom(room); setModalOpen(true); }} />
                   <button
                     onClick={() => toggleCompare(r.id)}
-                    className={`absolute top-4 right-4 z-10 h-9 pl-3 pr-4 rounded-full text-xs flex items-center gap-2 border transition-all ${
+                    className={`absolute bottom-4 right-4 z-10 h-9 pl-3 pr-4 rounded-full text-xs flex items-center gap-2 border transition-all ${
                       compare.includes(r.id)
                         ? "bg-[#4F46E5] text-white border-[#4F46E5]"
                         : "bg-white/95 backdrop-blur text-slate-700 border-slate-200 hover:border-slate-300"

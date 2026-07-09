@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 // Poster-first video hero. If the video src fails we gracefully fall back to
 // the poster image.
-export const VideoHero = ({ children, poster, sources = [], className = "" }) => {
+export const VideoHero = ({ children, poster, sources = [], className = "", "data-testid": testid = "video-hero" }) => {
   const ref = useRef(null);
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(true);
@@ -26,7 +26,7 @@ export const VideoHero = ({ children, poster, sources = [], className = "" }) =>
   };
 
   return (
-    <div className={`relative min-h-[100vh] w-full overflow-hidden ${className}`} data-testid="video-hero">
+    <div className={`relative min-h-[100vh] w-full overflow-hidden ${className}`} data-testid={testid}>
       {videoOk && sources.length > 0 ? (
         <video
           ref={ref}

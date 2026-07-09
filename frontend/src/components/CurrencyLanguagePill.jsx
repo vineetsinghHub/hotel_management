@@ -31,6 +31,8 @@ export const CurrencyLanguagePill = () => {
           data-testid="cur-lang-panel"
           role="dialog"
           aria-label="Preferences"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <p className="text-eyebrow text-[#C9A227]">{t("common.currency")}</p>
           <div className="mt-2 grid grid-cols-4 gap-2" data-testid="currency-grid">

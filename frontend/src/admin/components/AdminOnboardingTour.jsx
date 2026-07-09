@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 
 const KEY = "aura_admin_tour_v1";
 
-// Simple 4-step onboarding tour for admin. Uses fixed positions relative to
-// known sidebar/topbar elements. Users can dismiss and it never nags again.
+// Simple 4-step onboarding tour for admin. Backdrop click and ESC both dismiss.
 const STEPS = [
   { t: "Welcome to Aura Console", d: "This quick tour will point out the tools you use every day. It takes 30 seconds.", i: "sparkles" },
   { t: "Command palette", d: "Press ⌘K or / anywhere to jump to any page, guest, room, or reservation.", i: "magnifying-glass" },
@@ -27,11 +26,21 @@ export const AdminOnboardingTour = () => {
     setOpen(false);
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") finish(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
   if (!open) return null;
   const s = STEPS[step];
   return (
-    <div className="fixed inset-0 z-[120] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" data-testid="admin-tour">
-      <div className="w-full max-w-md bg-white rounded-[20px] shadow-[0_40px_100px_rgba(15,23,42,0.35)] overflow-hidden">
+    <div className="fixed inset-0 z-[120] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" data-testid="admin-tour" onClick={finish}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-white rounded-[20px] shadow-[0_40px_100px_rgba(15,23,42,0.35)] overflow-hidden relative">
+        <button onClick={finish} className="absolute top-3 right-3 w-8 h-8 rounded-full hover:bg-slate-50 grid place-items-center z-10" aria-label="Close tour" data-testid="tour-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
         <div className="h-2 bg-slate-100"><div className="h-full bg-[#4F46E5] transition-all" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}></div></div>
         <div className="p-8">
           <div className="w-14 h-14 rounded-full bg-[#C9A227]/12 text-[#C9A227] grid place-items-center"><i className={`fa-solid fa-${s.i} text-2xl`}></i></div>
