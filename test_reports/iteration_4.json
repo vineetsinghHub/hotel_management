@@ -1,0 +1,20 @@
+{
+  "summary": "Frontend-only bug-fix verification for /dashboard on Aura Hotels. All 4 reported issues verified fixed: cancel removes items from Dining/Spa/Experiences lists, Reschedule opens modal with date/slot pills and updates row time + toast, Bookings row has no overlap between UPCOMING pill and View button at 1280x768 and 1440x900, mobile viewport (375x800) hides sidebar (translate-x-full, x=-288) with working hamburger toggle that opens sidebar (x=0) and closes on nav click. Sidebar regression at 1440 also passes for all sections that exist.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Note: review_request listed side-overview / side-concierge / side-billing sidebar test-ids but the actual sidebar exposes Dashboard/Bookings/Dining/Spa/Experiences/Invoices/Profile/Settings. All existing side-* nav items work correctly; the missing ones in T8 are simply not part of the current UI — not a bug."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "None (local state only, no backend)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 4 dashboard bug fixes verified end-to-end via Playwright: cancel-removes-item (dining/spa/experiences), reschedule-modal with date + slot selection updates row + toast, bookings row layout (no overlap; bounding boxes computed at 1280x768 and 1440x900), mobile hamburger toggle. Reschedule modal correctly applies selected slot to row text ('21:00' dining, '16:30' spa). Toasts show 'Reservation rescheduled' / 'Appointment rescheduled'. No console errors observed."
+}

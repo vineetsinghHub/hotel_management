@@ -35,13 +35,13 @@ const invoicesData = [
   { id: "INV-2024-104", ref: "AH-1C93AA", date: "Aug 01, 2024", amount: 8640, status: "Paid" },
 ];
 
-const upcomingDining = [
+const initialDining = [
   { id: "d1", name: "Chef's Table Tasting", when: "Nov 13, 20:00", guests: 2, restaurant: "The Palace Table" },
 ];
-const upcomingSpa = [
+const initialSpa = [
   { id: "s1", name: "Royal Abhyanga", when: "Nov 13, 15:00", therapist: "Meera K.", duration: "90 min" },
 ];
-const upcomingExperiences = [
+const initialExperiences = [
   { id: "e1", title: "Heritage Walk", when: "Nov 13, 07:00" },
   { id: "e2", title: "Sunset Boating", when: "Nov 14, 17:30" },
 ];
@@ -57,7 +57,12 @@ export default function Dashboard() {
   const [earlyOpen, setEarlyOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(null);
   const [detailBooking, setDetailBooking] = useState(null);
+  const [rescheduleItem, setRescheduleItem] = useState(null); // { kind: 'dining'|'spa'|'experience', item }
+  const [dining, setDining] = useState(initialDining);
+  const [spa, setSpa] = useState(initialSpa);
+  const [upcomingExps, setUpcomingExps] = useState(initialExperiences);
   const [query, setQuery] = useState("");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Profile state
   const [profile, setProfile] = useState({
@@ -99,6 +104,22 @@ export default function Dashboard() {
   const saveProfile = () => toast.success("Profile updated", { description: "Your preferences are saved." });
   const savePrefs = () => toast.success("Preferences saved");
 
+  // Dining / Spa / Experience cancel + reschedule
+  const cancelDining = (id) => { setDining((s) => s.filter((x) => x.id !== id)); toast.success("Dining reservation cancelled"); };
+  const cancelSpa = (id) => { setSpa((s) => s.filter((x) => x.id !== id)); toast.success("Spa appointment cancelled"); };
+  const cancelExperience = (id) => { setUpcomingExps((s) => s.filter((x) => x.id !== id)); toast.success("Experience cancelled"); };
+
+  const confirmReschedule = (newWhen) => {
+    if (!rescheduleItem) return;
+    const { kind, item } = rescheduleItem;
+    const updater = (list) => list.map((x) => (x.id === item.id ? { ...x, when: newWhen } : x));
+    if (kind === "dining") setDining(updater);
+    if (kind === "spa") setSpa(updater);
+    if (kind === "experience") setUpcomingExps(updater);
+    toast.success(`${kind === "spa" ? "Appointment" : kind === "dining" ? "Reservation" : "Experience"} rescheduled`, { description: `New time: ${newWhen}` });
+    setRescheduleItem(null);
+  };
+
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
@@ -112,15 +133,18 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#FAFAF8] flex" data-testid="dashboard-page">
       {/* SIDEBAR */}
-      <aside className="hidden lg:flex flex-col w-72 bg-white border-r border-slate-200 fixed inset-y-0 left-0 z-40" data-testid="dashboard-sidebar">
-        <div className="p-8 border-b border-slate-100">
+      <aside className={`flex flex-col w-72 bg-white border-r border-slate-200 fixed inset-y-0 left-0 z-40 transition-transform duration-300 ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`} data-testid="dashboard-sidebar">
+        <div className="p-8 border-b border-slate-100 flex items-center justify-between">
           <PropertyMark size="sm" />
+          <button onClick={() => setMobileNavOpen(false)} className="lg:hidden w-8 h-8 rounded-full hover:bg-slate-50 grid place-items-center">
+            <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+          </button>
         </div>
         <nav className="p-5 flex-1 space-y-1 overflow-y-auto">
           {nav.map((n) => (
             <button
               key={n.id}
-              onClick={() => setActive(n.id)}
+              onClick={() => { setActive(n.id); setMobileNavOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-[14px] text-sm transition-all ${
                 active === n.id
                   ? "bg-slate-900 text-white shadow-[0_6px_20px_rgba(15,23,42,0.25)]"
@@ -144,14 +168,27 @@ export default function Dashboard() {
         </div>
       </aside>
 
+      {mobileNavOpen && (
+        <div className="lg:hidden fixed inset-0 bg-slate-900/40 z-30" onClick={() => setMobileNavOpen(false)}></div>
+      )}
+
       <div className="flex-1 lg:ml-72">
         {/* Top bar */}
         <header className="sticky top-0 z-30 bg-[#FAFAF8]/80 backdrop-blur-xl border-b border-slate-200 px-6 md:px-10 py-5 flex items-center justify-between">
-          <div>
-            <p className="text-eyebrow text-slate-500">Good evening,</p>
-            <h1 className="font-serif text-2xl text-slate-900">
-              {active === "dashboard" ? "Welcome back, Aarav" : nav.find((n) => n.id === active)?.label}
-            </h1>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileNavOpen(true)}
+              className="lg:hidden w-10 h-10 rounded-full border border-slate-200 hover:bg-white grid place-items-center"
+              data-testid="mobile-nav-toggle"
+            >
+              <i className="fa-solid fa-bars text-xs text-slate-600"></i>
+            </button>
+            <div>
+              <p className="text-eyebrow text-slate-500">Good evening,</p>
+              <h1 className="font-serif text-2xl text-slate-900">
+                {active === "dashboard" ? "Welcome back, Aarav" : nav.find((n) => n.id === active)?.label}
+              </h1>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -398,18 +435,30 @@ export default function Dashboard() {
               </div>
               <div className="divide-y divide-slate-100">
                 {bookingHistory.map((b) => (
-                  <div key={b.id} className="p-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-center" data-testid={`booking-row-${b.id}`}>
-                    <div className="md:col-span-3">
-                      <p className="text-xs text-slate-500 font-mono">{b.id}</p>
-                      <p className="mt-1 font-serif text-lg text-slate-900">{b.suite}</p>
+                  <div key={b.id} className="p-6 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6" data-testid={`booking-row-${b.id}`}>
+                    <div className="lg:w-64 flex-shrink-0">
+                      <p className="text-[10px] text-slate-500 font-mono tracking-widest uppercase">{b.id}</p>
+                      <p className="mt-1 font-serif text-lg text-slate-900 leading-tight">{b.suite}</p>
                     </div>
-                    <div className="md:col-span-3 text-sm text-slate-600">{b.dates}</div>
-                    <div className="md:col-span-1 text-sm text-slate-600 font-mono">{b.nights}n</div>
-                    <div className="md:col-span-2 text-sm font-mono text-slate-900">${b.amount.toLocaleString()}</div>
-                    <div className="md:col-span-1">
-                      <span className={`text-[10px] px-2.5 py-1 rounded-full tracking-widest uppercase ${b.status === "Upcoming" ? "bg-indigo-50 text-indigo-700" : "bg-emerald-50 text-emerald-700"}`}>{b.status}</span>
+                    <div className="flex-1 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                      <div className="min-w-[160px]">
+                        <p className="text-[10px] text-slate-400 tracking-widest uppercase">Dates</p>
+                        <p className="text-slate-700 mt-0.5">{b.dates}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-slate-400 tracking-widest uppercase">Nights</p>
+                        <p className="font-mono text-slate-700 mt-0.5">{b.nights}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-slate-400 tracking-widest uppercase">Total</p>
+                        <p className="font-mono text-slate-900 mt-0.5">${b.amount.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-slate-400 tracking-widest uppercase">Status</p>
+                        <span className={`inline-block mt-0.5 text-[10px] px-2.5 py-1 rounded-full tracking-widest uppercase ${b.status === "Upcoming" ? "bg-indigo-50 text-indigo-700" : "bg-emerald-50 text-emerald-700"}`}>{b.status}</span>
+                      </div>
                     </div>
-                    <div className="md:col-span-2 flex items-center gap-2 justify-end">
+                    <div className="flex items-center gap-2 flex-wrap lg:justify-end lg:flex-shrink-0">
                       <button onClick={() => setDetailBooking(b)} className="text-xs px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50" data-testid={`view-${b.id}`}>View</button>
                       {b.status === "Upcoming" ? (
                         <>
@@ -429,7 +478,7 @@ export default function Dashboard() {
           {active === "dining" && (
             <section className="space-y-6">
               <div className="bg-white rounded-[24px] border border-slate-200 p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-3">
                   <div>
                     <p className="text-eyebrow text-[#C9A227]">Upcoming</p>
                     <h3 className="mt-1 font-serif text-2xl text-slate-900">Dining reservations</h3>
@@ -437,8 +486,14 @@ export default function Dashboard() {
                   <Link to="/dining" className="text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-full">Reserve table</Link>
                 </div>
                 <div className="mt-6 space-y-3">
-                  {upcomingDining.map((d) => (
-                    <div key={d.id} className="p-5 rounded-[16px] border border-slate-200 flex items-center justify-between" data-testid={`dining-${d.id}`}>
+                  {dining.length === 0 ? (
+                    <div className="p-8 text-center rounded-[16px] border border-dashed border-slate-200" data-testid="dining-empty">
+                      <i className="fa-solid fa-utensils text-2xl text-slate-300"></i>
+                      <p className="mt-3 text-sm text-slate-500">No upcoming dining reservations.</p>
+                      <Link to="/dining" className="mt-4 inline-block text-xs px-4 py-2 rounded-full bg-slate-900 text-white">Reserve a table</Link>
+                    </div>
+                  ) : dining.map((d) => (
+                    <div key={d.id} className="p-5 rounded-[16px] border border-slate-200 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between" data-testid={`dining-${d.id}`}>
                       <div className="flex items-center gap-4">
                         <i className="fa-solid fa-utensils text-[#C9A227]"></i>
                         <div>
@@ -446,9 +501,9 @@ export default function Dashboard() {
                           <p className="text-xs text-slate-500">{d.restaurant} · {d.when} · {d.guests} guests</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => toast.success("Modification request sent")} className="text-xs px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50">Modify</button>
-                        <button onClick={() => toast.success("Reservation cancelled")} className="text-xs px-3 py-2 rounded-full border border-rose-200 text-rose-600 hover:bg-rose-50">Cancel</button>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button onClick={() => setRescheduleItem({ kind: "dining", item: d })} className="text-xs px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50" data-testid={`dining-reschedule-${d.id}`}>Reschedule</button>
+                        <button onClick={() => cancelDining(d.id)} className="text-xs px-3 py-2 rounded-full border border-rose-200 text-rose-600 hover:bg-rose-50" data-testid={`dining-cancel-${d.id}`}>Cancel</button>
                       </div>
                     </div>
                   ))}
@@ -460,7 +515,7 @@ export default function Dashboard() {
           {active === "spa" && (
             <section className="space-y-6">
               <div className="bg-white rounded-[24px] border border-slate-200 p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-3">
                   <div>
                     <p className="text-eyebrow text-[#C9A227]">Upcoming</p>
                     <h3 className="mt-1 font-serif text-2xl text-slate-900">Spa appointments</h3>
@@ -468,8 +523,14 @@ export default function Dashboard() {
                   <Link to="/spa" className="text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-full">New appointment</Link>
                 </div>
                 <div className="mt-6 space-y-3">
-                  {upcomingSpa.map((s) => (
-                    <div key={s.id} className="p-5 rounded-[16px] border border-slate-200 flex items-center justify-between" data-testid={`spa-${s.id}`}>
+                  {spa.length === 0 ? (
+                    <div className="p-8 text-center rounded-[16px] border border-dashed border-slate-200" data-testid="spa-empty">
+                      <i className="fa-solid fa-spa text-2xl text-slate-300"></i>
+                      <p className="mt-3 text-sm text-slate-500">No upcoming spa appointments.</p>
+                      <Link to="/spa" className="mt-4 inline-block text-xs px-4 py-2 rounded-full bg-slate-900 text-white">Book a treatment</Link>
+                    </div>
+                  ) : spa.map((s) => (
+                    <div key={s.id} className="p-5 rounded-[16px] border border-slate-200 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between" data-testid={`spa-${s.id}`}>
                       <div className="flex items-center gap-4">
                         <i className="fa-solid fa-spa text-[#C9A227]"></i>
                         <div>
@@ -477,9 +538,9 @@ export default function Dashboard() {
                           <p className="text-xs text-slate-500">{s.duration} · with {s.therapist} · {s.when}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => toast.success("Reschedule request sent")} className="text-xs px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50">Reschedule</button>
-                        <button onClick={() => toast.success("Appointment cancelled")} className="text-xs px-3 py-2 rounded-full border border-rose-200 text-rose-600 hover:bg-rose-50">Cancel</button>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button onClick={() => setRescheduleItem({ kind: "spa", item: s })} className="text-xs px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50" data-testid={`spa-reschedule-${s.id}`}>Reschedule</button>
+                        <button onClick={() => cancelSpa(s.id)} className="text-xs px-3 py-2 rounded-full border border-rose-200 text-rose-600 hover:bg-rose-50" data-testid={`spa-cancel-${s.id}`}>Cancel</button>
                       </div>
                     </div>
                   ))}
@@ -504,7 +565,7 @@ export default function Dashboard() {
           {active === "experiences" && (
             <section className="space-y-6">
               <div className="bg-white rounded-[24px] border border-slate-200 p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-3">
                   <div>
                     <p className="text-eyebrow text-[#C9A227]">Upcoming</p>
                     <h3 className="mt-1 font-serif text-2xl text-slate-900">Your experiences</h3>
@@ -512,8 +573,14 @@ export default function Dashboard() {
                   <Link to="/experiences" className="text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-full">Browse</Link>
                 </div>
                 <div className="mt-6 space-y-3">
-                  {upcomingExperiences.map((e) => (
-                    <div key={e.id} className="p-5 rounded-[16px] border border-slate-200 flex items-center justify-between" data-testid={`experience-${e.id}`}>
+                  {upcomingExps.length === 0 ? (
+                    <div className="p-8 text-center rounded-[16px] border border-dashed border-slate-200" data-testid="exp-empty">
+                      <i className="fa-solid fa-compass text-2xl text-slate-300"></i>
+                      <p className="mt-3 text-sm text-slate-500">No upcoming experiences.</p>
+                      <Link to="/experiences" className="mt-4 inline-block text-xs px-4 py-2 rounded-full bg-slate-900 text-white">Discover experiences</Link>
+                    </div>
+                  ) : upcomingExps.map((e) => (
+                    <div key={e.id} className="p-5 rounded-[16px] border border-slate-200 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between" data-testid={`experience-${e.id}`}>
                       <div className="flex items-center gap-4">
                         <i className="fa-solid fa-compass text-[#C9A227]"></i>
                         <div>
@@ -521,7 +588,10 @@ export default function Dashboard() {
                           <p className="text-xs text-slate-500">{e.when}</p>
                         </div>
                       </div>
-                      <button onClick={() => toast.success("Confirmed")} className="text-xs px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50">View details</button>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button onClick={() => setRescheduleItem({ kind: "experience", item: e })} className="text-xs px-3 py-2 rounded-full border border-slate-200 hover:bg-slate-50" data-testid={`exp-reschedule-${e.id}`}>Reschedule</button>
+                        <button onClick={() => cancelExperience(e.id)} className="text-xs px-3 py-2 rounded-full border border-rose-200 text-rose-600 hover:bg-rose-50" data-testid={`exp-cancel-${e.id}`}>Cancel</button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -715,6 +785,11 @@ export default function Dashboard() {
         </ModalShell>
       )}
 
+      {/* RESCHEDULE MODAL */}
+      {rescheduleItem && (
+        <RescheduleModal item={rescheduleItem} onClose={() => setRescheduleItem(null)} onConfirm={confirmReschedule} />
+      )}
+
       {/* BOOKING DETAIL MODAL */}
       {detailBooking && (
         <ModalShell title={detailBooking.suite} onClose={() => setDetailBooking(null)} testid="detail-modal">
@@ -798,3 +873,52 @@ const ModalShell = ({ title, onClose, children, testid }) => (
     </div>
   </div>
 );
+
+const RescheduleModal = ({ item, onClose, onConfirm }) => {
+  const kindLabel = item.kind === "spa" ? "appointment" : item.kind === "dining" ? "reservation" : "experience";
+  const [date, setDate] = useState("2025-11-14");
+  const [time, setTime] = useState("15:00");
+  const slots = ["09:00", "10:30", "12:00", "13:30", "15:00", "16:30", "18:00", "19:30", "20:00", "21:00"];
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-8 bg-slate-900/60 backdrop-blur-sm reveal-in" data-testid="reschedule-modal">
+      <div className="bg-white w-full max-w-lg rounded-t-[24px] md:rounded-[24px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)] reveal-scale relative">
+        <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="reschedule-close">
+          <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
+        </button>
+        <p className="text-eyebrow text-[#C9A227]">Reschedule {kindLabel}</p>
+        <h3 className="mt-1 font-serif text-2xl text-slate-900">{item.item.name || item.item.title}</h3>
+        <p className="text-xs text-slate-500 mt-1">Current: {item.item.when}</p>
+
+        <div className="mt-5">
+          <label className="text-eyebrow text-slate-500">New date</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="reschedule-date" />
+        </div>
+        <div className="mt-4">
+          <label className="text-eyebrow text-slate-500">New time</label>
+          <div className="mt-2 grid grid-cols-5 gap-2">
+            {slots.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTime(t)}
+                className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === t ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`}
+                data-testid={`reschedule-slot-${t}`}
+              >{t}</button>
+            ))}
+          </div>
+        </div>
+        <div className="mt-6 flex items-center gap-3 justify-end">
+          <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm" data-testid="reschedule-cancel">Cancel</button>
+          <button
+            onClick={() => {
+              const d = new Date(date);
+              const label = `${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+              onConfirm(label);
+            }}
+            className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm"
+            data-testid="reschedule-confirm"
+          >Confirm reschedule</button>
+        </div>
+      </div>
+    </div>
+  );
+};
