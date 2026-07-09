@@ -1,52 +1,39 @@
 import { useEffect } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import { Toaster } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import Home from "@/pages/Home";
+import Rooms from "@/pages/Rooms";
+import Booking from "@/pages/Booking";
+import Payment from "@/pages/Payment";
+import Confirmation from "@/pages/Confirmation";
+import Dashboard from "@/pages/Dashboard";
+import Experiences from "@/pages/Experiences";
+import Dining from "@/pages/Dining";
+import Spa from "@/pages/Spa";
+import GalleryContact from "@/pages/GalleryContact";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
+function App() {
   useEffect(() => {
-    helloWorldApi();
+    document.title = "Aura Hotels | Timeless Heritage & Luxury";
   }, []);
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
     <div className="App">
       <BrowserRouter>
+        <Toaster position="top-center" richColors />
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/rooms" element={<Rooms />} />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="/confirmation" element={<Confirmation />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/experiences" element={<Experiences />} />
+          <Route path="/dining" element={<Dining />} />
+          <Route path="/spa" element={<Spa />} />
+          <Route path="/gallery" element={<GalleryContact />} />
         </Routes>
       </BrowserRouter>
     </div>
