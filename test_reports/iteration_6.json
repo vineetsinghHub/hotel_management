@@ -1,0 +1,28 @@
+{
+  "summary": "Re-verified Pay Balance fix on /dashboard. Bug is NOT fixed. balance-due still goes NEGATIVE after clicking Pay Balance in BOTH scenarios (with added extras and with only the default room-service extra).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Dashboard payBalance handler", "issue": "After Pay Balance click, balance-due=$-165 (with champagne extra) and $-45 (no added extras) instead of $0. The applied fix `paid: s.paid + balanceDue` combined with `setExtras([])` still double-credits extras: new paid = old paid + (grand - paid + extrasTotal) = grand + extrasTotal; then extras cleared to 0 → new balanceDue = grand - (grand + extrasTotal) + 0 = -extrasTotal.", "selector": "[data-testid='balance-due']", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix payBalance in /app/frontend/src/pages/Dashboard.jsx. Correct fix options: (a) `setStay(s => ({...s, paid: s.grand}))` then `setExtras([])` — but this loses record of extras being paid; OR (b) do NOT clear extras, add them into stay.grand permanently and reset extras — e.g. `setStay(s => ({...s, grand: s.grand + extrasTotal, paid: s.grand + extrasTotal})); setExtras([]);`; OR (c) simplest: `setStay(s => ({...s, paid: s.paid + balanceDue - extrasTotal})); setExtras([]);` so paid ends at grand and balance-due = 0.",
+    "Ensure toast still fires with original balanceDue amount."
+  ],
+  "critical_code_review_comments": [
+    "payBalance handler in Dashboard.jsx L145-149: capturing balanceDue in closure then clearing extras causes negative balance because balanceDue already accounted for extras which are then removed from the grand-total side of the equation.",
+    "Displayed 'Balance settled $X charged' still uses the correct closure amount ($3,390 in test 1), so toast text is fine but state math is broken."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "0% (both pay-balance scenarios failing)"},
+  "test_credentials": "N/A",
+  "seed_data_creation": "None; localStorage cleared before each test",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Only need to retest Pay Balance flow. Test 1: clear localStorage, add champagne ($120), pay → expect balance-due=$0. Test 2: clear localStorage, pay directly → expect balance-due=$0. Observed in iteration_6: -$165 and -$45 respectively.",
+  "rca of the issue": "In Dashboard.jsx payBalance: `setStay(s => ({...s, paid: s.paid + balanceDue})); setExtras([]);`. Because balanceDue = grand - paid + extrasTotal, new paid becomes grand + extrasTotal. Then extras is emptied so displayed balance-due = grand - (grand+extrasTotal) + 0 = -extrasTotal. Correct behavior: after paying, paid should equal grand (extras zeroed since they've been billed) OR grand should be incremented by extrasTotal so paid still matches. Simplest correct patch: `setStay(s => ({...s, paid: s.paid + balanceDue - extrasTotal})); setExtras([]);` (mathematically yields paid = grand)."
+}

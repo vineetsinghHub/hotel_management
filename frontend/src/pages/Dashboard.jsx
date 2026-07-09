@@ -143,7 +143,7 @@ export default function Dashboard() {
   };
 
   const payBalance = () => {
-    setStay((s) => ({ ...s, paid: s.grand + extrasTotal }));
+    setStay((s) => ({ ...s, paid: s.paid + balanceDue }));
     setExtras([]);
     toast.success("Balance settled", { description: `$${balanceDue.toLocaleString()} charged to Visa •••• 4242` });
     setPayBalanceOpen(false);
