@@ -1,15 +1,35 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { rooms, upsells } from "@/data/mockData";
 
-const room = rooms[0];
-
 const countries = ["India", "United States", "United Kingdom", "United Arab Emirates", "Singapore", "France", "Italy", "Japan"];
+
+const toISODate = (d) => d.toISOString().slice(0, 10);
+const parseISO = (s) => {
+  const [y, m, day] = s.split("-").map(Number);
+  return new Date(y, m - 1, day);
+};
+const fmtLong = (d) => d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+const fmtShort = (d) => d.toLocaleDateString("en-US", { day: "2-digit", month: "short" });
+const weekday = (d) => d.toLocaleDateString("en-US", { weekday: "short" });
 
 export default function Booking() {
   const nav = useNavigate();
+
+  // Editable stay
+  const defaultIn = new Date(); defaultIn.setDate(defaultIn.getDate() + 4);
+  const defaultOut = new Date(); defaultOut.setDate(defaultOut.getDate() + 7);
+  const [roomId, setRoomId] = useState(rooms[0].id);
+  const [checkIn, setCheckIn] = useState(toISODate(defaultIn));
+  const [checkOut, setCheckOut] = useState(toISODate(defaultOut));
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
+  const [roomsCount, setRoomsCount] = useState(1);
+
+  const room = useMemo(() => rooms.find((r) => r.id === roomId) || rooms[0], [roomId]);
+
   const [form, setForm] = useState({
     firstName: "Aarav",
     lastName: "",
@@ -26,14 +46,18 @@ export default function Booking() {
 
   const toggle = (id) => setSelectedUpsells((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
-  const nights = 3;
-  const nightly = room.price;
+  const inDate = parseISO(checkIn);
+  const outDate = parseISO(checkOut);
+  const nights = Math.max(1, Math.round((outDate - inDate) / (1000 * 60 * 60 * 24)));
+  const nightly = room.price * roomsCount;
   const roomTotal = nightly * nights;
   const addOnsTotal = selectedUpsells.reduce((sum, id) => sum + (upsells.find((u) => u.id === id)?.price || 0), 0);
   const taxes = Math.round((roomTotal + addOnsTotal) * 0.18);
   const discount = promoCode === "AURA24" ? Math.round(roomTotal * 0.12) : 0;
   const grand = roomTotal + addOnsTotal + taxes - discount;
 
+  const overCapacity = adults + children > room.guests * roomsCount;
+  const dateError = outDate <= inDate;
   const lastNameError = !form.lastName;
 
   return (
@@ -69,6 +93,118 @@ export default function Booking() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* LEFT */}
             <div className="lg:col-span-2 space-y-8">
+              {/* Your Stay — editable */}
+              <div className="bg-white rounded-[24px] border border-slate-200 p-8" data-testid="your-stay-card">
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <p className="text-eyebrow text-[#C9A227]">Your Stay</p>
+                    <h2 className="mt-2 font-serif text-3xl text-slate-900">Review & modify</h2>
+                  </div>
+                  <Link to="/rooms" className="text-xs text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
+                    <i className="fa-solid fa-arrow-left text-[10px]"></i>Browse all suites
+                  </Link>
+                </div>
+
+                {/* Room selector */}
+                <div className="mt-6">
+                  <label className="text-eyebrow text-slate-500">Suite</label>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {rooms.map((r) => {
+                      const isOn = r.id === roomId;
+                      return (
+                        <button
+                          key={r.id}
+                          onClick={() => setRoomId(r.id)}
+                          className={`text-left rounded-[16px] border transition-all overflow-hidden flex items-center gap-4 p-3 ${
+                            isOn ? "border-[#4F46E5] ring-2 ring-[#4F46E5]/15 bg-indigo-50/30" : "border-slate-200 hover:border-slate-300 bg-white"
+                          }`}
+                          data-testid={`stay-room-${r.id}`}
+                        >
+                          <img src={r.images[0]} alt={r.name} className="w-20 h-20 rounded-[12px] object-cover flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-serif text-lg text-slate-900 truncate">{r.name}</h3>
+                              {isOn && <i className="fa-solid fa-check text-[#4F46E5] text-xs"></i>}
+                            </div>
+                            <p className="text-xs text-slate-500 truncate">{r.view} · Up to {r.guests} guests · {r.size} ft²</p>
+                            <p className="mt-1 font-mono text-sm text-slate-900">${r.price}<span className="text-xs text-slate-500"> / night</span></p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Dates + Guests row */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-eyebrow text-slate-500">Check-in</label>
+                    <input
+                      type="date"
+                      value={checkIn}
+                      min={toISODate(new Date())}
+                      onChange={(e) => setCheckIn(e.target.value)}
+                      className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono"
+                      data-testid="stay-checkin"
+                    />
+                    <p className="text-[11px] text-slate-500 mt-1.5">{weekday(inDate)} · from 14:00</p>
+                  </div>
+                  <div>
+                    <label className="text-eyebrow text-slate-500">Check-out</label>
+                    <input
+                      type="date"
+                      value={checkOut}
+                      min={checkIn}
+                      onChange={(e) => setCheckOut(e.target.value)}
+                      className={`mt-2 w-full bg-[#FAFAF8] border rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono ${dateError ? "border-rose-400 bg-rose-50/50" : "border-slate-200"}`}
+                      data-testid="stay-checkout"
+                    />
+                    <p className={`text-[11px] mt-1.5 ${dateError ? "text-rose-500" : "text-slate-500"}`}>
+                      {dateError ? "Check-out must be after check-in" : `${weekday(outDate)} · by 12:00 · ${nights} night${nights > 1 ? "s" : ""}`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Guests + Rooms */}
+                <div className="mt-6">
+                  <label className="text-eyebrow text-slate-500">Guests</label>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {[
+                      { l: "Adults", d: "Ages 13+", v: adults, set: setAdults, min: 1, k: "adults" },
+                      { l: "Children", d: "Ages 2–12", v: children, set: setChildren, min: 0, k: "children" },
+                      { l: "Rooms", d: "Suites needed", v: roomsCount, set: setRoomsCount, min: 1, k: "rooms" },
+                    ].map((row) => (
+                      <div key={row.l} className="flex items-center justify-between p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100">
+                        <div>
+                          <p className="text-sm text-slate-900 font-medium">{row.l}</p>
+                          <p className="text-[11px] text-slate-500">{row.d}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => row.set(Math.max(row.min, row.v - 1))}
+                            className="w-8 h-8 rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                            disabled={row.v <= row.min}
+                            data-testid={`stay-${row.k}-minus`}
+                          >−</button>
+                          <span className="font-mono w-6 text-center text-sm" data-testid={`stay-${row.k}-value`}>{row.v}</span>
+                          <button
+                            onClick={() => row.set(row.v + 1)}
+                            className="w-8 h-8 rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            data-testid={`stay-${row.k}-plus`}
+                          >+</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {overCapacity && (
+                    <p className="mt-3 text-xs text-rose-500 flex items-center gap-1.5" data-testid="stay-capacity-error">
+                      <i className="fa-solid fa-circle-exclamation text-[10px]"></i>
+                      {room.name} accommodates up to {room.guests * roomsCount} guest{room.guests * roomsCount > 1 ? "s" : ""}. Add a room or select a larger suite.
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="bg-white rounded-[24px] border border-slate-200 p-8" data-testid="guest-details-card">
                 <div className="flex items-baseline justify-between">
                   <div>
@@ -199,23 +335,28 @@ export default function Booking() {
                   <div className="mt-5 grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-[14px] bg-[#FAFAF8]">
                       <p className="text-[10px] tracking-widest uppercase text-slate-400">Check-in</p>
-                      <p className="font-serif text-lg text-slate-900 mt-1">Nov 12</p>
-                      <p className="text-[10px] text-slate-500">Wed · 14:00</p>
+                      <p className="font-serif text-lg text-slate-900 mt-1" data-testid="summary-checkin">{fmtShort(inDate)}</p>
+                      <p className="text-[10px] text-slate-500">{weekday(inDate)} · 14:00</p>
                     </div>
                     <div className="p-3 rounded-[14px] bg-[#FAFAF8]">
                       <p className="text-[10px] tracking-widest uppercase text-slate-400">Check-out</p>
-                      <p className="font-serif text-lg text-slate-900 mt-1">Nov 15</p>
-                      <p className="text-[10px] text-slate-500">Sat · 12:00</p>
+                      <p className="font-serif text-lg text-slate-900 mt-1" data-testid="summary-checkout">{fmtShort(outDate)}</p>
+                      <p className="text-[10px] text-slate-500">{weekday(outDate)} · 12:00</p>
                     </div>
                   </div>
 
                   <div className="mt-4 flex items-center justify-between p-3 rounded-[14px] bg-[#FAFAF8]">
                     <span className="text-sm text-slate-600">Guests</span>
-                    <span className="text-sm font-mono text-slate-900">2 Adults · 1 Suite</span>
+                    <span className="text-sm font-mono text-slate-900" data-testid="summary-guests">
+                      {adults} Adult{adults > 1 ? "s" : ""}{children > 0 ? ` · ${children} Child${children > 1 ? "ren" : ""}` : ""} · {roomsCount} Suite{roomsCount > 1 ? "s" : ""}
+                    </span>
                   </div>
 
                   <div className="mt-6 pt-6 border-t border-slate-100 space-y-2 text-sm">
-                    <div className="flex justify-between text-slate-600"><span>${nightly} × {nights} nights</span><span className="font-mono">${roomTotal}</span></div>
+                    <div className="flex justify-between text-slate-600">
+                      <span>${room.price} × {nights} night{nights > 1 ? "s" : ""}{roomsCount > 1 ? ` × ${roomsCount}` : ""}</span>
+                      <span className="font-mono" data-testid="summary-room-total">${roomTotal}</span>
+                    </div>
                     {selectedUpsells.map((id) => {
                       const u = upsells.find((x) => x.id === id);
                       return <div key={id} className="flex justify-between text-slate-600"><span>{u.title}</span><span className="font-mono">+${u.price}</span></div>;
@@ -245,7 +386,7 @@ export default function Booking() {
 
                   <button
                     onClick={() => nav("/payment")}
-                    disabled={!terms || lastNameError}
+                    disabled={!terms || lastNameError || overCapacity || dateError}
                     className="mt-6 w-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm py-4 rounded-full shadow-[0_10px_28px_rgba(79,70,229,0.32)]"
                     data-testid="book-now-btn"
                   >
