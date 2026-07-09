@@ -1,0 +1,22 @@
+{
+  "summary": "Frontend-only comprehensive smoke test of Aura Hotels across all 10 routes. Verified data-testids, open-state popovers, modals, live countdown, filter behavior, menu tabs, treatment selection, FAQ, and global nav/footer. All 17 scripted checks passed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Home.jsx experiences strip reuses experiences[0]/[1] with hardcoded titles; harmless for showcase but the data-testid uses index only (experience-tile-0..3), consider naming by slug.",
+    "BookingWidget always shows open popovers when showOpenStates=true — toggle button UX slightly odd (state controls only that popover; fine for showcase).",
+    "Design system fonts/colors and 20px radius verified visually consistent across pages."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% (17/17)"},
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Frontend-only showcase, mock data. All pages/routes render correctly. Key testids present: hero-book-cta, hero-explore-cta, booking-widget, calendar-popover, guest-popover, promo-popover, room-card-*, room-details-*, room-detail-modal, testimonial-dot-*, input-last-name-error, book-now-btn (correctly disabled when last name empty), pay-method-{card,upi,netbanking,gpay,apple}, pay-securely-btn, payment-success-modal (contains AH-9F27C1), exp-details-heritage-walk, experience-modal, menu-tab-{breakfast,lunch,dinner,desserts,wine}, treatment-{abhyanga,shirodhara,hammam,couples}, tab-{gallery,video,tour,contact}, faq-0, site-navbar, site-footer. Dashboard live countdown ticks each second. Rooms 'Signature' filter reduces 4->1 as expected."
+}

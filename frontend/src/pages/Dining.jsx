@@ -14,7 +14,7 @@ const restaurantGallery = [
 ];
 
 const reviews = [
-  { n: "Andrea F.", r: 5, t: "The Chef's Table was the most memorable dinner of our travels this year. Extraordinary." },
+  { n: "Andrea F.", r: 5, t: "The Chef&apos;s Table was the most memorable dinner of our travels this year. Extraordinary." },
   { n: "Ravi K.", r: 5, t: "Every dish arrived like a piece of theatre — thoughtful, precise, deeply local." },
   { n: "Elise B.", r: 5, t: "The rose kulfi is worth the journey alone. A true palace of flavours." },
 ];
@@ -43,7 +43,7 @@ export default function Dining() {
           <h1 className="mt-4 font-serif text-white text-5xl md:text-7xl leading-[1.05] max-w-4xl">
             The <span className="italic font-light">Royal</span> Kitchens
           </h1>
-          <p className="mt-5 text-white/80 text-lg max-w-2xl">A living archive of Rajput recipes, kept alive by a family of chefs whose lineage stretches back to the palace's founding.</p>
+          <p className="mt-5 text-white/80 text-lg max-w-2xl">A living archive of Rajput recipes, kept alive by a family of chefs whose lineage stretches back to the palace&apos;s founding.</p>
         </div>
       </section>
 
@@ -56,11 +56,11 @@ export default function Dining() {
                 <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=1200&q=85" alt="Chef" className="absolute inset-0 w-full h-full object-cover" />
               </div>
               <div className="p-8">
-                <p className="text-eyebrow text-[#C9A227]">Chef's Recommendation</p>
+                <p className="text-eyebrow text-[#C9A227]">Chef&apos;s Recommendation</p>
                 <h2 className="mt-3 font-serif text-3xl text-slate-900">Chef Vikram Singh</h2>
                 <p className="text-xs text-slate-500 tracking-widest uppercase mt-1">Executive Chef · 24 years</p>
                 <p className="mt-4 text-sm text-slate-600 leading-relaxed">
-                  "Our kitchen is not a place of invention — it is a place of memory. We cook with what the season gives, in the way it was given to us."
+                  &ldquo;Our kitchen is not a place of invention — it is a place of memory. We cook with what the season gives, in the way it was given to us.&rdquo;
                 </p>
                 <div className="mt-6 flex items-center gap-3">
                   <span className="inline-flex items-center gap-2 text-xs px-3 py-1.5 bg-[#FAFAF8] rounded-full">
@@ -172,7 +172,7 @@ export default function Dining() {
                 <div className="flex text-[#E6C868] gap-1">
                   {[...Array(r.r)].map((_, i) => <i key={i} className="fa-solid fa-star text-xs"></i>)}
                 </div>
-                <p className="mt-4 font-serif text-lg leading-relaxed">"{r.t}"</p>
+                <p className="mt-4 font-serif text-lg leading-relaxed">&ldquo;{r.t}&rdquo;</p>
                 <p className="mt-6 text-eyebrow text-white/60">{r.n}</p>
               </div>
             ))}
