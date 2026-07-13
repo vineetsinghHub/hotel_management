@@ -40,7 +40,7 @@ export default function Reservations() {
             <button onClick={() => setView("calendar")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "calendar" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="view-calendar"><i className="fa-solid fa-calendar-days text-[10px]"></i>Calendar</button>
             <button onClick={() => setView("kanban")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "kanban" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="view-kanban"><i className="fa-solid fa-columns text-[10px]"></i>Kanban</button>
           </div>
-          <button onClick={() => toast.success("New reservation form opened")} className={`bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs px-4 py-2 rounded-full ${readOnly ? "hidden" : ""}`} data-testid="new-reservation-btn">+ Reservation</button>
+          {!readOnly && <button onClick={() => toast.success("New reservation form opened")} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs px-4 py-2 rounded-full" data-testid="new-reservation-btn">+ Reservation</button>}
         </div>
       </div>
 

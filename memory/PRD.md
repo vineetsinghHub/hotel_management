@@ -127,5 +127,29 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
   - Message Center: WhatsApp channel hidden on Basic · Broadcast button shows Pro badge and opens a locked upgrade modal
   - Executive dashboard: bottom "Advanced analytics" section becomes a Pro teaser card on Basic
 
+### Sprint 8 — Guest Auth, Team Chat & Read-Only Enforcement (Feb 13, 2026)
+- **Guest-side authentication gate** (`/app/frontend/src/lib/guestAuth.js`, `RequireGuestAuth`)
+  - Mock guest auth store with `useGuestAuth()` hook (any email + non-empty password)
+  - `GuestAuthModal` glass-styled sign-in / sign-up modal
+  - Wall + modal render on `/dashboard`, `/booking`, `/payment`, `/confirmation` when unauthed
+  - Navbar swaps "My account" link for user menu (avatar + first name + Sign out) when signed in
+- **Message Center Guests / Team segregation** (`MessageCenter.jsx`)
+  - Segment switcher (Guests / Team) with independent unread counts
+  - Team segment merges the staff threads used by the FAB
+  - Segment-specific right panel (guest templates vs team templates)
+  - Per-thread × button to remove from list; localStorage-persisted, with Undo toast
+- **FAB Ops-assistant thread removal**
+  - × button on each staff thread pill (data-testid `fab-thread-remove-{id}`)
+  - Removal syncs with `aura_fab_removed_threads` localStorage
+  - Global FAB unread badge updates when a thread with unread messages is removed
+- **Read-only mode enforcement** (`ReadOnlyBanner`, `useReadOnly`)
+  - New reusable banner + hook driven by `isReadOnly(user.role)`
+  - Every write CTA hidden for the Auditor role across Events, Reservations, Restaurant, Marketing, Inventory, Guests
+  - Topbar "+ New" button hidden entirely for read-only role
+  - Restaurant menu toggle disabled with error toast on click
+- **Tier reactivity** — `tier.js` refactored with `subscribeTier()` + `useTier()` hook. TierGate upgrade, Settings switcher and sidebar Pro badges all update **live** without page reload.
+- **Per-role landing pages** (`ROLE_LANDING` map in `roles.js`)
+  - After login, each role goes to their most-relevant page (HK→housekeeping, F&B→restaurant, Spa→spa, Marketing→marketing, Accounting→invoices, Front Desk→front-desk, GM/Super Admin/Audit→dashboard)
+
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.

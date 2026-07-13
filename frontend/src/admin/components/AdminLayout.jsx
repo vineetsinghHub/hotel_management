@@ -73,7 +73,7 @@ export const AdminLayout = ({ pageTitle, children }) => {
                 <p className="px-5 mb-1 text-[9px] tracking-[0.22em] uppercase text-slate-400 font-medium">{g.label}</p>
                 {visible.map((it) => {
                   const active = loc.pathname === it.to;
-                  const proBadge = isProModule(it.k);
+                  const proBadge = isProModule(it.k) && !isPro;
                   return (
                     <Link key={it.k} to={it.to} onClick={() => setMobileOpen(false)}
                       className={`mx-3 px-3 py-2 rounded-[10px] text-sm flex items-center gap-3 transition-all ${active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
