@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import AdminLayout from "@/admin/components/AdminLayout";
 import { auditLog, AUDIT_ACTION_LABELS } from "@/admin/adminMockData";
 import { ROLES, roleLabel, roleColor } from "@/admin/roles";
+import { TIERS, getTier, setTier as persistTier } from "@/admin/tier";
+import { ProBadge } from "@/admin/components/TierGate";
 
 const ROLE_FILTERS = ["all", ...ROLES.map((r) => r.key)];
 const ACTION_FILTERS = ["all", ...Object.keys(AUDIT_ACTION_LABELS)];
@@ -16,11 +18,68 @@ const RANGE_FILTERS = [
 export default function Settings() {
   const [prop, setProp] = useState({ name: "Aura Hotels", tagline: "Timeless Heritage & Luxury", currency: "INR", timezone: "Asia/Kolkata", language: "English", taxRate: 18 });
   const [ints, setInts] = useState({ stripe: true, gmail: true, whatsapp: false, google_analytics: true, booking_com: true });
+  const [tier, setTier] = useState(getTier());
+
+  const switchTier = (t) => {
+    persistTier(t);
+    setTier(t);
+    toast.success(`Switched to Aura ${t === "pro" ? "Pro" : "Basic"}`, { description: t === "pro" ? "All premium modules unlocked." : "Premium modules locked with upsell walls." });
+    setTimeout(() => window.location.reload(), 800);
+  };
 
   return (
     <AdminLayout pageTitle="Settings">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {/* Subscription tier */}
+          <div className="p-6 bg-white rounded-[16px] border border-slate-200" data-testid="tier-settings">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-eyebrow text-[#C9A227]">Subscription</p>
+                <h3 className="mt-1 font-serif text-xl text-slate-900">Your Aura plan</h3>
+                <p className="mt-1 text-xs text-slate-500">Basic covers day-to-day operations. Pro unlocks OTA syncing, the master rate calendar, marketing automation and advanced reports.</p>
+              </div>
+              <span className={`text-[10px] tracking-[0.22em] uppercase px-3 py-1 rounded-full font-medium ${tier === "pro" ? "bg-gradient-to-r from-[#C9A227] to-[#E6C868] text-slate-900" : "bg-slate-200 text-slate-700"}`}>{tier === "pro" ? "Pro" : "Basic"}</span>
+            </div>
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {["BASIC", "PRO"].map((k) => {
+                const t = TIERS[k];
+                const isCurrent = tier === t.key;
+                return (
+                  <div
+                    key={k}
+                    className={`p-5 rounded-[16px] border transition-all ${isCurrent ? "border-[#4F46E5] bg-gradient-to-br from-white to-indigo-50/40" : "border-slate-200 bg-[#FAFAF8]"}`}
+                    data-testid={`tier-card-${t.key}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {t.key === "pro" && <i className="fa-solid fa-crown text-[#C9A227]"></i>}
+                        <p className="font-serif text-xl text-slate-900">{t.label}</p>
+                      </div>
+                      {isCurrent && <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-white">Current</span>}
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500 font-mono">{t.price}</p>
+                    <p className="mt-2 text-xs text-slate-600 leading-relaxed">{t.tagline}</p>
+                    <ul className="mt-3 space-y-1.5 text-xs text-slate-600">
+                      {t.features.map((f) => (
+                        <li key={f} className="flex items-start gap-1.5"><i className={`fa-solid fa-check ${t.key === "pro" ? "text-[#4F46E5]" : "text-emerald-500"} text-[9px] mt-0.5`}></i>{f}</li>
+                      ))}
+                    </ul>
+                    {!isCurrent && (
+                      <button
+                        onClick={() => switchTier(t.key)}
+                        className={`mt-4 w-full text-xs px-4 py-2 rounded-full ${t.key === "pro" ? "bg-[#4F46E5] hover:bg-[#4338CA] text-white" : "border border-slate-200 hover:bg-white text-slate-700"}`}
+                        data-testid={`tier-switch-${t.key}`}
+                      >
+                        {t.key === "pro" ? "Upgrade to Pro" : "Downgrade to Basic"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="p-6 bg-white rounded-[16px] border border-slate-200">
             <p className="text-eyebrow text-[#C9A227]">Property</p>
             <h3 className="mt-1 font-serif text-xl text-slate-900">Basic information</h3>

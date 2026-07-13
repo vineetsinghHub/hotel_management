@@ -1,19 +1,17 @@
 import AdminLayout from "@/admin/components/AdminLayout";
 import OccupancyHeatmap from "@/admin/components/OccupancyHeatmap";
 import AdminExtraAnalytics from "@/admin/components/AdminExtraAnalytics";
-import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
+import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { stats, revenueTrend, arrivals, activities, channels, statusColor, occupancyTrend } from "@/admin/adminMockData";
-
-const KPI = ({ label, value, delta, icon, color }) => (
-  <div className="p-5 bg-white rounded-[16px] border border-slate-200">
-    <div className="flex items-start justify-between">
-      <p className="text-[10px] tracking-[0.2em] uppercase text-slate-500">{label}</p>
-      <span className="w-8 h-8 rounded-full grid place-items-center" style={{ backgroundColor: `${color}15`, color }}><i className={`fa-solid fa-${icon} text-xs`}></i></span>
-    </div>
-    <p className="mt-3 font-mono text-3xl text-slate-900">{value}</p>
-    <p className="text-xs text-emerald-600 mt-1">{delta}</p>
-  </div>
-);
+import { getAdminUser } from "@/admin/adminAuth";
+import { ROLE_KEYS } from "@/admin/roles";
+import { isPro } from "@/admin/tier";
+import { ProBadge } from "@/admin/components/TierGate";
+import {
+  RoleGreeting, KPI,
+  FrontDeskDashboard, HousekeepingDashboard, FBDashboard,
+  SpaDashboard, MarketingDashboard, AccountingDashboard, ReadOnlyDashboard,
+} from "@/admin/components/RoleDashboards";
 
 const RevenueTooltip = ({ active, payload }) => {
   if (!active || !payload || !payload.length) return null;
@@ -44,13 +42,16 @@ const occupancyDonut = [
   { name: "OOO/Maint.", value: 2, color: "#F43F5E" },
 ];
 
-export default function AdminDashboard() {
+// ─────────────────────────────────────────────────────────────────────────────
+// GM / Super Admin — full executive dashboard (original view)
+// ─────────────────────────────────────────────────────────────────────────────
+const ExecutiveDashboard = () => {
   const totalRooms = occupancyDonut.reduce((s, x) => s + x.value, 0);
   const occPct = Math.round((occupancyDonut[0].value / totalRooms) * 100);
+  const pro = isPro();
 
   return (
-    <AdminLayout pageTitle="Dashboard">
-      {/* KPIs */}
+    <div data-testid="dashboard-executive">
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="kpi-row">
         <KPI label="Today's Arrivals" value={stats.arrivals} delta="+2 vs yesterday" icon="right-to-bracket" color="#4F46E5" />
         <KPI label="Today's Departures" value={stats.departures} delta="On track" icon="right-from-bracket" color="#F43F5E" />
@@ -58,7 +59,6 @@ export default function AdminDashboard() {
         <KPI label="Revenue Today" value={`₹${(stats.revenueToday/1000).toFixed(1)}K`} delta="+18% MoM" icon="indian-rupee-sign" color="#10B981" />
       </section>
 
-      {/* Revenue + Occupancy */}
       <section className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 bg-white rounded-[16px] border border-slate-200 p-6" data-testid="revenue-chart-card">
           <div className="flex items-center justify-between">
@@ -126,7 +126,6 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Arrivals + Activity */}
       <section className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 bg-white rounded-[16px] border border-slate-200">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -176,7 +175,6 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Channels + Occupancy trend */}
       <section className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-white rounded-[16px] border border-slate-200 p-6">
           <p className="text-eyebrow text-[#C9A227]">Booking Channels</p>
@@ -216,7 +214,6 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Occupancy heatmap */}
       <section className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <OccupancyHeatmap />
         <div className="p-5 rounded-[16px] bg-gradient-to-br from-[#4F46E5] to-slate-900 text-white" data-testid="quick-metrics">
@@ -240,10 +237,51 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Extra analytics */}
-      <section className="mt-6">
-        <AdminExtraAnalytics />
-      </section>
+      {pro && (
+        <section className="mt-6">
+          <AdminExtraAnalytics />
+        </section>
+      )}
+      {!pro && (
+        <section className="mt-6 p-6 rounded-[16px] border border-dashed border-slate-300 bg-white flex items-center justify-between gap-4" data-testid="pro-teaser-analytics">
+          <div>
+            <div className="flex items-center gap-2"><p className="text-eyebrow text-[#C9A227]">Advanced analytics</p><ProBadge /></div>
+            <h4 className="mt-1 font-serif text-lg text-slate-900">Segment ADR, funnel drop-offs, cohort LTV & more</h4>
+            <p className="mt-1 text-sm text-slate-500">Unlocked on the Pro plan — with 12 additional charts and CSV export.</p>
+          </div>
+          <a href="/admin/settings" className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm">Upgrade →</a>
+        </section>
+      )}
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Router — renders the right dashboard for the signed-in role
+// ─────────────────────────────────────────────────────────────────────────────
+export default function AdminDashboard() {
+  const user = getAdminUser();
+
+  const renderByRole = () => {
+    switch (user?.role) {
+      case ROLE_KEYS.FRONT_DESK: return <FrontDeskDashboard />;
+      case ROLE_KEYS.HOUSEKEEPING: return <HousekeepingDashboard />;
+      case ROLE_KEYS.FB_MANAGER: return <FBDashboard />;
+      case ROLE_KEYS.SPA_MANAGER: return <SpaDashboard />;
+      case ROLE_KEYS.MARKETING: return <MarketingDashboard />;
+      case ROLE_KEYS.ACCOUNTING: return <AccountingDashboard />;
+      case ROLE_KEYS.READ_ONLY: return <ReadOnlyDashboard />;
+      case ROLE_KEYS.SUPER_ADMIN:
+      case ROLE_KEYS.GM:
+      default:
+        return <ExecutiveDashboard />;
+    }
+  };
+
+  return (
+    <AdminLayout pageTitle="Dashboard">
+      <RoleGreeting user={user} />
+      {renderByRole()}
     </AdminLayout>
   );
 }

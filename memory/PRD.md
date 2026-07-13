@@ -95,5 +95,37 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
 - Print stylesheet for folio / invoice
 - PWA manifest (installable)
 
+### Sprint 7 — Roles, Tiers & Staff Chat (Feb 13, 2026)
+- **Role-specific Dashboards**: 7 tailored dashboard variants driven off `getAdminUser().role`
+  - Executive (GM / Super Admin) — full KPI matrix, revenue trend, occupancy donut, arrivals, channels, heatmap
+  - Front Desk — arriving/in-house/departing lists, walk-in estimate, quick-action tile
+  - Housekeeping — priority queue, room-status donut, cleaning KPIs
+  - F&B — covers-per-day bars, top items today, revenue
+  - Spa — appointment schedule, therapist utilisation
+  - Marketing — campaign performance table, audience KPIs
+  - Accounting — invoices, revenue trend, GST payable, refunds
+  - Read-only — compact viewer with KPIs + activity
+- **Strict role-based hiding across the console**:
+  - Sidebar filters by `hasAccess()` (existing) + Pro badges rendered next to premium modules
+  - Topbar "New" menu filters by role permission (hidden entirely if role has no perms)
+  - Command-palette (⌘K) page list filters by role
+  - FAB Quick actions and Jump-to links filter by role
+- **Basic vs Pro Subscription Tiers** (`/app/frontend/src/admin/tier.js`)
+  - Basic: `₹4,999/mo` — front desk, reservations, rooms, guest CRM, housekeeping, inventory, basic invoicing
+  - Pro: `₹14,999/mo` — everything + OTA sync, master rate calendar, report builder, marketing automation, broadcast messaging
+  - **Pro-gated modules**: `rate-channel`, `reports`, `marketing` (hard-locked) · `messages` (soft-locked broadcast + WhatsApp)
+  - Beautiful `TierGate` upgrade wall with gradient hero, dual plan cards, in-mock upgrade CTA
+  - Tier stored in `localStorage` (`aura_admin_tier`); toggle from **Settings → Subscription**
+  - `ProBadge` component rendered on Pro modules in sidebar
+- **FAB Staff Messaging** (`AdminFloatingActions.jsx`)
+  - New "Messages" tab in FAB drawer alongside Quick actions & Ask
+  - Red unread-count badge on the FAB button itself (like notifications)
+  - Horizontal thread strip of colleagues (Front Desk / Housekeeping / F&B / Spa / Marketing)
+  - Full conversation UI with online status, avatars, chat bubbles, input, "Open Message Center →"
+  - `messagesStore.js` provides shared unread state across the app
+- **Basic tier UX in shared modules**
+  - Message Center: WhatsApp channel hidden on Basic · Broadcast button shows Pro badge and opens a locked upgrade modal
+  - Executive dashboard: bottom "Advanced analytics" section becomes a Pro teaser card on Basic
+
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.

@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { getAdminUser, clearAdminUser, seedUsers } from "@/admin/adminAuth";
 import { hasAccess, roleLabel, roleColor } from "@/admin/roles";
 import { arrivals, roomsInventory, guests, notificationsAdmin } from "@/admin/adminMockData";
+import { isProModule, isPro } from "@/admin/tier";
+import { ProBadge } from "@/admin/components/TierGate";
 import AdminOnboardingTour from "@/admin/components/AdminOnboardingTour";
 import AdminQuickCreateModal from "@/admin/components/AdminQuickCreateModal";
 import AdminFloatingActions from "@/admin/components/AdminFloatingActions";
@@ -70,6 +72,7 @@ export const AdminLayout = ({ pageTitle, children }) => {
                 <p className="px-5 mb-1 text-[9px] tracking-[0.22em] uppercase text-slate-400 font-medium">{g.label}</p>
                 {visible.map((it) => {
                   const active = loc.pathname === it.to;
+                  const proBadge = isProModule(it.k);
                   return (
                     <Link key={it.k} to={it.to} onClick={() => setMobileOpen(false)}
                       className={`mx-3 px-3 py-2 rounded-[10px] text-sm flex items-center gap-3 transition-all ${active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
@@ -77,6 +80,7 @@ export const AdminLayout = ({ pageTitle, children }) => {
                     >
                       <i className={`fa-solid fa-${it.icon} text-[11px] w-4`}></i>
                       <span className="flex-1">{it.label}</span>
+                      {proBadge && <ProBadge />}
                       {it.badge != null && <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded-full ${active ? "bg-white/20 text-white" : "bg-[#C9A227]/15 text-[#C9A227]"}`}>{it.badge}</span>}
                     </Link>
                   );
@@ -98,7 +102,12 @@ export const AdminLayout = ({ pageTitle, children }) => {
               </span>
               <div className="text-left flex-1 min-w-0">
                 <p className="text-sm text-slate-900 font-medium truncate">{user.name}</p>
-                <p className="text-[10px] text-slate-500 truncate">{roleLabel(user.role)}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[10px] text-slate-500 truncate">{roleLabel(user.role)}</p>
+                  <span className={`text-[8px] tracking-[0.15em] uppercase font-medium px-1.5 py-0.5 rounded-[4px] ${isPro() ? "bg-gradient-to-r from-[#C9A227] to-[#E6C868] text-slate-900" : "bg-slate-200 text-slate-600"}`} data-testid="tier-pill">
+                    {isPro() ? "Pro" : "Basic"}
+                  </span>
+                </div>
               </div>
               <i className="fa-solid fa-chevron-up text-[9px] text-slate-400"></i>
             </button>
@@ -122,6 +131,7 @@ export const AdminLayout = ({ pageTitle, children }) => {
 
 const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
   const nav = useNavigate();
+  const user = getAdminUser();
   const [searchOpen, setSearchOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -129,6 +139,16 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
   const [quickEntity, setQuickEntity] = useState(null);
   const [notifs, setNotifs] = useState(notificationsAdmin);
   const unread = notifs.filter((n) => !n.read).length;
+
+  const newItems = [
+    { l: "New Reservation", i: "calendar-plus", entity: "reservation", perm: "reservations" },
+    { l: "New Guest", i: "user-plus", entity: "guest", perm: "guests" },
+    { l: "New Staff", i: "id-badge", entity: "staff", perm: "staff" },
+    { l: "New Invoice", i: "file-invoice-dollar", entity: "invoice", perm: "invoices" },
+    { l: "New Event", i: "calendar-heart", entity: "event", perm: "events" },
+    { l: "New Menu Item", i: "utensils", entity: "menu", perm: "restaurant" },
+    { l: "New Campaign", i: "bullhorn", entity: "campaign", perm: "marketing" },
+  ].filter((it) => !user || hasAccess(it.perm, user.role));
 
   useEffect(() => {
     const onKey = (e) => {
@@ -178,18 +198,15 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
             )}
           </div>
           <div className="relative">
-            <button onClick={() => setNewOpen((v) => !v)} className="inline-flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm px-4 py-2 rounded-full shadow-[0_6px_20px_rgba(79,70,229,0.28)]" data-testid="new-btn"><i className="fa-solid fa-plus text-[10px]"></i>New</button>
+            {newItems.length > 0 && (
+              <button onClick={() => setNewOpen((v) => !v)} className="inline-flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm px-4 py-2 rounded-full shadow-[0_6px_20px_rgba(79,70,229,0.28)]" data-testid="new-btn"><i className="fa-solid fa-plus text-[10px]"></i>New</button>
+            )}
             {newOpen && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200 rounded-[16px] shadow-[0_20px_50px_rgba(15,23,42,0.10)] py-2 z-40" data-testid="new-menu">
-                {[
-                  { l: "New Reservation", i: "calendar-plus", entity: "reservation" },
-                  { l: "New Guest", i: "user-plus", entity: "guest" },
-                  { l: "New Staff", i: "id-badge", entity: "staff" },
-                  { l: "New Invoice", i: "file-invoice-dollar", entity: "invoice" },
-                  { l: "New Event", i: "calendar-heart", entity: "event" },
-                  { l: "New Menu Item", i: "utensils", entity: "menu" },
-                  { l: "New Campaign", i: "bullhorn", entity: "campaign" },
-                ].map((it) => (
+                {newItems.length === 0 && (
+                  <p className="px-4 py-3 text-xs text-slate-400">No quick-create actions available for your role.</p>
+                )}
+                {newItems.map((it) => (
                   <button key={it.l} onClick={() => { setNewOpen(false); setQuickEntity(it.entity); }} className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-3" data-testid={`new-${it.entity}`}>
                     <span className="w-7 h-7 rounded-full bg-[#C9A227]/12 text-[#C9A227] grid place-items-center"><i className={`fa-solid fa-${it.i} text-[11px]`}></i></span>
                     {it.l}
@@ -202,7 +219,7 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
       </header>
       <main className="p-6 md:p-8">{children}</main>
 
-      {searchOpen && <SearchPalette onClose={() => setSearchOpen(false)} />}
+      {searchOpen && <SearchPalette onClose={() => setSearchOpen(false)} user={user} />}
       {helpOpen && <HelpDrawer onClose={() => setHelpOpen(false)} />}
       {quickEntity && <AdminQuickCreateModal entity={quickEntity} onClose={() => setQuickEntity(null)} />}
       <AdminFloatingActions />
@@ -210,21 +227,22 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
   );
 };
 
-const SearchPalette = ({ onClose }) => {
+const SearchPalette = ({ onClose, user }) => {
   const [q, setQ] = useState("");
   const nav = useNavigate();
-  const pages = [
-    { l: "Dashboard", to: "/admin/dashboard" }, { l: "Front Desk", to: "/admin/front-desk" },
-    { l: "Reservations", to: "/admin/reservations" }, { l: "Rooms", to: "/admin/rooms" },
-    { l: "Guests", to: "/admin/guests" }, { l: "Housekeeping", to: "/admin/housekeeping" },
-    { l: "Restaurant", to: "/admin/restaurant" }, { l: "Spa", to: "/admin/spa" },
-    { l: "Events", to: "/admin/events" }, { l: "Inventory", to: "/admin/inventory" },
-    { l: "Staff", to: "/admin/staff" }, { l: "Invoices", to: "/admin/invoices" },
-    { l: "Rate & Channel", to: "/admin/rate-channel" },
-    { l: "Marketing", to: "/admin/marketing" }, { l: "Reviews", to: "/admin/reviews" },
-    { l: "Reports", to: "/admin/reports" }, { l: "Notifications", to: "/admin/notifications" },
-    { l: "Settings", to: "/admin/settings" },
+  const allPages = [
+    { l: "Dashboard", to: "/admin/dashboard", k: "dashboard" }, { l: "Front Desk", to: "/admin/front-desk", k: "front-desk" },
+    { l: "Reservations", to: "/admin/reservations", k: "reservations" }, { l: "Rooms", to: "/admin/rooms", k: "rooms" },
+    { l: "Guests", to: "/admin/guests", k: "guests" }, { l: "Housekeeping", to: "/admin/housekeeping", k: "housekeeping" },
+    { l: "Restaurant", to: "/admin/restaurant", k: "restaurant" }, { l: "Spa", to: "/admin/spa", k: "spa" },
+    { l: "Events", to: "/admin/events", k: "events" }, { l: "Inventory", to: "/admin/inventory", k: "inventory" },
+    { l: "Staff", to: "/admin/staff", k: "staff" }, { l: "Invoices", to: "/admin/invoices", k: "invoices" },
+    { l: "Rate & Channel", to: "/admin/rate-channel", k: "rate-channel" },
+    { l: "Marketing", to: "/admin/marketing", k: "marketing" }, { l: "Reviews", to: "/admin/reviews", k: "reviews" },
+    { l: "Reports", to: "/admin/reports", k: "reports" }, { l: "Notifications", to: "/admin/notifications", k: "notifications" },
+    { l: "Settings", to: "/admin/settings", k: "settings" },
   ];
+  const pages = user ? allPages.filter((p) => hasAccess(p.k, user.role)) : allPages;
   const results = useMemo(() => {
     if (!q.trim()) return [];
     const s = q.toLowerCase(); const out = [];

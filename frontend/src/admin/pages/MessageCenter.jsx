@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import AdminLayout from "@/admin/components/AdminLayout";
 import { guests as adminGuests } from "@/admin/adminMockData";
 import { toast } from "sonner";
+import { isPro } from "@/admin/tier";
+import TierGate, { ProBadge } from "@/admin/components/TierGate";
 
 const templates = [
   { id: "tpl-arrival", name: "Pre-arrival welcome", body: "Dear {{name}},\n\nWe look forward to welcoming you to Aura on {{arrival}}. Anything special we can prepare?", tag: "Arrival" },
@@ -9,14 +11,14 @@ const templates = [
   { id: "tpl-upgrade", name: "Suite upgrade offer", body: "Dear {{name}},\n\nOn your next stay, enjoy a complimentary upgrade to a signature suite.", tag: "Marketing" },
 ];
 
-const channels = [
-  { k: "email", i: "envelope" },
-  { k: "sms", i: "mobile-screen" },
-  { k: "whatsapp", i: "whatsapp", brand: true },
+const allChannels = [
+  { k: "email", i: "envelope", pro: false },
+  { k: "sms", i: "mobile-screen", pro: false },
+  { k: "whatsapp", i: "whatsapp", brand: true, pro: true },
 ];
 
 const seedThreads = (list) => list.slice(0, 12).map((g, i) => ({
-  id: `th-${g.id}`, guest: g, unread: (i % 3 === 0) ? 1 : 0, updated: `${(i % 8) + 1}m ago`, channel: channels[i % 3].k,
+  id: `th-${g.id}`, guest: g, unread: (i % 3 === 0) ? 1 : 0, updated: `${(i % 8) + 1}m ago`, channel: allChannels[i % 3].k,
   messages: [
     { id: 1, from: "guest", text: i % 2 === 0 ? "Hi — could we get a late checkout?" : "Thank you for the wonderful stay!", when: "Today, 09:24" },
     { id: 2, from: "staff", text: i % 2 === 0 ? "Absolutely. We've extended to 2pm complimentary." : "You're most welcome. Do come back soon.", when: "Today, 09:32" },
@@ -30,6 +32,8 @@ export default function MessageCenter() {
   const [draft, setDraft] = useState("");
   const [channel, setChannel] = useState("email");
   const [broadcastOpen, setBroadcastOpen] = useState(false);
+  const pro = isPro();
+  const channels = allChannels.filter((c) => pro || !c.pro);
 
   const filtered = useMemo(() => threads.filter((t) => t.guest.name.toLowerCase().includes(q.toLowerCase())), [threads, q]);
   const active = threads.find((t) => t.id === activeId);
@@ -53,8 +57,9 @@ export default function MessageCenter() {
           <p className="text-eyebrow text-[#C9A227]">Guest communications</p>
           <h2 className="mt-1 font-serif text-2xl text-slate-900">Message Center</h2>
         </div>
-        <button onClick={() => setBroadcastOpen(true)} className="px-4 py-2 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]" data-testid="broadcast-open">
-          <i className="fa-solid fa-bullhorn mr-1.5 text-[11px]"></i>Broadcast
+        <button onClick={() => setBroadcastOpen(true)} className="px-4 py-2 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)] flex items-center gap-1.5" data-testid="broadcast-open">
+          <i className="fa-solid fa-bullhorn text-[11px]"></i>Broadcast
+          {!isPro() && <ProBadge className="ml-1" />}
         </button>
       </div>
 
@@ -140,7 +145,15 @@ export default function MessageCenter() {
         </aside>
       </div>
 
-      {broadcastOpen && (
+      {broadcastOpen && !isPro() && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={() => setBroadcastOpen(false)} data-testid="broadcast-locked">
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-2xl">
+            <TierGate routeKey="messages" inline onUpgrade={() => setBroadcastOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      {broadcastOpen && isPro() && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={() => setBroadcastOpen(false)} data-testid="broadcast-modal">
           <div onClick={(e) => e.stopPropagation()} className="bg-white w-full max-w-md rounded-[20px] p-8 shadow-[0_40px_100px_rgba(15,23,42,0.35)]">
             <p className="text-eyebrow text-[#C9A227]">Broadcast</p>
