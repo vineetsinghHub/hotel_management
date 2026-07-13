@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useTenantStore } from "@/tenants/tenantStore";
 import { applyTenantTheme } from "@/tenants/applyTheme";
 import { DEFAULT_TENANT, getTenant } from "@/tenants/tenantRegistry";
@@ -35,7 +35,7 @@ export const TenantProvider = ({ children }) => {
           <p className="text-eyebrow text-brand-accent">404</p>
           <h2 className="mt-1 font-serif text-3xl text-brand-ink">Property not found</h2>
           <p className="mt-2 text-sm text-brand-ink-soft">We couldn't find a hotel with slug "{slug}". Try one of our sample properties instead.</p>
-          <a href={`/t/${target.slug}`} className="mt-6 inline-block px-6 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-brand-primary-fg text-sm">Visit {target.brandName}</a>
+          <Link to={`/t/${target.slug}`} className="mt-6 inline-block px-6 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-brand-primary-fg text-sm">Visit {target.brandName}</Link>
         </div>
       </div>
     );

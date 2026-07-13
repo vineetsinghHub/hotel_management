@@ -12,6 +12,8 @@ export const TenantSwitcher = () => {
   const [open, setOpen] = useState(false);
   const tenants = listTenants();
 
+  // Preview-only surface: hide in production builds and on admin/super-admin.
+  if (process.env.NODE_ENV === "production" && process.env.REACT_APP_SHOW_TENANT_SWITCHER !== "true") return null;
   if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) return null;
 
   const activeSlug = slug || "aura";
