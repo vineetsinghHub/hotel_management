@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import AdminLayout from "@/admin/components/AdminLayout";
+import ReadOnlyBanner, { useReadOnly } from "@/admin/components/ReadOnlyBanner";
 import { inventory as seed } from "@/admin/adminMockData";
 import { toast } from "sonner";
 import { undoToast } from "@/lib/undo";
@@ -14,6 +15,7 @@ export default function Inventory() {
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ item: "", category: "F&B", stock: 0, par: 10, unit: "units", cost: 0 });
   const [q, setQ] = useState("");
+  const readOnly = useReadOnly();
 
   const filtered = useMemo(() => items.filter((i) => (i.item || "").toLowerCase().includes(q.toLowerCase())), [items, q]);
 
@@ -42,6 +44,7 @@ export default function Inventory() {
 
   return (
     <AdminLayout pageTitle="Inventory">
+      <ReadOnlyBanner />
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div>
           <p className="text-eyebrow text-[#C9A227]">Stock ({items.length})</p>
@@ -49,7 +52,7 @@ export default function Inventory() {
         </div>
         <div className="flex items-center gap-2">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search items…" className="bg-[#FAFAF8] border border-slate-200 rounded-full px-4 py-2 text-sm outline-none focus:border-[#4F46E5] w-48" data-testid="inv-search" />
-          <button onClick={() => setAddOpen(true)} className="inline-flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm px-4 py-2 rounded-full shadow-[0_6px_20px_rgba(79,70,229,0.28)]" data-testid="inv-add"><i className="fa-solid fa-plus text-[10px]"></i>Add item</button>
+          {!readOnly && <button onClick={() => setAddOpen(true)} className="inline-flex items-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm px-4 py-2 rounded-full shadow-[0_6px_20px_rgba(79,70,229,0.28)]" data-testid="inv-add"><i className="fa-solid fa-plus text-[10px]"></i>Add item</button>}
         </div>
       </div>
 
@@ -115,9 +118,10 @@ export default function Inventory() {
                       <button onClick={() => { setEditing(null); toast.success("Saved"); }} className="text-xs text-emerald-600 hover:underline" data-testid={`inv-save-${i.id}`}>Save</button>
                     ) : (
                       <div className="inline-flex items-center gap-2">
-                        {low && <button onClick={() => reorder(i)} className="text-xs text-[#C9A227] hover:underline" data-testid={`inv-reorder-${i.id}`}>Reorder</button>}
-                        <button onClick={() => setEditing(i.id)} className="text-xs text-[#4F46E5] hover:underline" data-testid={`inv-edit-${i.id}`}>Edit</button>
-                        <button onClick={() => removeItem(i.id)} className="text-xs text-rose-500 hover:underline" data-testid={`inv-remove-${i.id}`}>Remove</button>
+                        {low && !readOnly && <button onClick={() => reorder(i)} className="text-xs text-[#C9A227] hover:underline" data-testid={`inv-reorder-${i.id}`}>Reorder</button>}
+                        {!readOnly && <button onClick={() => setEditing(i.id)} className="text-xs text-[#4F46E5] hover:underline" data-testid={`inv-edit-${i.id}`}>Edit</button>}
+                        {!readOnly && <button onClick={() => removeItem(i.id)} className="text-xs text-rose-500 hover:underline" data-testid={`inv-remove-${i.id}`}>Remove</button>}
+                        {readOnly && <span className="text-[10px] text-slate-400">Read only</span>}
                       </div>
                     )}
                   </td>

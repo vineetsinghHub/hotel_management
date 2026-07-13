@@ -1,0 +1,51 @@
+{
+  "summary": "Sprint 8 frontend E2E testing complete. Guest auth wall + modal + navbar, Message Center Guests/Team segments + thread removal (with Undo + localStorage persistence), FAB Ops-assistant thread removal + persistence, Read-only enforcement on 6 admin pages, per-role landing pages (8 roles), and tier reactivity all tested. 1 real bug found: Sidebar Pro badges DO NOT disappear reactively when tier is upgraded — they always render for pro modules regardless of current tier.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "AdminLayout.jsx (sidebar nav)",
+        "issue": "Sidebar Pro badges next to Rate & Channel / Marketing / Messages / Reports do not disappear when tier is upgraded to Pro. `proBadge = isProModule(it.k)` is computed without checking current tier. Sidebar count remained 4 on both Basic and Pro (should be 0 on Pro). Downgrade path back to Basic is fine because badges never went away.",
+        "selector": "nav a[data-testid^='nav-'] > span (ProBadge)",
+        "priority": "MEDIUM",
+        "fix_hint": "In /app/frontend/src/admin/components/AdminLayout.jsx line 76: change `const proBadge = isProModule(it.k);` to `const proBadge = isProModule(it.k) && !isPro;`"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "observations": [
+    "Read-only + Marketing: Auditor (Basic tier) visiting /admin/marketing sees the TierGate wall instead of the ReadOnlyBanner because Marketing is Pro-only and Basic tier gating takes precedence. Not necessarily wrong, but the Sprint 8 spec explicitly listed /admin/marketing as a route that should show ReadOnlyBanner for the auditor. Consider allowing Read-only auditors to view Pro modules (banner instead of gate) OR update the spec.",
+    "The Sprint 8 spec mentions a demo tile `demo-general_manager`, but gm@aurahotels.com is assigned role SUPER_ADMIN in adminAuth.js, so the tile rendered is `demo-super_admin`. This is a naming mismatch between the spec and the seed data — either the seed should carry a distinct GM user or the spec should be adjusted. All 8 actually-rendered demo tiles land on the correct per-role page.",
+    "'+ Reservation' button uses Tailwind `hidden` class when readOnly; button exists in DOM but is not visible. Passes the intent of hiding write CTAs."
+  ],
+  "features_verified": [
+    "Guest auth wall on /dashboard, /booking, /payment, /confirmation when unauthed (data-testid='guest-auth-wall' + modal open).",
+    "Guest sign-in via modal (any email + non-empty password) dismisses wall; signed-in state persists across those routes.",
+    "Navbar: nav-account opens guest-auth-modal when unauthed; opens nav-account-menu with Sign out when authed; Sign out clears aura_guest_user.",
+    "MessageCenter: msg-segment-switcher with guests/team tabs; Team shows Ravi Menon, Meera Kaur, Chef Vikram, Priya Nair, Karan Malhotra + Team templates (Shift handover, VIP arrival brief). Guest tab hides team templates.",
+    "MessageCenter thread removal: thread-remove-{id} on guests, team-thread-remove-{id} on team; removal persists in aura_msg_removed_threads localStorage; Undo toast restores.",
+    "FAB (admin-fab): Messages tab shows staff thread pills; fab-thread-remove-{id} removes and persists in aura_fab_removed_threads; unread badge updates.",
+    "Read-only (audit@aurahotels.com): readonly-banner visible on /admin/events, /admin/reservations, /admin/restaurant, /admin/inventory, /admin/guests; write CTAs (new-btn, +Reservation, +New dish, +New campaign, inv-add, import-open) hidden.",
+    "Tier reactivity: /admin/rate-channel tier-gate-upgrade-rate-channel dismisses page-level gate without URL change or reload; localStorage aura_admin_tier flips to 'pro'. /admin/settings tier-switch-basic flips back; tier-pill updates instantly.",
+    "Per-role landing: super_admin→/admin/dashboard, front_desk→/admin/front-desk, housekeeping→/admin/housekeeping, fb_manager→/admin/restaurant, spa_manager→/admin/spa, marketing→/admin/marketing, accounting→/admin/invoices, read_only→/admin/dashboard."
+  ],
+  "test_report_links": [],
+  "action_items": [
+    "Fix sidebar Pro badge reactivity in /app/frontend/src/admin/components/AdminLayout.jsx (one-line change on line 76).",
+    "Decide policy for Read-only auditor on Pro modules (Marketing/Reports/Rate & Channel/Messages): show ReadOnlyBanner or keep TierGate?",
+    "Optional: rename spec reference from `demo-general_manager` to `demo-super_admin` OR seed a separate GM demo user."
+  ],
+  "critical_code_review_comments": [
+    "AdminLayout.jsx L76: proBadge should depend on both isProModule AND !isPro so the badge disappears reactively when tier changes.",
+    "Reservations.jsx uses `className={readOnly ? 'hidden' : ''}` on write buttons — this leaves buttons in DOM. Prefer conditional render (`{!readOnly && <button …/>}`) for consistency with the rest of the read-only-aware pages."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (backend testing skipped per request)", "frontend": "97%"},
+  "test_credentials": "See /app/memory/test_credentials.md — all admin demo tiles work with any password; guest side accepts any email + non-empty password.",
+  "seed_data_creation": "None — all data mocked in frontend.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Reset localStorage keys aura_admin_user, aura_admin_tier, aura_guest_user, aura_fab_removed_threads, aura_msg_removed_threads between scenarios. FAB toggle testid is `admin-fab` (not `fab-toggle`). GM email (gm@aurahotels.com) is bound to SUPER_ADMIN role so demo tile is `demo-super_admin`. Auditor tier is Basic by default, which triggers TierGate on Pro modules before the ReadOnlyBanner can render.",
+  "rca of the issue": "AdminLayout.jsx computes `const proBadge = isProModule(it.k)` which is a static route-key check independent of tier. The `useTier()` hook is already imported and destructured (`const { isPro } = useTier();` on line 51), so gating the badge with `&& !isPro` is sufficient and will make the sidebar reactive via the existing subscribeTier notification path."
+}

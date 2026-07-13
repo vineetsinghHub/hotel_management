@@ -40,6 +40,7 @@ import Reports from "@/admin/pages/Reports";
 import Notifications from "@/admin/pages/Notifications";
 import AdminSettings from "@/admin/pages/Settings";
 import ProtectedAdmin from "@/admin/ProtectedAdmin";
+import RequireGuestAuth from "@/components/RequireGuestAuth";
 
 function App() {
   useEffect(() => { document.title = "Aura Hotels | Timeless Heritage & Luxury"; }, []);
@@ -58,10 +59,10 @@ function App() {
                 {/* Guest site */}
                 <Route path="/" element={<Home />} />
                 <Route path="/rooms" element={<RoomsPage />} />
-                <Route path="/booking" element={<Booking />} />
-                <Route path="/payment" element={<Payment />} />
-                <Route path="/confirmation" element={<Confirmation />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/booking" element={<RequireGuestAuth reason="Sign in to complete your reservation."><Booking /></RequireGuestAuth>} />
+                <Route path="/payment" element={<RequireGuestAuth reason="Sign in to review your invoice and pay securely."><Payment /></RequireGuestAuth>} />
+                <Route path="/confirmation" element={<RequireGuestAuth reason="Sign in to see your reservation confirmation."><Confirmation /></RequireGuestAuth>} />
+                <Route path="/dashboard" element={<RequireGuestAuth reason="Sign in to view your reservations, itinerary and stay preferences."><Dashboard /></RequireGuestAuth>} />
                 <Route path="/experiences" element={<Experiences />} />
                 <Route path="/dining" element={<Dining />} />
                 <Route path="/spa" element={<Spa />} />

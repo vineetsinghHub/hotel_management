@@ -22,7 +22,6 @@ export const TierGate = ({ routeKey, inline = false, onUpgrade }) => {
       toast.success("Welcome to Aura Pro", { description: "All premium modules unlocked." });
       setBusy(false);
       if (onUpgrade) onUpgrade();
-      else window.location.reload();
     }, 900);
   };
 

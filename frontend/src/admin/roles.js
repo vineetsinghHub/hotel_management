@@ -55,5 +55,24 @@ export const hasAccess = (routeKey, roleKey) => {
   return perm.includes(roleKey);
 };
 
+// Write / mutation guard — read-only auditors can navigate to modules but can
+// never create, edit, delete, or run destructive actions.
+export const isReadOnly = (roleKey) => roleKey === ROLE_KEYS.READ_ONLY;
+export const canWrite = (roleKey) => !!roleKey && !isReadOnly(roleKey);
+
 export const roleLabel = (k) => ROLES.find((r) => r.key === k)?.label || k;
 export const roleColor = (k) => ROLES.find((r) => r.key === k)?.color || "#64748B";
+
+// Landing route each role should be taken to right after signing in.
+export const ROLE_LANDING = {
+  [ROLE_KEYS.SUPER_ADMIN]: "/admin/dashboard",
+  [ROLE_KEYS.GM]: "/admin/dashboard",
+  [ROLE_KEYS.FRONT_DESK]: "/admin/front-desk",
+  [ROLE_KEYS.HOUSEKEEPING]: "/admin/housekeeping",
+  [ROLE_KEYS.FB_MANAGER]: "/admin/restaurant",
+  [ROLE_KEYS.SPA_MANAGER]: "/admin/spa",
+  [ROLE_KEYS.MARKETING]: "/admin/marketing",
+  [ROLE_KEYS.ACCOUNTING]: "/admin/invoices",
+  [ROLE_KEYS.READ_ONLY]: "/admin/dashboard",
+};
+export const landingFor = (roleKey) => ROLE_LANDING[roleKey] || "/admin/dashboard";

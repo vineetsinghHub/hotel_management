@@ -11,6 +11,10 @@ import {
   subscribeUnreadMessages,
 } from "@/admin/messagesStore";
 
+const REMOVED_KEY = "aura_fab_removed_threads";
+const readRemoved = () => { try { return JSON.parse(localStorage.getItem(REMOVED_KEY) || "[]"); } catch (e) { return []; } };
+const writeRemoved = (arr) => { try { localStorage.setItem(REMOVED_KEY, JSON.stringify(arr)); } catch (e) {} };
+
 // Admin help / action bubble — floating in the bottom-right on admin pages.
 // Tabs: Quick actions · Messages (staff chat) · Ask (AI-lite bot).
 const suggestions = [
@@ -59,8 +63,15 @@ export const AdminFloatingActions = () => {
   const [chat, setChat] = useState([{ id: "h1", from: "bot", text: "Hi — I'm your ops assistant. Ask me anything about the console." }]);
   const [text, setText] = useState("");
   const [quick, setQuick] = useState(null);
-  const [threads, setThreads] = useState(seedStaffThreads);
-  const [activeThreadId, setActiveThreadId] = useState(seedStaffThreads[0]?.id || null);
+  const [threads, setThreads] = useState(() => {
+    const removed = readRemoved();
+    return seedStaffThreads.filter((t) => !removed.includes(t.id));
+  });
+  const [activeThreadId, setActiveThreadId] = useState(() => {
+    const removed = readRemoved();
+    const first = seedStaffThreads.find((t) => !removed.includes(t.id));
+    return first?.id || null;
+  });
   const [threadDraft, setThreadDraft] = useState("");
   const [unread, setUnreadState] = useState(getUnreadMessages());
   const nav = useNavigate();
@@ -100,6 +111,31 @@ export const AdminFloatingActions = () => {
     } : th));
     setThreadDraft("");
     toast.success("Sent");
+  };
+
+  const removeThread = (id, e) => {
+    if (e) e.stopPropagation();
+    const removed = readRemoved();
+    const next = Array.from(new Set([...removed, id]));
+    writeRemoved(next);
+    const target = threads.find((t) => t.id === id);
+    // Deduct unread from the global counter if removed thread had unread items.
+    if (target && target.unread > 0) setUnreadMessages(Math.max(0, unread - target.unread));
+    const remaining = threads.filter((t) => t.id !== id);
+    setThreads(remaining);
+    if (activeThreadId === id) setActiveThreadId(remaining[0]?.id || null);
+    toast.success(`${target?.name || "Thread"} removed`, {
+      description: "You won't see this conversation in Quick messages.",
+      action: {
+        label: "Undo",
+        onClick: () => {
+          const rolledBack = readRemoved().filter((x) => x !== id);
+          writeRemoved(rolledBack);
+          setThreads((s) => [target, ...s]);
+          if (target?.unread) setUnreadMessages(unread + target.unread);
+        },
+      },
+    });
   };
 
   const activeThread = threads.find((t) => t.id === activeThreadId);
@@ -178,10 +214,10 @@ export const AdminFloatingActions = () => {
                 {/* Threads strip */}
                 <div className="px-3 py-2 border-b border-slate-100 overflow-x-auto flex gap-2 flex-shrink-0" data-testid="fab-thread-strip">
                   {threads.map((th) => (
-                    <button
+                    <div
                       key={th.id}
                       onClick={() => setActiveThreadId(th.id)}
-                      className={`flex-shrink-0 flex items-center gap-2 px-2.5 py-1.5 rounded-full transition-all border ${activeThreadId === th.id ? "bg-slate-900 text-white border-slate-900" : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700"}`}
+                      className={`group flex-shrink-0 flex items-center gap-2 pl-2.5 pr-1.5 py-1.5 rounded-full transition-all border cursor-pointer ${activeThreadId === th.id ? "bg-slate-900 text-white border-slate-900" : "bg-slate-50 hover:bg-white border-slate-200 text-slate-700"}`}
                       data-testid={`fab-thread-${th.id}`}
                     >
                       <span className="relative">
@@ -190,8 +226,22 @@ export const AdminFloatingActions = () => {
                       </span>
                       <span className="text-[11px] max-w-[70px] truncate">{th.name.split(" ")[0]}</span>
                       {th.unread > 0 && <span className="min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-mono grid place-items-center">{th.unread}</span>}
-                    </button>
+                      <button
+                        onClick={(e) => removeThread(th.id, e)}
+                        className={`w-5 h-5 rounded-full ${activeThreadId === th.id ? "bg-white/15 hover:bg-white/25" : "opacity-0 group-hover:opacity-100 bg-slate-200 hover:bg-slate-300"} grid place-items-center transition-opacity`}
+                        aria-label={`Remove ${th.name} from list`}
+                        data-testid={`fab-thread-remove-${th.id}`}
+                        title="Remove from list"
+                      >
+                        <i className="fa-solid fa-xmark text-[9px]"></i>
+                      </button>
+                    </div>
                   ))}
+                  {threads.length === 0 && (
+                    <div className="px-3 py-3 text-[11px] text-slate-400 whitespace-nowrap" data-testid="fab-threads-empty">
+                      No active threads. Removed threads still live in Message Center → Team.
+                    </div>
+                  )}
                 </div>
 
                 {/* Conversation */}

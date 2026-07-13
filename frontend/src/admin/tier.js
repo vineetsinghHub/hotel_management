@@ -1,6 +1,6 @@
 // Subscription tier gating — Basic vs Pro.
-// Small hoteliers land on Basic; when they hit a premium module we display an
-// upsell-locked screen instead of the feature. Toggle-able from Settings.
+// Reactive: components subscribe via `subscribe()` (or the `useTier()` hook)
+// and see tier changes instantly, no page reload.
 
 const TIER_KEY = "aura_admin_tier";
 
@@ -62,19 +62,36 @@ export const PRO_MODULES = {
     hook: "Reach every in-house guest across email, SMS and WhatsApp.",
     reason: "Templated broadcasts and WhatsApp channel are Pro-only. You can still reply 1:1 on Basic.",
     icon: "comments",
-    softLock: true, // still accessible, just limits inside
+    softLock: true,
   },
 };
 
-export const getTier = () => {
-  try { return localStorage.getItem(TIER_KEY) || "basic"; } catch (e) { return "basic"; }
+// ── Reactive tier store ────────────────────────────────────────────────────
+let _tier = "basic";
+try { _tier = localStorage.getItem(TIER_KEY) || "basic"; } catch (e) {}
+const listeners = new Set();
+
+export const getTier = () => _tier;
+export const setTier = (t) => {
+  _tier = t;
+  try { localStorage.setItem(TIER_KEY, t); } catch (e) {}
+  listeners.forEach((cb) => cb(_tier));
 };
-export const setTier = (t) => localStorage.setItem(TIER_KEY, t);
-export const isPro = () => getTier() === "pro";
+export const subscribeTier = (cb) => { listeners.add(cb); return () => listeners.delete(cb); };
+
+export const isPro = (t = _tier) => t === "pro";
 export const isProModule = (routeKey) => Boolean(PRO_MODULES[routeKey]);
-export const canAccessModule = (routeKey) => {
+export const canAccessModule = (routeKey, t = _tier) => {
   const info = PRO_MODULES[routeKey];
-  if (!info) return true; // free module
-  if (info.softLock) return true; // page opens but shows partial content
-  return isPro();
+  if (!info) return true;
+  if (info.softLock) return true;
+  return isPro(t);
+};
+
+// React hook for components that need to react to tier changes.
+import { useEffect, useState } from "react";
+export const useTier = () => {
+  const [tier, setTierState] = useState(_tier);
+  useEffect(() => subscribeTier(setTierState), []);
+  return { tier, isPro: tier === "pro", setTier };
 };

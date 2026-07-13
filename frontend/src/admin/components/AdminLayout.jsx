@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getAdminUser, clearAdminUser, seedUsers } from "@/admin/adminAuth";
-import { hasAccess, roleLabel, roleColor } from "@/admin/roles";
+import { hasAccess, roleLabel, roleColor, isReadOnly } from "@/admin/roles";
 import { arrivals, roomsInventory, guests, notificationsAdmin } from "@/admin/adminMockData";
-import { isProModule, isPro } from "@/admin/tier";
+import { isProModule, useTier } from "@/admin/tier";
 import { ProBadge } from "@/admin/components/TierGate";
 import AdminOnboardingTour from "@/admin/components/AdminOnboardingTour";
 import AdminQuickCreateModal from "@/admin/components/AdminQuickCreateModal";
@@ -48,6 +48,7 @@ export const AdminLayout = ({ pageTitle, children }) => {
   const loc = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const { isPro } = useTier();
 
   const doLogout = () => { clearAdminUser(); toast.success("Signed out"); nav("/admin/login"); };
 
@@ -104,8 +105,8 @@ export const AdminLayout = ({ pageTitle, children }) => {
                 <p className="text-sm text-slate-900 font-medium truncate">{user.name}</p>
                 <div className="flex items-center gap-1.5">
                   <p className="text-[10px] text-slate-500 truncate">{roleLabel(user.role)}</p>
-                  <span className={`text-[8px] tracking-[0.15em] uppercase font-medium px-1.5 py-0.5 rounded-[4px] ${isPro() ? "bg-gradient-to-r from-[#C9A227] to-[#E6C868] text-slate-900" : "bg-slate-200 text-slate-600"}`} data-testid="tier-pill">
-                    {isPro() ? "Pro" : "Basic"}
+                  <span className={`text-[8px] tracking-[0.15em] uppercase font-medium px-1.5 py-0.5 rounded-[4px] ${isPro ? "bg-gradient-to-r from-[#C9A227] to-[#E6C868] text-slate-900" : "bg-slate-200 text-slate-600"}`} data-testid="tier-pill">
+                    {isPro ? "Pro" : "Basic"}
                   </span>
                 </div>
               </div>
@@ -148,7 +149,7 @@ const TopbarAndMain = ({ pageTitle, onOpenMobile, children }) => {
     { l: "New Event", i: "calendar-heart", entity: "event", perm: "events" },
     { l: "New Menu Item", i: "utensils", entity: "menu", perm: "restaurant" },
     { l: "New Campaign", i: "bullhorn", entity: "campaign", perm: "marketing" },
-  ].filter((it) => !user || hasAccess(it.perm, user.role));
+  ].filter((it) => !user || (hasAccess(it.perm, user.role) && !isReadOnly(user.role)));
 
   useEffect(() => {
     const onKey = (e) => {

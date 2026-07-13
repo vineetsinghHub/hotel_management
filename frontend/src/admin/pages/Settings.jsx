@@ -24,7 +24,6 @@ export default function Settings() {
     persistTier(t);
     setTier(t);
     toast.success(`Switched to Aura ${t === "pro" ? "Pro" : "Basic"}`, { description: t === "pro" ? "All premium modules unlocked." : "Premium modules locked with upsell walls." });
-    setTimeout(() => window.location.reload(), 800);
   };
 
   return (

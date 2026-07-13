@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import AdminLayout from "@/admin/components/AdminLayout";
+import ReadOnlyBanner, { useReadOnly } from "@/admin/components/ReadOnlyBanner";
 import KanbanReservations from "@/admin/components/KanbanReservations";
 import { arrivals, roomsInventory, statusColor } from "@/admin/adminMockData";
 
@@ -16,6 +17,7 @@ export default function Reservations() {
   const [f, setF] = useState("all");
   const [q, setQ] = useState("");
   const [view, setView] = useState("table"); // "table" | "calendar" | "kanban"
+  const readOnly = useReadOnly();
   // Anchor date for the calendar
   const [anchor, setAnchor] = useState(new Date(2026, 2, 12)); // Mar 12, 2026
 
@@ -23,6 +25,7 @@ export default function Reservations() {
 
   return (
     <AdminLayout pageTitle="Reservations">
+      <ReadOnlyBanner />
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 flex-1 min-w-64">
           <i className="fa-solid fa-magnifying-glass text-xs text-slate-400"></i>
@@ -37,7 +40,7 @@ export default function Reservations() {
             <button onClick={() => setView("calendar")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "calendar" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="view-calendar"><i className="fa-solid fa-calendar-days text-[10px]"></i>Calendar</button>
             <button onClick={() => setView("kanban")} className={`px-3 py-1.5 text-xs rounded-full flex items-center gap-1.5 ${view === "kanban" ? "bg-white shadow-sm text-slate-900" : "text-slate-500"}`} data-testid="view-kanban"><i className="fa-solid fa-columns text-[10px]"></i>Kanban</button>
           </div>
-          <button onClick={() => toast.success("New reservation form opened")} className="bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs px-4 py-2 rounded-full" data-testid="new-reservation-btn">+ Reservation</button>
+          <button onClick={() => toast.success("New reservation form opened")} className={`bg-[#4F46E5] hover:bg-[#4338CA] text-white text-xs px-4 py-2 rounded-full ${readOnly ? "hidden" : ""}`} data-testid="new-reservation-btn">+ Reservation</button>
         </div>
       </div>
 

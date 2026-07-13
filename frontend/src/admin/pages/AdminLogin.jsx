@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { mockLogin, seedUsers } from "@/admin/adminAuth";
-import { roleLabel, roleColor } from "@/admin/roles";
+import { roleLabel, roleColor, landingFor } from "@/admin/roles";
 
 export default function AdminLogin() {
   const nav = useNavigate();
@@ -15,10 +15,10 @@ export default function AdminLogin() {
     const u = mockLogin(email);
     if (!u) { setError("No user with that email. Try one of the demo accounts below."); return; }
     toast.success(`Welcome, ${u.name}`, { description: roleLabel(u.role) });
-    nav("/admin/dashboard");
+    nav(landingFor(u.role));
   };
 
-  const quickLogin = (u) => { setEmail(u.email); setTimeout(() => { mockLogin(u.email); toast.success(`Signed in as ${u.name}`); nav("/admin/dashboard"); }, 100); };
+  const quickLogin = (u) => { setEmail(u.email); setTimeout(() => { mockLogin(u.email); toast.success(`Signed in as ${u.name}`); nav(landingFor(u.role)); }, 100); };
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] grid lg:grid-cols-2" data-testid="admin-login">
