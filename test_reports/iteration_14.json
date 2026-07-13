@@ -1,0 +1,28 @@
+{
+  "summary": "Sprint 10 Super Admin Hub E2E frontend testing complete. All critical flows PASS: auth (demo tile + email/password + persistent Zustand + signout + unknown-email error), Overview (4 KPIs, MRR area chart, signups bar chart, top tenants sorted by MRR, 6 audit items, at-risk pills for himalaya-camps + the-mint-house), Tenants grid (10 rows page 1 of 12 with 'Page 1 of 2 · 12 tenants', search filters to 1 row for 'bhairav', empty state, all filter pills, row actions preview/impersonate/details), Tenant Detail (buttons + 404 slug), 4-step Provision wizard (profile→domain→brand→seed→launch → redirect to /tenants), Feature Flags (7 toggles + 7 expanders + 8 tenant override chips), Billing (paid/overdue + suspended the-mint-house shows overdue), Audit (6 entries), PMS + guest storefront isolation intact. No regressions detected.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "SuperOverview initial render", "issues": ["Recharts logs multiple 'width(-1) height(-1)' warnings on initial mount before ResponsiveContainer measures parent. Non-blocking; charts render correctly after layout settles. Consider setting minWidth=0 / a fixed aspect on ResponsiveContainer."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Nit: Review request document referenced data-testid names like 'kpi-active-tenants', 'kpi-mrr', 'kpi-avg-health', 'kpi-uptime'. Actual implementation uses 'super-kpi-active-tenants', 'super-kpi-mrr', 'super-kpi-avg.-health' (note the '.' from 'Avg.'), 'super-kpi-uptime-sla'. Either the doc or the test-ids should be aligned. Consider slugifying the KPI label with a helper that strips punctuation to avoid 'avg.-health'.",
+    "Nit: Recharts ResponsiveContainer warnings on first paint in SuperOverview — add minHeight/minWidth or fixed aspect to silence."
+  ],
+  "critical_code_review_comments": [
+    "KPI data-testid uses raw label.toLowerCase().replace(/\\s/g,'-') which produces 'super-kpi-avg.-health' (period retained). Sanitize with .replace(/[^a-z0-9-]/g,'') for cleaner ids.",
+    "SuperProvision profile step has 6 inputs but only Brand/Owner-Email/City are required; testing-agents may target inputs by index. Adding stable data-testids like 'provision-brand-name', 'provision-owner-email', 'provision-city' would improve testability."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% of critical flows"},
+  "test_credentials": "platform@aurahotels.com / any password (demo tile also works)",
+  "seed_data_creation": "None (all mock data)",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Reset localStorage key 'aura_super_admin_v1' between auth scenarios. Tenant slugs used in tests: bhairavgarh, himalaya-camps, the-mint-house, kalinga-court, coastline-6, sundara-spa (not 'front-desk-hub-4' — that is the deployment hostname, not a tenant slug). KPI test-ids on Overview are prefixed 'super-kpi-*' not 'kpi-*'. Provision wizard step 1 requires Brand Name / Owner Email / City to enable Continue.",
+  "rca of the issue": "N/A - no issues found"
+}

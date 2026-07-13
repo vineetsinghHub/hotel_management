@@ -46,6 +46,16 @@ import AdminSettings from "@/admin/pages/Settings";
 import ProtectedAdmin from "@/admin/ProtectedAdmin";
 import RequireGuestAuth from "@/components/RequireGuestAuth";
 
+import SuperLogin from "@/superAdmin/pages/SuperLogin";
+import SuperOverview from "@/superAdmin/pages/SuperOverview";
+import SuperTenants from "@/superAdmin/pages/SuperTenants";
+import SuperTenantDetail from "@/superAdmin/pages/SuperTenantDetail";
+import SuperProvision from "@/superAdmin/pages/SuperProvision";
+import SuperFlags from "@/superAdmin/pages/SuperFlags";
+import SuperBilling from "@/superAdmin/pages/SuperBilling";
+import SuperAudit from "@/superAdmin/pages/SuperAudit";
+import { ProtectedSuperAdmin } from "@/superAdmin/SuperAdminLayout";
+
 // Guest-site layout that wraps every /t/:slug/* route with the TenantProvider.
 // The provider reads useParams().slug, loads that tenant's config into the
 // zustand store, and applies its theme via CSS variables on <html>.
@@ -118,6 +128,17 @@ function App() {
                   <Route path="/admin/reports" element={guarded("reports", Reports)} />
                   <Route path="/admin/notifications" element={guarded("notifications", Notifications)} />
                   <Route path="/admin/settings" element={guarded("settings", AdminSettings)} />
+
+                  {/* ── Super Admin (SaaS control plane) ── */}
+                  <Route path="/super-admin" element={<Navigate to="/super-admin/overview" replace />} />
+                  <Route path="/super-admin/login" element={<SuperLogin />} />
+                  <Route path="/super-admin/overview" element={<ProtectedSuperAdmin><SuperOverview /></ProtectedSuperAdmin>} />
+                  <Route path="/super-admin/tenants" element={<ProtectedSuperAdmin><SuperTenants /></ProtectedSuperAdmin>} />
+                  <Route path="/super-admin/tenants/:slug" element={<ProtectedSuperAdmin><SuperTenantDetail /></ProtectedSuperAdmin>} />
+                  <Route path="/super-admin/provision" element={<ProtectedSuperAdmin><SuperProvision /></ProtectedSuperAdmin>} />
+                  <Route path="/super-admin/flags" element={<ProtectedSuperAdmin><SuperFlags /></ProtectedSuperAdmin>} />
+                  <Route path="/super-admin/billing" element={<ProtectedSuperAdmin><SuperBilling /></ProtectedSuperAdmin>} />
+                  <Route path="/super-admin/audit" element={<ProtectedSuperAdmin><SuperAudit /></ProtectedSuperAdmin>} />
                 </Routes>
               </main>
               <GuestOnlyPill />
@@ -129,10 +150,10 @@ function App() {
   );
 }
 
-// Only mount the pill on guest-site routes (not /admin/*)
+// Only mount the pill on guest-site routes (not /admin/* or /super-admin/*)
 const GuestOnlyPill = () => {
-  const isAdmin = typeof window !== "undefined" && window.location.pathname.startsWith("/admin");
-  if (isAdmin) return null;
+  const p = typeof window !== "undefined" ? window.location.pathname : "";
+  if (p.startsWith("/admin") || p.startsWith("/super-admin")) return null;
   return <CurrencyLanguagePill />;
 };
 
