@@ -3,18 +3,21 @@ import { AreaChart, Area, BarChart, Bar, ResponsiveContainer, Tooltip, XAxis, YA
 import SuperAdminLayout from "@/superAdmin/SuperAdminLayout";
 import { platformKpis, platformTenants, mrrTrend, signupTrend, platformAudit, statusPill, churnPill } from "@/superAdmin/superAdminMockData";
 
-const KPI = ({ label, value, delta, icon, color = "#4F46E5" }) => (
-  <div className="p-5 rounded-[16px] bg-white/5 border border-white/10" data-testid={`super-kpi-${label.toLowerCase().replace(/\s/g, "-")}`}>
-    <div className="flex items-start justify-between">
-      <p className="text-[10px] tracking-widest uppercase text-slate-500">{label}</p>
-      <span className="w-8 h-8 rounded-full grid place-items-center" style={{ backgroundColor: `${color}25`, color }}>
-        <i className={`fa-solid fa-${icon} text-xs`}></i>
-      </span>
+const KPI = ({ label, value, delta, icon, color = "#4F46E5" }) => {
+  const id = label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return (
+    <div className="p-5 rounded-[16px] bg-white/5 border border-white/10" data-testid={`super-kpi-${id}`}>
+      <div className="flex items-start justify-between">
+        <p className="text-[10px] tracking-widest uppercase text-slate-500">{label}</p>
+        <span className="w-8 h-8 rounded-full grid place-items-center" style={{ backgroundColor: `${color}25`, color }}>
+          <i className={`fa-solid fa-${icon} text-xs`}></i>
+        </span>
+      </div>
+      <p className="mt-3 font-mono text-3xl text-white">{value}</p>
+      {delta && <p className="text-xs text-emerald-400 mt-1">{delta}</p>}
     </div>
-    <p className="mt-3 font-mono text-3xl text-white">{value}</p>
-    {delta && <p className="text-xs text-emerald-400 mt-1">{delta}</p>}
-  </div>
-);
+  );
+};
 
 const RevTooltip = ({ active, payload }) => active && payload?.[0] ? (
   <div className="bg-slate-900 border border-white/10 rounded-[10px] px-3 py-2 shadow-xl">

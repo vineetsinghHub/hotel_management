@@ -170,5 +170,24 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
 - **React Query scaffold** — `QueryClientProvider` wired at app root with sensible defaults (30s stale, no window-focus refetch, retry:1). `apiClient.js` axios instance auto-attaches `X-Tenant` header from the URL. Ready to swap mocks for backend calls without touching UI.
 - **`useTenantPath()`** hook centralises tenant-scoped path building across guest components (`Navbar`, `Footer`, `Home`, `Rooms`, `RoomCard`, `RequireGuestAuth`).
 
+### Sprint 10 — Super Admin Hub (Phase F, Feb 13, 2026)
+- **New app at `/super-admin/*`** — the SaaS platform's control plane, isolated from tenant PMS and guest storefront.
+- **Separate operator auth** (`superAdminAuth.js`, Zustand-persisted) with 3 demo roles:
+  - `platform@aurahotels.com` — Platform Admin (full write)
+  - `support@aurahotels.com` — Support (read-only+impersonation)
+  - `billing@aurahotels.com` — Billing (invoices+refunds)
+- **Screens shipped:**
+  - **Login** (`SuperLogin.jsx`) — dual-panel dark hero + demo tiles
+  - **Overview** (`SuperOverview.jsx`) — 4 KPIs (Active Tenants / MRR / Avg. Health / Uptime SLA), MRR area chart, sign-ups bar chart, Top 6 tenants table, Recent Activity audit feed, At-Risk callout
+  - **Tenants grid** (`SuperTenants.jsx`) — TanStack Table with search, tier/status/template filter pills, MRR sort, pagination (10 per page), per-row actions (preview storefront, impersonate, drill-in)
+  - **Tenant detail** (`SuperTenantDetail.jsx`) — Identity + stats + billing + enabled modules + danger zone
+  - **Provision wizard** (`SuperProvision.jsx`) — 4-step: Profile → Domain (path vs subdomain) → Brand (3 template presets + color pickers + tier) → Launch (seed data checkboxes)
+  - **Feature Flags** (`SuperFlags.jsx`) — 7 flags with global on/off + per-tenant override chips
+  - **Billing** (`SuperBilling.jsx`) — 3-month invoice table with paid/pending/overdue statuses
+  - **Audit log** (`SuperAudit.jsx`) — operator action feed
+- **Isolation verified:** PMS and guest storefront untouched. CurrencyLanguagePill hidden on /super-admin/*.
+- **12 platform tenants seeded** — mix of tiers, templates, statuses (2 at-risk) for realistic ops demos.
+- **TanStack Table 8.21.3 installed** — reusable pattern for future data grids.
+
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.
