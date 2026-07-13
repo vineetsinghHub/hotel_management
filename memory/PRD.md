@@ -151,5 +151,24 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
 - **Per-role landing pages** (`ROLE_LANDING` map in `roles.js`)
   - After login, each role goes to their most-relevant page (HK→housekeeping, F&B→restaurant, Spa→spa, Marketing→marketing, Accounting→invoices, Front Desk→front-desk, GM/Super Admin/Audit→dashboard)
 
+### Sprint 9 — SaaS Foundation: Multi-Tenancy, Zustand, React Query (Feb 13, 2026)
+- **Design token system** — `--brand-*` CSS variables in `index.css` + semantic Tailwind aliases (`bg-brand-primary`, `text-brand-accent`, `bg-brand-surface`, etc.). Any component using these classes now themes automatically per tenant.
+- **`<TenantProvider>` + `useTenant()`** (`/app/frontend/src/tenants/`)
+  - Path-based routing: **`/t/:slug/*`** for all guest routes
+  - Legacy paths (`/`, `/rooms`, `/booking`, …) 302-redirect to `/t/aura/…`
+  - Zustand-backed tenant store, applies theme via CSS variables on `<html>`
+  - Sets `data-tenant` + `data-template` attributes for scoped CSS
+  - Renders a 404 wall for unknown slugs
+- **Tenant registry** (`/app/frontend/src/tenants/tenantRegistry.js`) with 3 seed tenants:
+  - **Aura Hotels** (luxury / Basic tier / indigo + gold) — default
+  - **Bhairavgarh Palace** (heritage / Pro tier / maroon + brass)
+  - **Hill Haven Boutique** (basic / Basic tier / teal + amber, no spa/events)
+- **3 template variants** (heritage / luxury / basic) — scoped CSS in `index.css` adjusts radii, serif face, hero overlays without touching component code
+- **Module-based nav filtering** — Navbar/Footer honour `tenant.enabledModules` (Hill Haven correctly hides Spa)
+- **Preview TenantSwitcher** — floating pill (bottom-left) swaps tenants live on guest routes
+- **Zustand migration** — `tier.js`, `guestAuth.js` refactored to `zustand + persist` middleware (backwards-compatible public API preserved). Custom pub-sub in `tier.js` replaced.
+- **React Query scaffold** — `QueryClientProvider` wired at app root with sensible defaults (30s stale, no window-focus refetch, retry:1). `apiClient.js` axios instance auto-attaches `X-Tenant` header from the URL. Ready to swap mocks for backend calls without touching UI.
+- **`useTenantPath()`** hook centralises tenant-scoped path building across guest components (`Navbar`, `Footer`, `Home`, `Rooms`, `RoomCard`, `RequireGuestAuth`).
+
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.

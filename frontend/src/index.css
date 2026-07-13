@@ -14,6 +14,30 @@
   --border: #E2E8F0;
   --success: #10B981;
   --error: #F43F5E;
+
+  /* =========================================================
+   * TENANT-CONFIGURABLE BRAND TOKENS
+   * Set by <TenantProvider> at runtime. Defaults = Aura luxury.
+   * Guest-facing components must use var(--brand-*) — never hex.
+   * ========================================================= */
+  --brand-primary: #4F46E5;
+  --brand-primary-hover: #4338CA;
+  --brand-primary-fg: #FFFFFF;
+  --brand-primary-soft: rgba(79, 70, 229, 0.12);
+  --brand-accent: #C9A227;
+  --brand-accent-hover: #B08D1E;
+  --brand-accent-soft: rgba(201, 162, 39, 0.12);
+  --brand-ink: #0F172A;
+  --brand-ink-soft: #64748B;
+  --brand-surface: #FAFAF8;
+  --brand-surface-elev: #FFFFFF;
+  --brand-border: #E2E8F0;
+  --brand-radius: 20px;
+  --brand-radius-sm: 12px;
+  --brand-font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --brand-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* template variant identifier — heritage | luxury | basic */
+  --brand-template: 'luxury';
 }
 
 html, body, #root {
@@ -192,6 +216,37 @@ button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline: 
   }
   .confetti-piece { display: none; }
 }
+
+/* ===== Multi-tenant template variants =====
+ * The TenantProvider sets html[data-template="heritage|luxury|basic"] and this
+ * block adjusts personality (radii, letter-spacing, hero treatments) so each
+ * template feels distinct without touching component code.
+ */
+html[data-template="heritage"] .font-serif {
+  letter-spacing: 0.005em;
+  font-weight: 600;
+}
+html[data-template="heritage"] .rounded-full { border-radius: 8px !important; }
+html[data-template="heritage"] .rounded-\[16px\],
+html[data-template="heritage"] .rounded-\[20px\],
+html[data-template="heritage"] .rounded-\[24px\] { border-radius: 10px !important; }
+html[data-template="heritage"] .hero-overlay {
+  background: linear-gradient(180deg, rgba(27, 19, 16, 0.55) 0%, rgba(27, 19, 16, 0.7) 100%);
+}
+html[data-template="heritage"] .glass {
+  background: rgba(251, 246, 238, 0.85);
+  border-color: rgba(232, 221, 202, 0.6);
+}
+
+html[data-template="basic"] .font-serif {
+  font-family: 'Playfair Display', 'Cormorant Garamond', serif;
+  font-weight: 500;
+}
+html[data-template="basic"] .rounded-\[24px\] { border-radius: 16px !important; }
+html[data-template="basic"] .rounded-\[20px\] { border-radius: 14px !important; }
+html[data-template="basic"] .rounded-\[16px\] { border-radius: 12px !important; }
+
+/* Luxury is the default styling — no overrides needed */
 
 /* ===== DARK MODE (attribute-based, no per-component rewrites needed) ===== */
 html.dark { color-scheme: dark; }

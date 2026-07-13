@@ -1,8 +1,9 @@
 // Subscription tier gating — Basic vs Pro.
-// Reactive: components subscribe via `subscribe()` (or the `useTier()` hook)
-// and see tier changes instantly, no page reload.
+// Backed by Zustand with a localStorage bridge. Consumers use the reactive
+// `useTier()` hook or the imperative `getTier()/setTier()` helpers.
 
-const TIER_KEY = "aura_admin_tier";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export const TIERS = {
   BASIC: {
@@ -37,7 +38,6 @@ export const TIERS = {
   },
 };
 
-// Route keys that are locked behind Pro tier.
 export const PRO_MODULES = {
   "rate-channel": {
     title: "Rate & Channel Manager",
@@ -66,32 +66,36 @@ export const PRO_MODULES = {
   },
 };
 
-// ── Reactive tier store ────────────────────────────────────────────────────
-let _tier = "basic";
-try { _tier = localStorage.getItem(TIER_KEY) || "basic"; } catch (e) {}
-const listeners = new Set();
+// ── Zustand store (persisted) ─────────────────────────────────────────────
+export const useTierStore = create(
+  persist(
+    (set) => ({
+      tier: "basic",
+      setTier: (t) => set({ tier: t }),
+    }),
+    {
+      name: "aura_admin_tier_v2",
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
 
-export const getTier = () => _tier;
-export const setTier = (t) => {
-  _tier = t;
-  try { localStorage.setItem(TIER_KEY, t); } catch (e) {}
-  listeners.forEach((cb) => cb(_tier));
-};
-export const subscribeTier = (cb) => { listeners.add(cb); return () => listeners.delete(cb); };
+// ── Imperative API (kept for backwards compatibility) ─────────────────────
+export const getTier = () => useTierStore.getState().tier;
+export const setTier = (t) => useTierStore.getState().setTier(t);
+export const subscribeTier = (cb) => useTierStore.subscribe((s) => cb(s.tier));
 
-export const isPro = (t = _tier) => t === "pro";
+export const isPro = (t = getTier()) => t === "pro";
 export const isProModule = (routeKey) => Boolean(PRO_MODULES[routeKey]);
-export const canAccessModule = (routeKey, t = _tier) => {
+export const canAccessModule = (routeKey, t = getTier()) => {
   const info = PRO_MODULES[routeKey];
   if (!info) return true;
   if (info.softLock) return true;
   return isPro(t);
 };
 
-// React hook for components that need to react to tier changes.
-import { useEffect, useState } from "react";
+// React hook — components can pick the whole tuple or a single field.
 export const useTier = () => {
-  const [tier, setTierState] = useState(_tier);
-  useEffect(() => subscribeTier(setTierState), []);
+  const tier = useTierStore((s) => s.tier);
   return { tier, isPro: tier === "pro", setTier };
 };

@@ -13,6 +13,21 @@ module.exports = {
         sm: 'calc(var(--radius) - 4px)'
       },
       colors: {
+        // ── Tenant-configurable brand palette ──────────────────────
+        brand: {
+          primary: 'var(--brand-primary)',
+          'primary-hover': 'var(--brand-primary-hover)',
+          'primary-fg': 'var(--brand-primary-fg)',
+          'primary-soft': 'var(--brand-primary-soft)',
+          accent: 'var(--brand-accent)',
+          'accent-hover': 'var(--brand-accent-hover)',
+          'accent-soft': 'var(--brand-accent-soft)',
+          ink: 'var(--brand-ink)',
+          'ink-soft': 'var(--brand-ink-soft)',
+          surface: 'var(--brand-surface)',
+          'surface-elev': 'var(--brand-surface-elev)',
+          border: 'var(--brand-border)',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

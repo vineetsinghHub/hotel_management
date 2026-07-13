@@ -9,6 +9,7 @@ import VideoHero from "@/components/VideoHero";
 import EditorialSection from "@/components/EditorialSection";
 import { property, highlights, rooms, testimonials, galleryImages, experiences } from "@/data/mockData";
 import { useApp } from "@/context/AppContext";
+import { useTenant } from "@/tenants/TenantProvider";
 
 const heroImage =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2200&q=90";
@@ -20,9 +21,12 @@ export default function Home() {
   const [modalRoom, setModalRoom] = useState(null);
   const [testimIndex, setTestimIndex] = useState(0);
   const { t } = useApp();
+  const { tenant } = useTenant();
+  const slug = tenant?.slug || "aura";
+  const withT = (p) => `/t/${slug}${p ? "/" + p : ""}`;
 
   return (
-    <div className="bg-[#FAFAF8]" data-testid="home-page">
+    <div className="bg-brand-surface" data-testid="home-page" data-template={tenant?.template}>
       <Navbar transparent />
 
       {/* HERO */}
@@ -31,26 +35,26 @@ export default function Home() {
           <div className="max-w-3xl reveal-up">
             <p className="text-eyebrow text-[#E6C868] flex items-center gap-3">
               <span className="w-8 h-px bg-[#E6C868]"></span>
-              {t("home.hero.eyebrow")}
+              {tenant?.tagline || t("home.hero.eyebrow")}
             </p>
             <h1 className="mt-6 font-serif text-white text-5xl sm:text-6xl md:text-[84px] leading-[1.02] tracking-tight" data-testid="hero-title">
-              {t("home.hero.title")}
+              {tenant?.brandName || t("home.hero.title")}
             </h1>
             <p className="mt-8 text-white/80 text-lg max-w-xl leading-relaxed">
               {t("home.hero.subtitle")}
             </p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <Link
-                to="/booking"
-                className="inline-flex items-center gap-3 bg-[#4F46E5] hover:bg-[#4338CA] text-white px-8 py-4 rounded-full shadow-[0_14px_36px_rgba(79,70,229,0.45)] hover:-translate-y-0.5 transition-all"
+                to={withT("booking")}
+                className="inline-flex items-center gap-3 bg-brand-primary hover:bg-brand-primary-hover text-brand-primary-fg px-8 py-4 rounded-full shadow-[0_14px_36px_rgba(15,23,42,0.35)] hover:-translate-y-0.5 transition-all"
                 data-testid="hero-book-cta"
               >
                 {t("home.hero.cta_book")}
                 <i className="fa-solid fa-arrow-right text-xs"></i>
               </Link>
               <Link
-                to="/rooms"
-                className="inline-flex items-center gap-3 glass text-slate-900 px-8 py-4 rounded-full hover:bg-white transition-all"
+                to={withT("rooms")}
+                className="inline-flex items-center gap-3 glass text-brand-ink px-8 py-4 rounded-full hover:bg-white transition-all"
                 data-testid="hero-explore-cta"
               >
                 {t("home.hero.cta_explore")}

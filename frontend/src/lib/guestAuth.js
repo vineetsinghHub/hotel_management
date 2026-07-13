@@ -1,50 +1,55 @@
-// Lightweight guest-side auth used to gate Reserve / My account CTAs.
-// Mock-only: any email + non-empty password logs the guest in and persists
-// to localStorage. Reactive: components can subscribe with useGuestAuth().
+// Reactive guest auth backed by Zustand + localStorage persistence.
+// Public API kept unchanged: getGuest, setGuest, signOutGuest, mockGuestLogin,
+// mockGuestRegister, useGuestAuth.
 
-import { useEffect, useState } from "react";
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
-const KEY = "aura_guest_user";
-let _user = null;
-try { _user = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
-const listeners = new Set();
+const useGuestStore = create(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (u) => set({ user: u }),
+    }),
+    {
+      name: "aura_guest_user_v2",
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
 
-const notify = () => listeners.forEach((cb) => cb(_user));
-
-export const getGuest = () => _user;
-export const setGuest = (u) => {
-  _user = u;
-  try {
-    if (u) localStorage.setItem(KEY, JSON.stringify(u));
-    else localStorage.removeItem(KEY);
-  } catch (e) {}
-  notify();
-};
+export const getGuest = () => useGuestStore.getState().user;
+export const setGuest = (u) => useGuestStore.getState().setUser(u);
 export const signOutGuest = () => setGuest(null);
 
-// Any email + non-empty password logs the guest in (mock).
+const nameFromEmail = (email) =>
+  email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "Guest";
+
 export const mockGuestLogin = ({ email, password }) => {
   if (!email || !password) return null;
-  const name = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) || "Guest";
-  const u = { id: `g-${Date.now()}`, email, name, avatar: `https://i.pravatar.cc/200?u=${encodeURIComponent(email)}` };
+  const u = {
+    id: `g-${Date.now()}`,
+    email,
+    name: nameFromEmail(email),
+    avatar: `https://i.pravatar.cc/200?u=${encodeURIComponent(email)}`,
+  };
   setGuest(u);
   return u;
 };
 
 export const mockGuestRegister = ({ email, password, name }) => {
   if (!email || !password || !name) return null;
-  const u = { id: `g-${Date.now()}`, email, name, avatar: `https://i.pravatar.cc/200?u=${encodeURIComponent(email)}` };
+  const u = {
+    id: `g-${Date.now()}`,
+    email,
+    name,
+    avatar: `https://i.pravatar.cc/200?u=${encodeURIComponent(email)}`,
+  };
   setGuest(u);
   return u;
 };
 
-// React hook
 export const useGuestAuth = () => {
-  const [user, setUser] = useState(_user);
-  useEffect(() => {
-    const cb = (u) => setUser(u);
-    listeners.add(cb);
-    return () => listeners.delete(cb);
-  }, []);
+  const user = useGuestStore((s) => s.user);
   return { user, isAuthed: !!user, signOut: signOutGuest };
 };

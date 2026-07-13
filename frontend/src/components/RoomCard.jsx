@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWishlist, useCurrency } from "@/context/AppContext";
+import { useTenantPath } from "@/hooks/useTenantPath";
 import { toast } from "sonner";
 
 export const RoomCard = ({ room, onDetails, index = 0 }) => {
   const nav = useNavigate();
+  const t = useTenantPath();
   const [i, setI] = useState(0);
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { formatPrice } = useCurrency();
@@ -116,8 +118,8 @@ export const RoomCard = ({ room, onDetails, index = 0 }) => {
             View Details
           </button>
           <button
-            onClick={() => nav("/booking")}
-            className="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-sm py-3 rounded-full transition-colors"
+            onClick={() => nav(t("booking"))}
+            className="flex-1 bg-brand-primary hover:bg-brand-primary-hover text-brand-primary-fg text-sm py-3 rounded-full transition-colors"
             data-testid={`room-reserve-${room.id}`}
           >
             Reserve Now

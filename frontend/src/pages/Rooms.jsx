@@ -6,6 +6,7 @@ import BookingWidget from "@/components/BookingWidget";
 import RoomCard from "@/components/RoomCard";
 import RoomDetailModal from "@/components/RoomDetailModal";
 import { rooms as allRooms } from "@/data/mockData";
+import { useTenantPath } from "@/hooks/useTenantPath";
 
 const banner = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=2200&q=90";
 const filters = ["All Suites", "Signature", "Popular", "Waterfront", "Presidential"];
@@ -19,6 +20,7 @@ const sortOptions = [
 ];
 
 export default function Rooms() {
+  const t = useTenantPath();
   const [modalRoom, setModalRoom] = useState(allRooms[0]);
   const [modalOpen, setModalOpen] = useState(false);
   const [filter, setFilter] = useState("All Suites");
@@ -50,7 +52,7 @@ export default function Rooms() {
   const compareRooms = compare.map((id) => allRooms.find((r) => r.id === id)).filter(Boolean);
 
   return (
-    <div className="bg-[#FAFAF8]" data-testid="rooms-page">
+    <div className="bg-brand-surface" data-testid="rooms-page">
       <Navbar transparent />
 
       {/* Editorial banner */}
@@ -59,7 +61,7 @@ export default function Rooms() {
         <div className="absolute inset-0 hero-overlay"></div>
         <div className="relative max-w-7xl mx-auto px-6 md:px-10 h-full flex flex-col justify-end pb-16">
           <nav className="flex items-center gap-2 text-white/80 text-xs tracking-wider mb-6" data-testid="breadcrumb">
-            <Link to="/" className="hover:text-white">Home</Link>
+            <Link to={t("")} className="hover:text-white">Home</Link>
             <i className="fa-solid fa-chevron-right text-[8px] text-white/40"></i>
             <span className="text-white">Rooms & Suites</span>
           </nav>
@@ -182,7 +184,7 @@ export default function Rooms() {
             >
               Compare {compare.length > 0 ? `(${compare.length})` : "Suites"}
             </button>
-            <Link to="/booking" className="px-6 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm">Speak to Concierge</Link>
+            <Link to={t("booking")} className="px-6 py-3 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-brand-primary-fg text-sm">Speak to Concierge</Link>
           </div>
         </div>
       </section>
@@ -249,7 +251,7 @@ export default function Rooms() {
                         onClick={() => { setModalRoom(r); setModalOpen(true); setCompareOpen(false); }}
                         className="w-full py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-xs"
                       >View Details</button>
-                      <Link to="/booking" className="w-full text-center py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs">Reserve</Link>
+                      <Link to={t("booking")} className="w-full text-center py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-brand-primary-fg text-xs">Reserve</Link>
                     </div>
                   </div>
                 </div>

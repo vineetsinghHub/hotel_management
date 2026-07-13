@@ -1,0 +1,37 @@
+{
+  "summary": "Sprint 9 (SaaS foundation) frontend E2E testing complete — 26/26 checks passed. Path-based multi-tenancy (/t/:slug/*) works end-to-end: root and all guest legacy paths redirect to /t/aura, three seed tenants (aura/bhairavgarh/hillhaven) render with distinct brand colors (#4F46E5 / #7B2C2C / #0F766E via --brand-primary CSS var), brand names, taglines, and template variants. TenantSwitcher opens, lists other 2 tenants, and hot-swaps tenant + theme without reload. 404 unknown-slug page renders with data-testid='tenant-not-found'. Hillhaven navbar correctly omits Spa link (module disabled). Guest auth wall on /t/bhairavgarh/dashboard uses maroon lock icon (rgb(123,44,44)) — themed. Zustand persist works across reload; sign-out re-triggers wall. PMS untouched: /admin/login loads, gm@aurahotels.com logs in, admin console renders with Aura indigo branding, TenantSwitcher is hidden on /admin/*. Cross-tenant nav: Reserve button on /t/bhairavgarh/rooms navigates to /t/bhairavgarh/booking (stays in scope). No QueryClient errors in console. Sprint 8 sidebar Pro-badge reactivity bug from iteration_12 has been fixed in AdminLayout.jsx line 76 (`&& !isPro`).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "features_verified": [
+    "Root '/' redirects to /t/aura; /rooms → /t/aura/rooms (legacy redirects wired for all guest paths).",
+    "Aura tenant (luxury): brand-primary=#4F46E5, brand mark 'Aura Hotels', switcher pill shows 'Aura Hotels'.",
+    "Bhairavgarh tenant (heritage): brand-primary=#7B2C2C, brand mark 'Bhairavgarh Palace', tagline 'A Rajputana Legend Since 1732'.",
+    "Hillhaven tenant (basic): brand-primary=#0F766E, brand mark 'Hill Haven Boutique'. Navbar excludes Spa (module disabled).",
+    "TenantSwitcher: toggle opens menu, tenant-option-<slug> visible for other 2 tenants, click navigates and swaps theme live.",
+    "/t/nonexistent-slug renders data-testid='tenant-not-found' with 'Property not found' + CTA back to Aura.",
+    "Guest auth wall on /t/bhairavgarh/dashboard themed maroon (rgb(123,44,44)) — not indigo.",
+    "Guest sign-in via modal, Zustand persists across reload; sign-out via nav-menu-signout clears state and re-shows wall.",
+    "Admin login (gm@aurahotels.com) works; /admin/* uses Aura indigo regardless of last-visited tenant; TenantSwitcher hidden on /admin/*.",
+    "Cross-tenant navigation: Reserve on /t/bhairavgarh/rooms → /t/bhairavgarh/booking (stays in bhairavgarh scope).",
+    "QueryClientProvider mounted at root — no 'QueryClient not found' errors in console.",
+    "Zustand persist working via new v2 keys (aura_admin_tier_v2, aura_guest_user_v2)."
+  ],
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Sprint 9 foundation is clean. Note: TenantSwitcher is a preview-only floating pill — should be gated behind an env flag before production so end-guests don't see it.",
+    "TenantProvider.jsx 'not_found' branch uses <a href> for CTA which causes a full page reload rather than a client-side <Link>. Minor.",
+    "index.css --brand-* CSS vars are set on <html>; on admin routes theme is re-applied to Aura defaults which is correct — verified live."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only per request)", "frontend": "100% (26/26)"},
+  "test_credentials": "See /app/memory/test_credentials.md — gm@aurahotels.com / any password for admin; any email + non-empty password for guest.",
+  "seed_data_creation": "None — all tenant JSON is in tenantRegistry.js.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Sprint 9 SaaS foundation is stable. Persist keys renamed to *_v2. Legacy paths (/rooms, /booking, /dashboard, etc.) redirect to /t/aura/*. Admin routes stay Aura-branded (SaaS platform brand). For future tenant-scoped tests, use /t/bhairavgarh (pro tier) or /t/hillhaven (basic tier with spa/events disabled). Sprint 8 sidebar Pro-badge reactivity bug is fixed in AdminLayout.jsx L76."
+}
