@@ -1,0 +1,35 @@
+{
+  "summary": "Phase G Vite migration regression sweep — PASS. Vite 8.1.4 dev server serves the app correctly on port 3000. All Sprint 9/10 features verified working end-to-end: guest storefront across 3 tenants, PMS login + tier gating + FAB, Super Admin Hub, guest auth wall. process.env.REACT_APP_* shim works (backend URL resolves). No Vite/HMR-related console errors detected.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Vite dev logs show a stale scan of /app/frontend/public/index.html (still has old src/index.js reference) causing a one-time [PARSE_ERROR] on dependency scan. Non-fatal (server continues), but the legacy public/index.html should be removed or updated to avoid noise in logs.",
+    "vite.config.js sets both esbuild and oxc options — Vite warns 'Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored.' Consider migrating to optimizeDeps.rolldownOptions per Vite 8 recommendation.",
+    "optimizeDeps.esbuildOptions is deprecated in Vite 8 (uses Rolldown now) — same file cleanup suggested.",
+    "Admin tour overlay (data-testid='admin-tour') blocks clicks on tier-gate upgrade button until dismissed — pre-existing UX issue, not Vite-related, but worth guarding tour z-index so testable elements underneath remain reachable, or auto-dismiss tour on route change."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "100%"},
+  "test_credentials": "gm@aurahotels.com/pw (PMS), platform@aurahotels.com/pw (Super Admin) — from /app/memory/test_credentials.md",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Vite migration verified. All guest storefront (aura/bhairavgarh/hillhaven), PMS login+dashboard+tier gating (rate-channel upgrade unlocks live without page reload), Super Admin (overview + KPIs + MRR chart + top tenants + audit feed), guest auth wall, and FAB working. Two non-blocking Vite config warnings noted in code review. Legacy public/index.html should be removed to eliminate stale scan error.",
+  "verified_flows": [
+    "/ redirects to /t/aura (Aura Hotels home with hero + booking widget + tenant switcher + currency pill)",
+    "/t/bhairavgarh renders as Bhairavgarh Palace with distinct branding",
+    "/t/hillhaven renders as Hill Haven Boutique with distinct branding",
+    "/admin/login accepts gm@aurahotels.com and redirects to /admin/dashboard",
+    "/admin/rate-channel shows TierGate wall (data-testid='tier-gate-rate-channel')",
+    "Upgrade button (data-testid='tier-gate-upgrade-rate-channel') unlocks Rate & Channel Manager live, wall removed, 'Welcome to Aura Pro' toast shown, no page reload",
+    "FAB present on /admin/dashboard (data-testid='fab-toggle')",
+    "/super-admin/login accepts platform@aurahotels.com → /super-admin/overview with 4 KPIs + MRR chart + top tenants + audit feed",
+    "/t/aura/dashboard shows guest-auth-wall when unauthenticated"
+  ]
+}
