@@ -13,6 +13,7 @@ const NAV = [
   { to: "/super-admin/tenants", label: "Tenants", icon: "building" },
   { to: "/super-admin/provision", label: "Provision", icon: "plus-circle" },
   { to: "/super-admin/flags", label: "Feature Flags", icon: "flag" },
+  { to: "/super-admin/templates", label: "Templates", icon: "palette" },
   { to: "/super-admin/billing", label: "Billing", icon: "receipt" },
   { to: "/super-admin/audit", label: "Audit Log", icon: "clock-rotate-left" },
 ];

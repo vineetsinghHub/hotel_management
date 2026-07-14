@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useTenantStore } from "@aura/shared/tenants/tenantStore";
 import { applyTenantTheme } from "@aura/shared/tenants/applyTheme";
 import { DEFAULT_TENANT, getTenant } from "@aura/shared/tenants/tenantRegistry";
+import { AppearanceBridge } from "@aura/shared/templates/useApplyAppearance";
 
 // Public context that any component can consume.
 const TenantContext = createContext({ tenant: DEFAULT_TENANT });
@@ -41,7 +42,12 @@ export const TenantProvider = ({ children }) => {
     );
   }
 
-  return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
+  return (
+    <TenantContext.Provider value={value}>
+      <AppearanceBridge />
+      {children}
+    </TenantContext.Provider>
+  );
 };
 
 export const useTenant = () => useContext(TenantContext);

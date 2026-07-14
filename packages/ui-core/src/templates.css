@@ -1,0 +1,234 @@
+/* Aura Templates — base looks + sub-option overrides.
+ *
+ * Applied via data attributes on <html>:
+ *   <html data-template="luxury-classic"
+ *         data-base="luxury"
+ *         data-cursor="luxe"
+ *         data-button="pill"
+ *         data-input="underline"
+ *         data-animation="subtle">
+ *
+ * Each block below targets one attribute so they compose cleanly. Base rules
+ * set typography + brand token values; sub-option rules layer visual details
+ * on top without conflict.
+ */
+
+/* ══════════════════════════════════════════════════════════════════
+   BASE — luxury (default; palatial serif, indigo + gold, generous)
+   ══════════════════════════════════════════════════════════════════ */
+[data-base="luxury"] {
+  --tpl-font-heading: "Cormorant Garamond", "Playfair Display", serif;
+  --tpl-font-body: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --tpl-radius-sm: 8px;
+  --tpl-radius-md: 14px;
+  --tpl-radius-lg: 24px;
+  --tpl-shadow-elev: 0 20px 60px rgba(15, 23, 42, 0.08);
+}
+[data-base="luxury"] h1,
+[data-base="luxury"] h2,
+[data-base="luxury"] h3,
+[data-base="luxury"] .font-serif { font-family: var(--tpl-font-heading); font-feature-settings: "liga", "kern"; }
+
+/* ══════════════════════════════════════════════════════════════════
+   BASE — heritage (Rajputana; ornate serifs, sharper radii, brass)
+   ══════════════════════════════════════════════════════════════════ */
+[data-base="heritage"] {
+  --tpl-font-heading: "Cormorant Garamond", "Playfair Display", serif;
+  --tpl-font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --tpl-radius-sm: 4px;
+  --tpl-radius-md: 8px;
+  --tpl-radius-lg: 12px;
+  --tpl-shadow-elev: 0 24px 60px rgba(123, 44, 44, 0.15);
+}
+[data-base="heritage"] h1,
+[data-base="heritage"] h2 { letter-spacing: -0.01em; }
+
+/* ══════════════════════════════════════════════════════════════════
+   BASE — modern (clean sans, snappy, high-contrast CTAs)
+   ══════════════════════════════════════════════════════════════════ */
+[data-base="modern"] {
+  --tpl-font-heading: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --tpl-font-body: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --tpl-radius-sm: 10px;
+  --tpl-radius-md: 16px;
+  --tpl-radius-lg: 24px;
+  --tpl-shadow-elev: 0 12px 30px rgba(15, 23, 42, 0.10);
+}
+[data-base="modern"] h1,
+[data-base="modern"] h2,
+[data-base="modern"] .font-serif { font-family: var(--tpl-font-heading); font-weight: 600; letter-spacing: -0.03em; }
+
+/* ══════════════════════════════════════════════════════════════════
+   BASE — minimal (warm neutrals, generous whitespace, quiet)
+   ══════════════════════════════════════════════════════════════════ */
+[data-base="minimal"] {
+  --tpl-font-heading: "Cormorant Garamond", serif;
+  --tpl-font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --tpl-radius-sm: 6px;
+  --tpl-radius-md: 12px;
+  --tpl-radius-lg: 18px;
+  --tpl-shadow-elev: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+[data-base="minimal"] h1,
+[data-base="minimal"] h2 { font-weight: 400; }
+
+/* ══════════════════════════════════════════════════════════════════
+   CURSOR OPTIONS
+   ══════════════════════════════════════════════════════════════════ */
+[data-cursor="default"] { cursor: default; }
+
+[data-cursor="luxe"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26"><path d="M2 2 L2 20 L7 15 L11 24 L14 22 L10 14 L18 14 Z" fill="%230F172A" stroke="%23C9A227" stroke-width="1.5"/></svg>') 2 2, auto;
+}
+[data-cursor="luxe"] a,
+[data-cursor="luxe"] button,
+[data-cursor="luxe"] [role="button"],
+[data-cursor="luxe"] .cursor-pointer {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 26 26"><circle cx="13" cy="13" r="8" fill="%23C9A227" stroke="%230F172A" stroke-width="1.5"/><circle cx="13" cy="13" r="3" fill="%230F172A"/></svg>') 13 13, pointer;
+}
+
+[data-cursor="crosshair"],
+[data-cursor="crosshair"] * { cursor: crosshair; }
+[data-cursor="crosshair"] a,
+[data-cursor="crosshair"] button,
+[data-cursor="crosshair"] [role="button"] { cursor: crosshair; }
+
+[data-cursor="sparkle"] {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="3" fill="%234F46E5"/><circle cx="11" cy="11" r="9" fill="none" stroke="%234F46E5" stroke-opacity="0.4" stroke-width="1"/></svg>') 11 11, auto;
+}
+[data-cursor="sparkle"] a,
+[data-cursor="sparkle"] button {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="%23C9A227"/><path d="M12 2 L12 22 M2 12 L22 12" stroke="%234F46E5" stroke-width="1" opacity="0.7"/></svg>') 12 12, pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BUTTON OPTIONS
+   ══════════════════════════════════════════════════════════════════ */
+/* We target Tailwind's arbitrary bg-brand-primary utility as our
+   "primary button" hook, plus the .btn-primary escape hatch. */
+
+[data-button="pill"] .bg-brand-primary,
+[data-button="pill"] .btn-primary { border-radius: 9999px !important; }
+
+[data-button="sharp"] .bg-brand-primary,
+[data-button="sharp"] .btn-primary { border-radius: 4px !important; letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.7rem; }
+
+[data-button="glow"] .bg-brand-primary,
+[data-button="glow"] .btn-primary {
+  box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4), 0 8px 30px rgba(79, 70, 229, 0.25) !important;
+  animation: aura-glow 3s ease-in-out infinite;
+}
+@keyframes aura-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.35), 0 8px 30px rgba(79, 70, 229, 0.20); }
+  50% { box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.0), 0 12px 40px rgba(79, 70, 229, 0.35); }
+}
+
+[data-button="lift"] .bg-brand-primary,
+[data-button="lift"] .btn-primary {
+  transform: translateY(0);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+[data-button="lift"] .bg-brand-primary:hover,
+[data-button="lift"] .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INPUT OPTIONS — target `input.form-input`, textareas, and the
+   generic Tailwind border classes on inputs.
+   ══════════════════════════════════════════════════════════════════ */
+[data-input="underline"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+[data-input="underline"] textarea,
+[data-input="underline"] select {
+  border: none !important;
+  border-bottom: 1.5px solid rgba(15, 23, 42, 0.25) !important;
+  border-radius: 0 !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+  background: transparent !important;
+}
+[data-input="underline"] input:focus,
+[data-input="underline"] textarea:focus {
+  outline: none !important;
+  border-bottom-color: var(--brand-primary, #4F46E5) !important;
+}
+
+[data-input="filled"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+[data-input="filled"] textarea {
+  background: rgba(15, 23, 42, 0.04) !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+}
+[data-input="filled"] input:focus,
+[data-input="filled"] textarea:focus {
+  background: white !important;
+  border-color: var(--brand-primary, #4F46E5) !important;
+  outline: none !important;
+}
+
+[data-input="outlined"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+[data-input="outlined"] textarea {
+  border: 1.5px solid rgba(15, 23, 42, 0.20) !important;
+  border-radius: 8px !important;
+  background: white !important;
+}
+
+[data-input="soft"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="reset"]) {
+  border-radius: 9999px !important;
+  border: 1px solid rgba(15, 23, 42, 0.15) !important;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+  background: white !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ANIMATION OPTIONS — global transition-duration multipliers.
+   ══════════════════════════════════════════════════════════════════ */
+[data-animation="off"] *,
+[data-animation="off"] *::before,
+[data-animation="off"] *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* subtle = default; no overrides needed */
+
+[data-animation="lively"] a,
+[data-animation="lively"] button,
+[data-animation="lively"] .transition-all,
+[data-animation="lively"] .transition {
+  transition-duration: 150ms !important;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+[data-animation="lively"] button:active { transform: scale(0.96); }
+
+[data-animation="dramatic"] a,
+[data-animation="dramatic"] button,
+[data-animation="dramatic"] .transition-all,
+[data-animation="dramatic"] .transition {
+  transition-duration: 500ms !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+[data-animation="dramatic"] section,
+[data-animation="dramatic"] article {
+  animation: aura-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes aura-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Accessibility: respect prefers-reduced-motion regardless of choice
+   ══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  [data-animation] *,
+  [data-animation] *::before,
+  [data-animation] *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

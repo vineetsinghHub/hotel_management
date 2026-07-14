@@ -46,6 +46,7 @@ export const PERMISSIONS = {
   "reports": [ROLE_KEYS.SUPER_ADMIN, ROLE_KEYS.GM, ROLE_KEYS.ACCOUNTING, ROLE_KEYS.READ_ONLY],
   "notifications": "*",
   "settings": [ROLE_KEYS.SUPER_ADMIN, ROLE_KEYS.GM],
+  "appearance": [ROLE_KEYS.SUPER_ADMIN, ROLE_KEYS.GM, ROLE_KEYS.MARKETING],
 };
 
 export const hasAccess = (routeKey, roleKey) => {

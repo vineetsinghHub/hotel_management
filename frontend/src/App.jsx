@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import "@aura/ui-core/global.css";
 import "@aura/ui-core/print.css";
+import "@aura/ui-core/templates.css";
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -43,6 +44,7 @@ import Reviews from "@aura/b2b-pms/admin/pages/Reviews";
 import Reports from "@aura/b2b-pms/admin/pages/Reports";
 import Notifications from "@aura/b2b-pms/admin/pages/Notifications";
 import AdminSettings from "@aura/b2b-pms/admin/pages/Settings";
+import AdminAppearance from "@aura/b2b-pms/admin/pages/AdminAppearance";
 import ProtectedAdmin from "@aura/b2b-pms/admin/ProtectedAdmin";
 import RequireGuestAuth from "@aura/b2c-engine/components/RequireGuestAuth";
 
@@ -54,6 +56,7 @@ import SuperProvision from "@aura/super-admin/superAdmin/pages/SuperProvision";
 import SuperFlags from "@aura/super-admin/superAdmin/pages/SuperFlags";
 import SuperBilling from "@aura/super-admin/superAdmin/pages/SuperBilling";
 import SuperAudit from "@aura/super-admin/superAdmin/pages/SuperAudit";
+import SuperTemplates from "@aura/super-admin/superAdmin/pages/SuperTemplates";
 import { ProtectedSuperAdmin } from "@aura/super-admin/superAdmin/SuperAdminLayout";
 
 // Guest-site layout that wraps every /t/:slug/* route with the TenantProvider.
@@ -101,6 +104,7 @@ const adminRoutes = [
   { path: "reviews", key: "reviews", Component: Reviews },
   { path: "reports", key: "reports", Component: Reports },
   { path: "notifications", key: "notifications", Component: Notifications },
+  { path: "appearance", key: "appearance", Component: AdminAppearance },
   { path: "settings", key: "settings", Component: AdminSettings },
 ];
 
@@ -166,6 +170,7 @@ function App() {
                   <Route path="/super-admin/flags" element={<ProtectedSuperAdmin><SuperFlags /></ProtectedSuperAdmin>} />
                   <Route path="/super-admin/billing" element={<ProtectedSuperAdmin><SuperBilling /></ProtectedSuperAdmin>} />
                   <Route path="/super-admin/audit" element={<ProtectedSuperAdmin><SuperAudit /></ProtectedSuperAdmin>} />
+                  <Route path="/super-admin/templates" element={<ProtectedSuperAdmin><SuperTemplates /></ProtectedSuperAdmin>} />
                 </Routes>
               </main>
             </BrowserRouter>

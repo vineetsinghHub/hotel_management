@@ -43,6 +43,7 @@ const groups = [
   { label: "Insights", items: [
     { k: "reports", to: "admin/reports", label: "Reports", icon: "chart-line" },
     { k: "notifications", to: "admin/notifications", label: "Notifications", icon: "bell" },
+    { k: "appearance", to: "admin/appearance", label: "Appearance", icon: "palette" },
     { k: "settings", to: "admin/settings", label: "Settings", icon: "gear" },
   ]},
 ];
