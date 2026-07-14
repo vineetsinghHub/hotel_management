@@ -205,3 +205,17 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
 
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.
+
+### Sprint 12 — Global Chatbot, Admin Shortcut, Service Closures (Feb 14, 2026)
+- **Global guest widgets** (`GuestGlobalWidgets.jsx`) — the concierge chatbot and command palette are now mounted at the app root inside `GuestShell`, gated on `useGuestAuth().isAuthed`. They follow the signed-in guest across every storefront page (Home, Rooms, Experiences, Dining, Spa, Gallery, Booking, Payment, Confirmation, Dashboard). Auto-suppressed on admin/super-admin routes and inside `?embed=1` iframe previews. `Dashboard.jsx` no longer renders them locally.
+- **Admin quick-access button** — new outline pill `nav-admin-cta` (shield icon + "Admin") in the guest Navbar between the account menu and the Book-Your-Stay CTA. Adapts to the transparent-hero and scrolled-solid navbar variants; routes to `/admin/login`.
+- **Cross-cutting service closures** — new `serviceStatusStore.js` (Zustand + localStorage, keyed by tenant slug). Admin can now close/reopen Spa, Dining and Experiences from:
+  - `/admin/spa` (dedicated card at the top)
+  - `/admin/restaurant` (dedicated card at the top)
+  - `/admin/settings` → new "Service closures" section (consolidated control for all three)
+  When a service is closed:
+  * Admin view dims the appointment/reservation table to 50% opacity, KPIs zero out, status pill turns rose.
+  * Guest pages (`/spa`, `/dining`, `/experiences`) render a rose "Temporarily closed" banner with the operator-supplied reason.
+  * All Reserve/Reserve-Table/Reserve-Experience CTAs disable and re-label to "Currently closed" with a lock icon. Time-slot pickers on `/spa` all disable/strikethrough. Modal Reserve inside `/experiences` respects the flag.
+  Store fix: the OPEN_DEFAULT / EMPTY_MAP returns use frozen module-level singletons to avoid Zustand's "getSnapshot should be cached" infinite-loop trap.
+
