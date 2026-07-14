@@ -1,0 +1,14 @@
+{
+  "name": "@aura/ui-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": ["*.css"],
+  "main": "./src/index.js",
+  "exports": {
+    "./*": "./src/*.js",
+    "./*.js": "./src/*.js",
+    "./*.jsx": "./src/*.jsx",
+    "./*.css": "./src/*.css"
+  }
+}

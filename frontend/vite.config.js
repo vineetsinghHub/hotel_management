@@ -22,6 +22,11 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "src"),
+        "@aura/shared": path.resolve(__dirname, "../packages/shared/src"),
+        "@aura/ui-core": path.resolve(__dirname, "../packages/ui-core/src"),
+        "@aura/b2c-engine": path.resolve(__dirname, "../apps/b2c-engine/src"),
+        "@aura/b2b-pms": path.resolve(__dirname, "../apps/b2b-pms/src"),
+        "@aura/super-admin": path.resolve(__dirname, "../apps/super-admin/src"),
       },
     },
 
