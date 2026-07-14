@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ServiceClosedBanner, { useServiceClosed } from "@/components/guest/ServiceClosedBanner";
 import { menu } from "@/data/mockData";
 
 const banner = "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2200&q=90";
@@ -25,6 +27,7 @@ export default function Dining() {
   const [guests, setGuests] = useState(2);
   const [time, setTime] = useState("19:30");
   const [date, setDate] = useState("Nov 12");
+  const closed = useServiceClosed("dining");
 
   return (
     <div className="bg-[#FAFAF8]" data-testid="dining-page">
@@ -46,6 +49,8 @@ export default function Dining() {
           <p className="mt-5 text-white/80 text-lg max-w-2xl">A living archive of Rajput recipes, kept alive by a family of chefs whose lineage stretches back to the palace&apos;s founding.</p>
         </div>
       </section>
+
+      <ServiceClosedBanner service="dining" />
 
       <section className="py-20 px-6 md:px-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -103,8 +108,31 @@ export default function Dining() {
                   <button onClick={() => setGuests(guests + 1)} className="w-8 h-8 rounded-full border border-slate-200">+</button>
                 </div>
               </div>
-              <button className="w-full py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm mt-2" data-testid="reserve-table-btn">
-                Reserve Table
+              <button
+                onClick={() => {
+                  if (closed) {
+                    toast.error("The restaurant is temporarily closed", {
+                      description: "New table reservations are paused. Please try again later.",
+                    });
+                    return;
+                  }
+                  toast.success("Table reserved", {
+                    description: `${date} · ${time} · ${guests} guest${guests === 1 ? "" : "s"}.`,
+                  });
+                }}
+                disabled={closed}
+                className={`w-full py-3 rounded-full text-sm mt-2 transition-all ${
+                  closed
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-[#4F46E5] hover:bg-[#4338CA] text-white"
+                }`}
+                data-testid="reserve-table-btn"
+              >
+                {closed ? (
+                  <><i className="fa-solid fa-lock mr-2 text-[11px]"></i>Currently closed</>
+                ) : (
+                  "Reserve Table"
+                )}
               </button>
             </div>
           </div>

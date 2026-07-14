@@ -138,6 +138,15 @@ export const Navbar = ({ transparent = false }) => {
               {t("nav.book")}
               <i className="fa-solid fa-arrow-right text-[10px]" aria-hidden="true"></i>
             </Link>
+            <Link
+              to="/admin/login"
+              className={`hidden md:inline-flex items-center gap-2 text-[12px] tracking-wide px-3 py-2 rounded-full border transition-all ${solid ? "border-brand-border text-brand-ink-soft hover:text-brand-ink hover:border-brand-ink/40" : "border-white/30 text-white/85 hover:text-white hover:border-white/60"}`}
+              data-testid="nav-admin-cta"
+              title="Hotel staff — access the operations console"
+            >
+              <i className="fa-solid fa-shield-halved text-[10px]" aria-hidden="true"></i>
+              <span>Admin</span>
+            </Link>
           </div>
         </div>
       </header>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import AdminLayout from "@/admin/components/AdminLayout";
+import ServiceClosurePanel from "@/admin/components/ServiceClosurePanel";
 import { auditLog, AUDIT_ACTION_LABELS } from "@/admin/adminMockData";
 import { ROLES, roleLabel, roleColor } from "@/admin/roles";
 import { TIERS, getTier, setTier as persistTier } from "@/admin/tier";
@@ -76,6 +77,22 @@ export default function Settings() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Service availability — cross-cutting closures that gate guest bookings */}
+          <div className="p-6 bg-white rounded-[16px] border border-slate-200" data-testid="service-availability">
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <p className="text-eyebrow text-[#C9A227]">Availability</p>
+                <h3 className="mt-1 font-serif text-xl text-slate-900">Service closures</h3>
+                <p className="mt-1 text-xs text-slate-500 max-w-2xl">Temporarily block new guest reservations for any of these services. Closing a service instantly hides its bookings on the guest storefront and disables the Reserve buttons.</p>
+              </div>
+            </div>
+            <div className="mt-5 space-y-3">
+              <ServiceClosurePanel tenantSlug="aura" service="spa" />
+              <ServiceClosurePanel tenantSlug="aura" service="dining" />
+              <ServiceClosurePanel tenantSlug="aura" service="experiences" />
             </div>
           </div>
 

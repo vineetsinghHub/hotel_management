@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ServiceClosedBanner, { useServiceClosed } from "@/components/guest/ServiceClosedBanner";
 import { experiences } from "@/data/mockData";
 
 const banner = "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=2200&q=90";
@@ -9,6 +11,7 @@ const banner = "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?aut
 export default function Experiences() {
   const [detail, setDetail] = useState(experiences[0]);
   const [open, setOpen] = useState(false);
+  const closed = useServiceClosed("experiences");
 
   return (
     <div className="bg-[#FAFAF8]" data-testid="experiences-page">
@@ -30,6 +33,8 @@ export default function Experiences() {
           <p className="mt-5 text-white/80 text-lg max-w-2xl">Custom-crafted experiences arranged by our concierge, from private historians to moonlit boat rides across Lake Pichola.</p>
         </div>
       </section>
+
+      <ServiceClosedBanner service="experiences" />
 
       <section className="py-24 px-6 md:px-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -62,8 +67,25 @@ export default function Experiences() {
                   >
                     Details
                   </button>
-                  <button className="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-sm py-3 rounded-full">
-                    Reserve
+                  <button
+                    onClick={() => {
+                      if (closed) {
+                        toast.error("Experiences are temporarily closed", {
+                          description: "New bookings are paused. Please try again later.",
+                        });
+                        return;
+                      }
+                      toast.success("Experience reserved", { description: ex.name });
+                    }}
+                    disabled={closed}
+                    className={`flex-1 text-sm py-3 rounded-full transition-all ${
+                      closed
+                        ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                        : "bg-slate-900 hover:bg-slate-800 text-white"
+                    }`}
+                    data-testid={`exp-reserve-${ex.id}`}
+                  >
+                    {closed ? "Closed" : "Reserve"}
                   </button>
                 </div>
               </div>
@@ -115,7 +137,28 @@ export default function Experiences() {
                   <p className="text-eyebrow text-slate-500">From</p>
                   <p className="font-mono text-4xl text-slate-900 mt-1">${detail.price}</p>
                   <p className="text-xs text-slate-500 mt-1">per guest, taxes included</p>
-                  <button className="mt-5 w-full py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm">Reserve Experience</button>
+                  <button
+                    onClick={() => {
+                      if (closed) {
+                        toast.error("Experiences are temporarily closed");
+                        return;
+                      }
+                      toast.success("Experience reserved", { description: detail.name });
+                    }}
+                    disabled={closed}
+                    className={`mt-5 w-full py-3 rounded-full text-sm transition-all ${
+                      closed
+                        ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                        : "bg-[#4F46E5] hover:bg-[#4338CA] text-white"
+                    }`}
+                    data-testid="exp-modal-reserve"
+                  >
+                    {closed ? (
+                      <><i className="fa-solid fa-lock mr-2 text-[11px]"></i>Currently closed</>
+                    ) : (
+                      "Reserve Experience"
+                    )}
+                  </button>
                   <button className="mt-3 w-full py-3 rounded-full border border-slate-200 hover:bg-white text-slate-900 text-sm">Chat with concierge</button>
                 </div>
               </div>

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ServiceClosedBanner, { useServiceClosed } from "@/components/guest/ServiceClosedBanner";
 import { spaTreatments } from "@/data/mockData";
 
 const banner = "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=2200&q=90";
@@ -11,6 +13,7 @@ const timeSlots = ["09:00", "10:30", "12:00", "13:30", "15:00", "16:30", "18:00"
 export default function Spa() {
   const [selected, setSelected] = useState(spaTreatments[0].id);
   const [slot, setSlot] = useState("15:00");
+  const closed = useServiceClosed("spa");
 
   return (
     <div className="bg-[#FAFAF8]" data-testid="spa-page">
@@ -32,6 +35,8 @@ export default function Spa() {
           <p className="mt-5 text-white/80 text-lg max-w-2xl">Twelve treatment suites carved from local marble, a rose hammam, and therapists whose hands remember what modern lives forget.</p>
         </div>
       </section>
+
+      <ServiceClosedBanner service="spa" />
 
       <section className="py-24 px-6 md:px-10">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -81,7 +86,7 @@ export default function Spa() {
 
               <div className="mt-6 grid grid-cols-4 gap-2">
                 {timeSlots.map((t) => {
-                  const disabled = t === "09:00" || t === "18:00";
+                  const disabled = closed || t === "09:00" || t === "18:00";
                   return (
                     <button
                       key={t}
@@ -109,10 +114,37 @@ export default function Spa() {
                 <span className="font-mono text-3xl text-slate-900">${spaTreatments.find((x) => x.id === selected)?.price}</span>
               </div>
 
-              <button className="mt-5 w-full py-3.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="reserve-appointment-btn">
-                Reserve Appointment
+              <button
+                onClick={() => {
+                  if (closed) {
+                    toast.error("The spa is temporarily closed", {
+                      description: "New reservations are paused. Please try again later.",
+                    });
+                    return;
+                  }
+                  toast.success("Appointment reserved", {
+                    description: `${spaTreatments.find((x) => x.id === selected)?.name} at ${slot}.`,
+                  });
+                }}
+                disabled={closed}
+                className={`mt-5 w-full py-3.5 rounded-full text-sm transition-all ${
+                  closed
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-[#4F46E5] hover:bg-[#4338CA] text-white"
+                }`}
+                data-testid="reserve-appointment-btn"
+              >
+                {closed ? (
+                  <><i className="fa-solid fa-lock mr-2 text-[11px]"></i>Currently closed</>
+                ) : (
+                  "Reserve Appointment"
+                )}
               </button>
-              <p className="text-[11px] text-slate-500 text-center mt-3">Charged to your suite · complimentary cancellation up to 4h prior.</p>
+              <p className="text-[11px] text-slate-500 text-center mt-3">
+                {closed
+                  ? "New spa reservations are paused. Please check back soon."
+                  : "Charged to your suite · complimentary cancellation up to 4h prior."}
+              </p>
             </div>
           </aside>
         </div>

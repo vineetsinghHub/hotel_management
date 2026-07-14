@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import AdminLayout from "@/admin/components/AdminLayout";
 import ReadOnlyBanner, { useReadOnly } from "@/admin/components/ReadOnlyBanner";
+import ServiceClosurePanel from "@/admin/components/ServiceClosurePanel";
 import { menuItems } from "@/admin/adminMockData";
 export default function Restaurant() {
   const [items, setItems] = useState(menuItems);
@@ -17,6 +18,9 @@ export default function Restaurant() {
   return (
     <AdminLayout pageTitle="Restaurant · Menu">
       <ReadOnlyBanner />
+      <div className="mb-6">
+        <ServiceClosurePanel tenantSlug="aura" service="dining" />
+      </div>
       <div className="flex flex-wrap items-center gap-2 mb-6">
         {cats.map((c) => <button key={c} onClick={() => setCat(c)} className={`px-4 py-2 rounded-full text-xs ${cat === c ? "bg-slate-900 text-white" : "bg-white border border-slate-200"}`} data-testid={`cat-${c}`}>{c}</button>)}
         {!readOnly && <button className="ml-auto text-xs bg-[#4F46E5] text-white px-4 py-2 rounded-full" data-testid="new-dish-btn">+ New dish</button>}

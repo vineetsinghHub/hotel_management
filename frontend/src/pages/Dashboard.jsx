@@ -3,14 +3,12 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { PropertyMark } from "@/components/PropertyMark";
 import { rooms, experiences, spaTreatments } from "@/data/mockData";
-import ConciergeChat from "@/components/guest/ConciergeChat";
 import RoomServiceSection from "@/components/guest/RoomServiceSection";
 import DigitalKey from "@/components/guest/DigitalKey";
 import ReviewPrompt from "@/components/guest/ReviewPrompt";
 import ReferralCard from "@/components/guest/ReferralCard";
 import PhotoDiary from "@/components/guest/PhotoDiary";
 import ItineraryPlanner from "@/components/guest/ItineraryPlanner";
-import GuestCommandPalette from "@/components/guest/GuestCommandPalette";
 import ToastHistoryBell from "@/components/guest/ToastHistory";
 import { useWishlist, useCurrency } from "@/context/AppContext";
 
@@ -943,9 +941,7 @@ export default function Dashboard() {
         </main>
       </div>
 
-      {/* Floating widgets */}
-      <ConciergeChat />
-      <GuestCommandPalette />
+      {/* Floating widgets are mounted globally via GuestGlobalWidgets in App.jsx */}
 
       {/* Review prompt appears once check-out is complete */}
       {reviewOpen && (

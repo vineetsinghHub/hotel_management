@@ -11,6 +11,7 @@ import CurrencyLanguagePill from "@/components/CurrencyLanguagePill";
 import { queryClient } from "@/lib/queryClient";
 import { TenantProvider } from "@/tenants/TenantProvider";
 import TenantSwitcher from "@/tenants/TenantSwitcher";
+import GuestGlobalWidgets from "@/components/guest/GuestGlobalWidgets";
 
 import Home from "@/pages/Home";
 import RoomsPage from "@/pages/Rooms";
@@ -62,6 +63,7 @@ import { ProtectedSuperAdmin } from "@/superAdmin/SuperAdminLayout";
 const GuestShell = () => (
   <TenantProvider>
     <Outlet />
+    <GuestGlobalWidgets />
     <TenantSwitcher />
   </TenantProvider>
 );
