@@ -49,7 +49,7 @@ export default function Payment() {
   const total = payNow;
 
   return (
-    <div className="bg-[#FAFAF8] min-h-screen" data-testid="payment-page">
+    <div className="bg-brand-surface min-h-screen" data-testid="payment-page">
       <Navbar />
       <div className="pt-32 pb-24 px-6 md:px-10">
         <div className="max-w-6xl mx-auto">
@@ -70,7 +70,7 @@ export default function Payment() {
             ].map((s, i) => (
               <div key={s.n} className="flex items-center gap-3 flex-1">
                 <div className={`w-8 h-8 rounded-full grid place-items-center text-xs font-mono ${
-                  s.done ? "bg-emerald-500 text-white" : s.active ? "bg-[#4F46E5] text-white" : "bg-white border border-slate-200 text-slate-500"
+                  s.done ? "bg-emerald-500 text-white" : s.active ? "bg-brand-primary text-white" : "bg-white border border-slate-200 text-slate-500"
                 }`}>
                   {s.done ? <i className="fa-solid fa-check text-[10px]"></i> : s.n}
                 </div>
@@ -86,7 +86,7 @@ export default function Payment() {
               <div className="bg-white rounded-[24px] border border-slate-200 p-8 md:p-10" data-testid="payment-card">
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <p className="text-eyebrow text-[#C9A227]">Step 2</p>
+                    <p className="text-eyebrow text-brand-accent">Step 2</p>
                     <h2 className="mt-2 font-serif text-3xl text-slate-900">{isFull ? "Payment" : "Reservation Deposit"}</h2>
                     <p className="text-slate-500 text-sm mt-1">
                       {isFull ? "Encrypted end-to-end · PCI DSS certified" : `Pay a deposit today · balance of $${balanceLater.toLocaleString()} due at check-out`}
@@ -120,11 +120,11 @@ export default function Payment() {
                       key={m.id}
                       onClick={() => setMethod(m.id)}
                       className={`p-4 rounded-[18px] border text-center transition-all ${
-                        method === m.id ? "border-[#4F46E5] bg-indigo-50/40 shadow-[0_6px_20px_rgba(79,70,229,0.12)]" : "border-slate-200 hover:border-slate-300"
+                        method === m.id ? "border-brand-primary bg-indigo-50/40 shadow-[0_6px_20px_rgba(79,70,229,0.12)]" : "border-slate-200 hover:border-slate-300"
                       }`}
                       data-testid={`pay-method-${m.id}`}
                     >
-                      <i className={`${m.icon} text-2xl ${method === m.id ? "text-[#4F46E5]" : "text-slate-700"}`}></i>
+                      <i className={`${m.icon} text-2xl ${method === m.id ? "text-brand-primary" : "text-slate-700"}`}></i>
                       <p className="mt-2 text-xs text-slate-700">{m.label}</p>
                     </button>
                   ))}
@@ -139,7 +139,7 @@ export default function Payment() {
                         <label className="text-eyebrow text-slate-500">Card Number</label>
                         <div className="relative mt-2">
                           <input value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })}
-                            className="w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5] font-mono tracking-wider" data-testid="card-number"/>
+                            className="w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary font-mono tracking-wider" data-testid="card-number"/>
                           <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                             <i className="fa-brands fa-cc-visa text-2xl text-slate-400"></i>
                             <i className="fa-brands fa-cc-mastercard text-2xl text-slate-300"></i>
@@ -149,17 +149,17 @@ export default function Payment() {
                       <div className="md:col-span-3">
                         <label className="text-eyebrow text-slate-500">Cardholder Name</label>
                         <input value={card.name} onChange={(e) => setCard({ ...card, name: e.target.value })}
-                          className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5]" data-testid="card-name"/>
+                          className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary" data-testid="card-name"/>
                       </div>
                       <div className="md:col-span-2">
                         <label className="text-eyebrow text-slate-500">Expiry</label>
                         <input value={card.expiry} onChange={(e) => setCard({ ...card, expiry: e.target.value })}
-                          className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="card-expiry"/>
+                          className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary font-mono" data-testid="card-expiry"/>
                       </div>
                       <div className="md:col-span-1">
                         <label className="text-eyebrow text-slate-500">CVC</label>
                         <input value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })}
-                          className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5] font-mono text-center" data-testid="card-cvc"/>
+                          className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary font-mono text-center" data-testid="card-cvc"/>
                       </div>
                     </div>
 
@@ -167,13 +167,13 @@ export default function Payment() {
                     <p className="text-eyebrow text-slate-500 mt-8 mb-4">Billing address</p>
                     <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                       <input placeholder="Street address" defaultValue="122 Marine Drive"
-                        className="md:col-span-6 bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5]" />
+                        className="md:col-span-6 bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary" />
                       <input placeholder="City" defaultValue="Mumbai"
-                        className="md:col-span-2 bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5]" />
+                        className="md:col-span-2 bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary" />
                       <input placeholder="State" defaultValue="Maharashtra"
-                        className="md:col-span-2 bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5]" />
+                        className="md:col-span-2 bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary" />
                       <input placeholder="Postal" defaultValue="400020"
-                        className="md:col-span-2 bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5] font-mono" />
+                        className="md:col-span-2 bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary font-mono" />
                     </div>
                   </div>
                 )}
@@ -182,7 +182,7 @@ export default function Payment() {
                   <div className="mt-10">
                     <p className="text-eyebrow text-slate-500 mb-4">UPI ID</p>
                     <input defaultValue="aarav@okhdfcbank"
-                      className="w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-[#4F46E5] font-mono" />
+                      className="w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3.5 text-sm outline-none focus:border-brand-primary font-mono" />
                     <p className="text-xs text-slate-500 mt-3">You will receive a payment prompt on your UPI app.</p>
                   </div>
                 )}
@@ -190,21 +190,21 @@ export default function Payment() {
                 {method === "netbanking" && (
                   <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-3">
                     {["HDFC", "ICICI", "Axis", "SBI", "Kotak", "Yes", "IDFC", "Federal"].map((b) => (
-                      <button key={b} className="p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-200 hover:border-slate-300 text-sm text-slate-800">{b} Bank</button>
+                      <button key={b} className="p-4 rounded-[14px] bg-brand-surface border border-slate-200 hover:border-slate-300 text-sm text-slate-800">{b} Bank</button>
                     ))}
                   </div>
                 )}
 
                 {(method === "gpay" || method === "apple") && (
-                  <div className="mt-10 py-16 grid place-items-center bg-[#FAFAF8] rounded-[20px]">
+                  <div className="mt-10 py-16 grid place-items-center bg-brand-surface rounded-[20px]">
                     <i className={`${method === "gpay" ? "fa-brands fa-google-pay" : "fa-brands fa-apple-pay"} text-6xl text-slate-800`}></i>
                     <p className="text-sm text-slate-500 mt-4">Tap the button below to open your wallet.</p>
                   </div>
                 )}
 
                 {/* Coupon */}
-                <div className="mt-10 p-5 rounded-[18px] bg-[#FAFAF8] border border-slate-200 flex items-center gap-4">
-                  <i className="fa-solid fa-ticket text-[#C9A227]"></i>
+                <div className="mt-10 p-5 rounded-[18px] bg-brand-surface border border-slate-200 flex items-center gap-4">
+                  <i className="fa-solid fa-ticket text-brand-accent"></i>
                   <input value={coupon} onChange={(e) => setCoupon(e.target.value.toUpperCase())}
                     className="flex-1 bg-transparent text-sm outline-none font-mono tracking-wider" data-testid="coupon-input"/>
                   <button className="text-xs bg-slate-900 text-white px-4 py-2 rounded-full">Apply</button>
@@ -226,7 +226,7 @@ export default function Payment() {
 
                 <button
                   onClick={() => setSuccess(true)}
-                  className="mt-8 w-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-base py-4 rounded-full shadow-[0_14px_36px_rgba(79,70,229,0.35)] hover:-translate-y-0.5 transition-all"
+                  className="mt-8 w-full bg-brand-primary hover:bg-brand-primary-hover text-white text-base py-4 rounded-full shadow-[0_14px_36px_rgba(79,70,229,0.35)] hover:-translate-y-0.5 transition-all"
                   data-testid="pay-securely-btn"
                 >
                   <i className="fa-solid fa-lock text-xs mr-2"></i>
@@ -285,11 +285,11 @@ export default function Payment() {
             <div className="w-16 h-16 rounded-full bg-emerald-100 mx-auto grid place-items-center">
               <i className="fa-solid fa-check text-emerald-600 text-2xl"></i>
             </div>
-            <p className="text-eyebrow text-[#C9A227] mt-6">Payment Successful</p>
+            <p className="text-eyebrow text-brand-accent mt-6">Payment Successful</p>
             <h3 className="mt-3 font-serif text-3xl text-slate-900">Your reservation is confirmed.</h3>
             <p className="mt-2 text-slate-500 text-sm">A confirmation has been sent to your email.</p>
 
-            <div className="mt-6 p-5 rounded-[18px] bg-[#FAFAF8] border border-slate-200 flex items-center gap-5">
+            <div className="mt-6 p-5 rounded-[18px] bg-brand-surface border border-slate-200 flex items-center gap-5">
               <div className="w-20 h-20 rounded-[12px] bg-white border border-slate-200 grid place-items-center">
                 {/* Fake QR */}
                 <svg viewBox="0 0 40 40" className="w-16 h-16">
@@ -311,13 +311,13 @@ export default function Payment() {
 
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button className="p-3 rounded-full border border-slate-200 text-sm text-slate-800 hover:bg-slate-50">
-                <i className="fa-solid fa-file-invoice mr-2 text-[#C9A227]"></i>Invoice
+                <i className="fa-solid fa-file-invoice mr-2 text-brand-accent"></i>Invoice
               </button>
               <button className="p-3 rounded-full border border-slate-200 text-sm text-slate-800 hover:bg-slate-50">
-                <i className="fa-regular fa-envelope mr-2 text-[#C9A227]"></i>Email
+                <i className="fa-regular fa-envelope mr-2 text-brand-accent"></i>Email
               </button>
               <button className="p-3 rounded-full border border-slate-200 text-sm text-slate-800 hover:bg-slate-50">
-                <i className="fa-regular fa-calendar-plus mr-2 text-[#C9A227]"></i>Calendar
+                <i className="fa-regular fa-calendar-plus mr-2 text-brand-accent"></i>Calendar
               </button>
               <button onClick={() => nav("/confirmation")} className="p-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-sm">
                 View Booking <i className="fa-solid fa-arrow-right text-[10px] ml-1"></i>

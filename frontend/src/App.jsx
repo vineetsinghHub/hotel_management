@@ -81,6 +81,39 @@ const guestRoutes = [
   { path: "gallery", element: <GalleryContact /> },
 ];
 
+// Admin route table — mounted at both /t/:slug/admin/* (canonical, tenant-scoped)
+// and /admin/* (legacy alias that redirects to /t/aura/admin/*).
+const adminRoutes = [
+  { path: "dashboard", key: "dashboard", Component: AdminDashboard },
+  { path: "front-desk", key: "front-desk", Component: FrontDesk },
+  { path: "reservations", key: "reservations", Component: Reservations },
+  { path: "rooms", key: "rooms", Component: AdminRooms },
+  { path: "guests", key: "guests", Component: Guests },
+  { path: "housekeeping", key: "housekeeping", Component: Housekeeping },
+  { path: "restaurant", key: "restaurant", Component: Restaurant },
+  { path: "spa", key: "spa", Component: AdminSpa },
+  { path: "events", key: "events", Component: Events },
+  { path: "inventory", key: "inventory", Component: Inventory },
+  { path: "staff", key: "staff", Component: Staff },
+  { path: "invoices", key: "invoices", Component: Invoices },
+  { path: "rate-channel", key: "rate-channel", Component: RateChannel },
+  { path: "marketing", key: "marketing", Component: Marketing },
+  { path: "messages", key: "messages", Component: MessageCenter },
+  { path: "reviews", key: "reviews", Component: Reviews },
+  { path: "reports", key: "reports", Component: Reports },
+  { path: "notifications", key: "notifications", Component: Notifications },
+  { path: "settings", key: "settings", Component: AdminSettings },
+];
+
+// Tenant-scoped admin shell — wraps every /t/:slug/admin/* route in the
+// TenantProvider so ProtectedAdmin + AdminLayout can access useTenant()
+// (tier, enabledModules, brand tokens) for per-hotel gating.
+const AdminShell = () => (
+  <TenantProvider>
+    <Outlet />
+  </TenantProvider>
+);
+
 function App() {
   useEffect(() => { document.title = "Aura Hotels | Timeless Heritage & Luxury"; }, []);
   const guarded = (key, Comp) => <ProtectedAdmin routeKey={key}><Comp /></ProtectedAdmin>;
@@ -108,28 +141,21 @@ function App() {
                     <Route key={r.path} path={`/${r.path}`} element={<Navigate to={`/t/aura/${r.path}`} replace />} />
                   ))}
 
-                  {/* ── Admin (PMS) ── */}
-                  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin/dashboard" element={guarded("dashboard", AdminDashboard)} />
-                  <Route path="/admin/front-desk" element={guarded("front-desk", FrontDesk)} />
-                  <Route path="/admin/reservations" element={guarded("reservations", Reservations)} />
-                  <Route path="/admin/rooms" element={guarded("rooms", AdminRooms)} />
-                  <Route path="/admin/guests" element={guarded("guests", Guests)} />
-                  <Route path="/admin/housekeeping" element={guarded("housekeeping", Housekeeping)} />
-                  <Route path="/admin/restaurant" element={guarded("restaurant", Restaurant)} />
-                  <Route path="/admin/spa" element={guarded("spa", AdminSpa)} />
-                  <Route path="/admin/events" element={guarded("events", Events)} />
-                  <Route path="/admin/inventory" element={guarded("inventory", Inventory)} />
-                  <Route path="/admin/staff" element={guarded("staff", Staff)} />
-                  <Route path="/admin/invoices" element={guarded("invoices", Invoices)} />
-                  <Route path="/admin/rate-channel" element={guarded("rate-channel", RateChannel)} />
-                  <Route path="/admin/marketing" element={guarded("marketing", Marketing)} />
-                  <Route path="/admin/messages" element={guarded("messages", MessageCenter)} />
-                  <Route path="/admin/reviews" element={guarded("reviews", Reviews)} />
-                  <Route path="/admin/reports" element={guarded("reports", Reports)} />
-                  <Route path="/admin/notifications" element={guarded("notifications", Notifications)} />
-                  <Route path="/admin/settings" element={guarded("settings", AdminSettings)} />
+                  {/* ── Admin (PMS) — canonical per-tenant routes ── */}
+                  <Route path="/t/:slug/admin" element={<AdminShell />}>
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="login" element={<AdminLogin />} />
+                    {adminRoutes.map(({ path, key, Component }) => (
+                      <Route key={path} path={path} element={guarded(key, Component)} />
+                    ))}
+                  </Route>
+
+                  {/* ── Legacy /admin/* → redirects to default tenant (aura) ── */}
+                  <Route path="/admin" element={<Navigate to="/t/aura/admin/dashboard" replace />} />
+                  <Route path="/admin/login" element={<Navigate to="/t/aura/admin/login" replace />} />
+                  {adminRoutes.map(({ path }) => (
+                    <Route key={`legacy-${path}`} path={`/admin/${path}`} element={<Navigate to={`/t/aura/admin/${path}`} replace />} />
+                  ))}
 
                   {/* ── Super Admin (SaaS control plane) ── */}
                   <Route path="/super-admin" element={<Navigate to="/super-admin/overview" replace />} />

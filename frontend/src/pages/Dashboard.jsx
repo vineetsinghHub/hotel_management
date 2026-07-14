@@ -226,7 +226,7 @@ export default function Dashboard() {
   }, [query]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] flex" data-testid="dashboard-page">
+    <div className="min-h-screen bg-brand-surface flex" data-testid="dashboard-page">
       {/* SIDEBAR */}
       <aside className={`flex flex-col w-72 bg-white border-r border-slate-200 fixed inset-y-0 left-0 z-40 transition-transform duration-300 ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`} data-testid="dashboard-sidebar">
         <div className="p-8 border-b border-slate-100 flex items-center justify-between">
@@ -249,16 +249,16 @@ export default function Dashboard() {
             >
               <i className={`fa-solid fa-${n.icon} text-xs w-4`}></i>
               <span>{n.label}</span>
-              {n.id === "bookings" && <span className="ml-auto text-[10px] bg-[#C9A227] text-white px-2 py-0.5 rounded-full font-mono">1</span>}
+              {n.id === "bookings" && <span className="ml-auto text-[10px] bg-brand-accent text-white px-2 py-0.5 rounded-full font-mono">1</span>}
             </button>
           ))}
         </nav>
         <div className="m-5 p-5 rounded-[18px] bg-gradient-to-br from-indigo-900 to-slate-900 text-white">
-          <p className="text-eyebrow text-[#E6C868]">Aura Circle</p>
+          <p className="text-eyebrow text-brand-accent-hover">Aura Circle</p>
           <p className="mt-2 font-serif text-2xl">Platinum</p>
           <p className="text-xs text-white/60 mt-1">2,480 nights to Diamond</p>
           <div className="mt-3 w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-            <div className="h-full w-2/3 bg-[#E6C868]"></div>
+            <div className="h-full w-2/3 bg-brand-accent-hover"></div>
           </div>
         </div>
       </aside>
@@ -269,7 +269,7 @@ export default function Dashboard() {
 
       <div className="flex-1 lg:ml-72">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-[#FAFAF8]/80 backdrop-blur-xl border-b border-slate-200 px-6 md:px-10 py-5 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-brand-surface/80 backdrop-blur-xl border-b border-slate-200 px-6 md:px-10 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileNavOpen(true)}
@@ -300,20 +300,20 @@ export default function Dashboard() {
                 data-testid="top-notifications"
               >
                 <i className="fa-regular fa-bell text-xs text-slate-600"></i>
-                {unreadCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-[#FAFAF8]"></span>}
+                {unreadCount > 0 && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-brand-surface"></span>}
               </button>
               {notifOpen && (
                 <div className="absolute right-0 top-full mt-2 w-96 bg-white border border-slate-200 rounded-[18px] shadow-[0_20px_50px_rgba(15,23,42,0.10)] p-4 z-40" data-testid="notif-panel">
                   <div className="flex items-center justify-between mb-3">
                     <p className="font-serif text-lg text-slate-900">Notifications</p>
-                    <button onClick={markAllRead} className="text-xs text-[#4F46E5] hover:underline" data-testid="mark-all-read">Mark all read</button>
+                    <button onClick={markAllRead} className="text-xs text-brand-primary hover:underline" data-testid="mark-all-read">Mark all read</button>
                   </div>
                   {notifs.length === 0 ? (
                     <p className="text-sm text-slate-500 py-6 text-center">You&apos;re all caught up.</p>
                   ) : (
                     <ul className="space-y-2 max-h-80 overflow-y-auto">
                       {notifs.map((n) => (
-                        <li key={n.id} className={`flex items-start gap-3 p-3 rounded-[12px] ${n.read ? "" : "bg-[#FAFAF8]"}`}>
+                        <li key={n.id} className={`flex items-start gap-3 p-3 rounded-[12px] ${n.read ? "" : "bg-brand-surface"}`}>
                           <span className="w-9 h-9 rounded-full grid place-items-center flex-shrink-0" style={{ backgroundColor: `${n.c}18`, color: n.c }}>
                             <i className={`fa-solid fa-${n.i} text-xs`}></i>
                           </span>
@@ -350,7 +350,7 @@ export default function Dashboard() {
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/55 to-slate-900/25"></div>
                 <div className="relative p-10 md:p-14 grid grid-cols-1 md:grid-cols-3 gap-10">
                   <div className="md:col-span-2">
-                    <p className="text-eyebrow text-[#E6C868]">Your Next Stay</p>
+                    <p className="text-eyebrow text-brand-accent-hover">Your Next Stay</p>
                     <h2 className="mt-3 font-serif text-4xl md:text-5xl leading-tight" data-testid="stay-suite">{stay.suite}</h2>
                     <p className="text-white/80 mt-2 text-sm" data-testid="stay-dates">
                       {new Date(stay.checkIn).toLocaleDateString("en-US", { month: "short", day: "numeric" })} → {new Date(stay.checkOut).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {Math.max(1, Math.round((new Date(stay.checkOut) - new Date(stay.checkIn)) / 86400000))} nights · {stay.guests}
@@ -369,7 +369,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="mt-8 flex flex-wrap items-center gap-3">
-                      <button onClick={() => setModifyOpen(true)} className="px-5 py-2.5 rounded-full bg-[#C9A227] hover:bg-[#B08D1E] text-slate-900 text-sm font-medium" data-testid="modify-booking-btn">Modify Booking</button>
+                      <button onClick={() => setModifyOpen(true)} className="px-5 py-2.5 rounded-full bg-brand-accent hover:bg-[#B08D1E] text-slate-900 text-sm font-medium" data-testid="modify-booking-btn">Modify Booking</button>
                       <button onClick={() => setEarlyOpen(true)} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="early-checkin-btn">Request Early Check-in</button>
                       <button onClick={() => setBookSpaOpen(true)} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="book-spa-btn">Book Spa</button>
                       <button onClick={() => setBookDinnerOpen(true)} className="px-5 py-2.5 rounded-full glass-dark text-white text-sm" data-testid="book-dinner-btn">Book Dinner</button>
@@ -378,9 +378,9 @@ export default function Dashboard() {
 
                   <div className="md:col-span-1 space-y-4">
                     <div className="glass-dark p-5 rounded-[18px]">
-                      <p className="text-eyebrow text-[#E6C868]">Weather · Udaipur</p>
+                      <p className="text-eyebrow text-brand-accent-hover">Weather · Udaipur</p>
                       <div className="mt-3 flex items-center gap-3">
-                        <i className="fa-solid fa-sun text-[#E6C868] text-3xl"></i>
+                        <i className="fa-solid fa-sun text-brand-accent-hover text-3xl"></i>
                         <div>
                           <p className="font-serif text-3xl">28°C</p>
                           <p className="text-xs text-white/70">Sunny, gentle breeze</p>
@@ -388,7 +388,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="glass-dark p-5 rounded-[18px] text-center">
-                      <p className="text-eyebrow text-[#E6C868]">QR Check-in</p>
+                      <p className="text-eyebrow text-brand-accent-hover">QR Check-in</p>
                       <div className="mt-3 mx-auto w-28 h-28 rounded-[14px] bg-white grid place-items-center">
                         <svg viewBox="0 0 40 40" className="w-24 h-24">
                           {[...Array(64)].map((_, k) => {
@@ -411,7 +411,7 @@ export default function Dashboard() {
                 <section className="bg-white rounded-[28px] border border-slate-200 p-8 md:p-10" data-testid="folio-card">
                   <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
                     <div>
-                      <p className="text-eyebrow text-[#C9A227]">Your Folio</p>
+                      <p className="text-eyebrow text-brand-accent">Your Folio</p>
                       <h3 className="mt-2 font-serif text-3xl text-slate-900">Outstanding Balance</h3>
                       <p className="mt-2 text-sm text-slate-500">Deposit paid at booking. Remaining balance plus in-stay extras is settled at check-out.</p>
                     </div>
@@ -423,7 +423,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-5 rounded-[16px] bg-[#FAFAF8] border border-slate-100">
+                    <div className="p-5 rounded-[16px] bg-brand-surface border border-slate-100">
                       <p className="text-eyebrow text-slate-500">Grand Total</p>
                       <p className="mt-2 font-mono text-2xl text-slate-900">${stay.grand.toLocaleString()}</p>
                     </div>
@@ -444,7 +444,7 @@ export default function Dashboard() {
                         {extras.map((e) => (
                           <div key={e.id} className="p-4 flex items-center justify-between" data-testid={`folio-item-${e.id}`}>
                             <div className="flex items-center gap-3">
-                              <i className="fa-solid fa-receipt text-[#C9A227]"></i>
+                              <i className="fa-solid fa-receipt text-brand-accent"></i>
                               <div>
                                 <p className="text-sm text-slate-900">{e.label}</p>
                                 <p className="text-xs text-slate-500">{e.when}</p>
@@ -466,7 +466,7 @@ export default function Dashboard() {
                     <button
                       onClick={() => setPayBalanceOpen(true)}
                       disabled={isFullyPaid}
-                      className="px-6 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]"
+                      className="px-6 py-3 rounded-full bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]"
                       data-testid="pay-balance-btn"
                     >
                       Pay Balance · <span className="font-mono">${balanceDue.toLocaleString()}</span>
@@ -476,14 +476,14 @@ export default function Dashboard() {
                       className="px-6 py-3 rounded-full border border-slate-200 hover:bg-slate-50 text-sm text-slate-900"
                       data-testid="add-extras-btn"
                     >
-                      <i className="fa-solid fa-plus mr-1.5 text-[#C9A227]"></i>Add extras
+                      <i className="fa-solid fa-plus mr-1.5 text-brand-accent"></i>Add extras
                     </button>
                     <button
                       onClick={() => setFastCheckoutOpen(true)}
-                      className="px-6 py-3 rounded-full bg-[#0F172A] hover:bg-slate-800 text-white text-sm shadow-[0_10px_28px_rgba(15,23,42,0.28)]"
+                      className="px-6 py-3 rounded-full bg-brand-ink hover:bg-slate-800 text-white text-sm shadow-[0_10px_28px_rgba(15,23,42,0.28)]"
                       data-testid="fast-checkout-btn"
                     >
-                      <i className="fa-solid fa-qrcode mr-1.5 text-[#E6C868]"></i>Fast Check-out
+                      <i className="fa-solid fa-qrcode mr-1.5 text-brand-accent-hover"></i>Fast Check-out
                     </button>
                     <button
                       onClick={emailFolio}
@@ -522,7 +522,7 @@ export default function Dashboard() {
                 <div className="lg:col-span-2 bg-white rounded-[24px] border border-slate-200 overflow-hidden" data-testid="booking-history">
                   <div className="p-6 flex items-center justify-between border-b border-slate-100">
                     <div>
-                      <p className="text-eyebrow text-[#C9A227]">Booking History</p>
+                      <p className="text-eyebrow text-brand-accent">Booking History</p>
                       <h3 className="mt-1 font-serif text-2xl text-slate-900">Your journeys</h3>
                     </div>
                     <button onClick={exportHistory} className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-testid="export-history">
@@ -542,7 +542,7 @@ export default function Dashboard() {
                     </thead>
                     <tbody>
                       {bookingHistory.map((b) => (
-                        <tr key={b.id} className="border-t border-slate-100 hover:bg-[#FAFAF8]" data-testid={`row-${b.id}`}>
+                        <tr key={b.id} className="border-t border-slate-100 hover:bg-brand-surface" data-testid={`row-${b.id}`}>
                           <td className="px-6 py-4 font-mono text-slate-900">{b.id}</td>
                           <td className="px-6 py-4 text-slate-800">{b.suite}</td>
                           <td className="px-6 py-4 text-slate-500 text-xs">{b.dates}</td>
@@ -567,7 +567,7 @@ export default function Dashboard() {
                 <div className="space-y-6">
                   <div className="bg-white rounded-[24px] border border-slate-200 p-6" data-testid="notifications-preview">
                     <div className="flex items-center justify-between">
-                      <p className="text-eyebrow text-[#C9A227]">Notifications</p>
+                      <p className="text-eyebrow text-brand-accent">Notifications</p>
                       <button onClick={() => setNotifOpen(true)} className="text-xs text-slate-500 hover:text-slate-900">View all</button>
                     </div>
                     <ul className="mt-4 space-y-4">
@@ -586,7 +586,7 @@ export default function Dashboard() {
                   </div>
 
                   <div className="bg-white rounded-[24px] border border-slate-200 p-6">
-                    <p className="text-eyebrow text-[#C9A227]">Quick Actions</p>
+                    <p className="text-eyebrow text-brand-accent">Quick Actions</p>
                     <div className="mt-4 grid grid-cols-2 gap-3">
                       {[
                         { i: "concierge-bell", l: "Concierge" },
@@ -597,10 +597,10 @@ export default function Dashboard() {
                         <button
                           key={a.l}
                           onClick={() => quickAction(a.l)}
-                          className="p-4 rounded-[14px] bg-[#FAFAF8] hover:bg-white hover:border-slate-300 border border-transparent text-left transition-all"
+                          className="p-4 rounded-[14px] bg-brand-surface hover:bg-white hover:border-slate-300 border border-transparent text-left transition-all"
                           data-testid={`quick-${a.l.toLowerCase().replace(/\s/g, "-")}`}
                         >
-                          <i className={`fa-solid fa-${a.i} text-[#C9A227]`}></i>
+                          <i className={`fa-solid fa-${a.i} text-brand-accent`}></i>
                           <p className="mt-2 text-sm text-slate-800">{a.l}</p>
                         </button>
                       ))}
@@ -615,10 +615,10 @@ export default function Dashboard() {
             <section className="bg-white rounded-[24px] border border-slate-200 overflow-hidden">
               <div className="p-6 flex items-center justify-between border-b border-slate-100">
                 <div>
-                  <p className="text-eyebrow text-[#C9A227]">Your Bookings</p>
+                  <p className="text-eyebrow text-brand-accent">Your Bookings</p>
                   <h3 className="mt-1 font-serif text-2xl text-slate-900">Manage reservations</h3>
                 </div>
-                <Link to="/booking" className="text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-full">+ New reservation</Link>
+                <Link to="/booking" className="text-xs bg-brand-primary hover:bg-brand-primary-hover text-white px-4 py-2 rounded-full">+ New reservation</Link>
               </div>
               <div className="divide-y divide-slate-100">
                 {bookingHistory.map((b) => (
@@ -667,10 +667,10 @@ export default function Dashboard() {
               <div className="bg-white rounded-[24px] border border-slate-200 p-6">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div>
-                    <p className="text-eyebrow text-[#C9A227]">Upcoming</p>
+                    <p className="text-eyebrow text-brand-accent">Upcoming</p>
                     <h3 className="mt-1 font-serif text-2xl text-slate-900">Dining reservations</h3>
                   </div>
-                  <Link to="/dining" className="text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-full">Reserve table</Link>
+                  <Link to="/dining" className="text-xs bg-brand-primary hover:bg-brand-primary-hover text-white px-4 py-2 rounded-full">Reserve table</Link>
                 </div>
                 <div className="mt-6 space-y-3">
                   {dining.length === 0 ? (
@@ -682,7 +682,7 @@ export default function Dashboard() {
                   ) : dining.map((d) => (
                     <div key={d.id} className="p-5 rounded-[16px] border border-slate-200 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between" data-testid={`dining-${d.id}`}>
                       <div className="flex items-center gap-4">
-                        <i className="fa-solid fa-utensils text-[#C9A227]"></i>
+                        <i className="fa-solid fa-utensils text-brand-accent"></i>
                         <div>
                           <p className="font-serif text-lg text-slate-900">{d.name}</p>
                           <p className="text-xs text-slate-500">{d.restaurant} · {d.when} · {d.guests} guests</p>
@@ -704,10 +704,10 @@ export default function Dashboard() {
               <div className="bg-white rounded-[24px] border border-slate-200 p-6">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div>
-                    <p className="text-eyebrow text-[#C9A227]">Upcoming</p>
+                    <p className="text-eyebrow text-brand-accent">Upcoming</p>
                     <h3 className="mt-1 font-serif text-2xl text-slate-900">Spa appointments</h3>
                   </div>
-                  <Link to="/spa" className="text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-full">New appointment</Link>
+                  <Link to="/spa" className="text-xs bg-brand-primary hover:bg-brand-primary-hover text-white px-4 py-2 rounded-full">New appointment</Link>
                 </div>
                 <div className="mt-6 space-y-3">
                   {spa.length === 0 ? (
@@ -719,7 +719,7 @@ export default function Dashboard() {
                   ) : spa.map((s) => (
                     <div key={s.id} className="p-5 rounded-[16px] border border-slate-200 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between" data-testid={`spa-${s.id}`}>
                       <div className="flex items-center gap-4">
-                        <i className="fa-solid fa-spa text-[#C9A227]"></i>
+                        <i className="fa-solid fa-spa text-brand-accent"></i>
                         <div>
                           <p className="font-serif text-lg text-slate-900">{s.name}</p>
                           <p className="text-xs text-slate-500">{s.duration} · with {s.therapist} · {s.when}</p>
@@ -736,7 +736,7 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {spaTreatments.slice(0, 2).map((t) => (
                   <div key={t.id} className="p-6 rounded-[20px] bg-white border border-slate-200">
-                    <p className="text-eyebrow text-[#C9A227]">Try next</p>
+                    <p className="text-eyebrow text-brand-accent">Try next</p>
                     <p className="mt-2 font-serif text-xl text-slate-900">{t.name}</p>
                     <p className="text-xs text-slate-500 mt-1">{t.benefits}</p>
                     <div className="mt-4 flex items-center justify-between">
@@ -754,10 +754,10 @@ export default function Dashboard() {
               <div className="bg-white rounded-[24px] border border-slate-200 p-6">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div>
-                    <p className="text-eyebrow text-[#C9A227]">Upcoming</p>
+                    <p className="text-eyebrow text-brand-accent">Upcoming</p>
                     <h3 className="mt-1 font-serif text-2xl text-slate-900">Your experiences</h3>
                   </div>
-                  <Link to="/experiences" className="text-xs bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-full">Browse</Link>
+                  <Link to="/experiences" className="text-xs bg-brand-primary hover:bg-brand-primary-hover text-white px-4 py-2 rounded-full">Browse</Link>
                 </div>
                 <div className="mt-6 space-y-3">
                   {upcomingExps.length === 0 ? (
@@ -769,7 +769,7 @@ export default function Dashboard() {
                   ) : upcomingExps.map((e) => (
                     <div key={e.id} className="p-5 rounded-[16px] border border-slate-200 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 justify-between" data-testid={`experience-${e.id}`}>
                       <div className="flex items-center gap-4">
-                        <i className="fa-solid fa-compass text-[#C9A227]"></i>
+                        <i className="fa-solid fa-compass text-brand-accent"></i>
                         <div>
                           <p className="font-serif text-lg text-slate-900">{e.title}</p>
                           <p className="text-xs text-slate-500">{e.when}</p>
@@ -790,7 +790,7 @@ export default function Dashboard() {
             <section className="bg-white rounded-[24px] border border-slate-200 overflow-hidden">
               <div className="p-6 flex items-center justify-between border-b border-slate-100">
                 <div>
-                  <p className="text-eyebrow text-[#C9A227]">Financials</p>
+                  <p className="text-eyebrow text-brand-accent">Financials</p>
                   <h3 className="mt-1 font-serif text-2xl text-slate-900">Invoices</h3>
                 </div>
                 <p className="text-xs text-slate-500">Total this year · <span className="font-mono text-slate-900">$24,980</span></p>
@@ -808,7 +808,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {invoicesData.map((inv) => (
-                    <tr key={inv.id} className="border-t border-slate-100 hover:bg-[#FAFAF8]" data-testid={`invoice-row-${inv.id}`}>
+                    <tr key={inv.id} className="border-t border-slate-100 hover:bg-brand-surface" data-testid={`invoice-row-${inv.id}`}>
                       <td className="px-6 py-4 font-mono text-slate-900">{inv.id}</td>
                       <td className="px-6 py-4 font-mono text-slate-600">{inv.ref}</td>
                       <td className="px-6 py-4 text-slate-500 text-xs">{inv.date}</td>
@@ -845,7 +845,7 @@ export default function Dashboard() {
                 <button onClick={() => toast.info("Photo upload coming soon")} className="mt-6 text-xs w-full py-2.5 rounded-full border border-slate-200 hover:bg-slate-50">Change photo</button>
               </div>
               <div className="lg:col-span-2 bg-white rounded-[24px] border border-slate-200 p-8">
-                <p className="text-eyebrow text-[#C9A227]">Personal Details</p>
+                <p className="text-eyebrow text-brand-accent">Personal Details</p>
                 <h3 className="mt-1 font-serif text-2xl text-slate-900">Edit your information</h3>
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
                   <FieldSm label="First Name" value={profile.firstName} onChange={(v) => setProfile({ ...profile, firstName: v })} testid="pf-first" />
@@ -858,7 +858,7 @@ export default function Dashboard() {
                   <FieldSm label="Preferences" value={profile.notes} onChange={(v) => setProfile({ ...profile, notes: v })} testid="pf-notes" />
                 </div>
                 <div className="mt-8 flex items-center gap-3">
-                  <button onClick={saveProfile} className="px-6 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="pf-save">Save changes</button>
+                  <button onClick={saveProfile} className="px-6 py-3 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm" data-testid="pf-save">Save changes</button>
                   <button onClick={() => setProfile((p) => ({ ...p, firstName: "Aarav", lastName: "Mehta" }))} className="px-6 py-3 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Reset</button>
                 </div>
               </div>
@@ -868,7 +868,7 @@ export default function Dashboard() {
           {active === "settings" && (
             <section className="space-y-6" data-testid="settings-section">
               <div className="bg-white rounded-[24px] border border-slate-200 p-8">
-                <p className="text-eyebrow text-[#C9A227]">Notifications</p>
+                <p className="text-eyebrow text-brand-accent">Notifications</p>
                 <h3 className="mt-1 font-serif text-2xl text-slate-900">How we reach you</h3>
                 <div className="mt-6 space-y-4">
                   {[
@@ -887,7 +887,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="bg-white rounded-[24px] border border-slate-200 p-8">
-                <p className="text-eyebrow text-[#C9A227]">Security</p>
+                <p className="text-eyebrow text-brand-accent">Security</p>
                 <h3 className="mt-1 font-serif text-2xl text-slate-900">Your account</h3>
                 <div className="mt-6 flex items-center justify-between py-4 border-b border-slate-100">
                   <div>
@@ -896,26 +896,26 @@ export default function Dashboard() {
                   </div>
                   <Toggle checked={prefs.twoFactor} onChange={(v) => setPrefs({ ...prefs, twoFactor: v })} testid="toggle-twoFactor" />
                 </div>
-                <button onClick={() => toast.info("Password reset email sent")} className="mt-4 text-sm text-[#4F46E5] hover:underline" data-testid="reset-password">Reset password</button>
+                <button onClick={() => toast.info("Password reset email sent")} className="mt-4 text-sm text-brand-primary hover:underline" data-testid="reset-password">Reset password</button>
               </div>
               <div className="bg-white rounded-[24px] border border-slate-200 p-8">
-                <p className="text-eyebrow text-[#C9A227]">Preferences</p>
+                <p className="text-eyebrow text-brand-accent">Preferences</p>
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
                     <label className="text-eyebrow text-slate-500">Currency</label>
-                    <select value={prefs.currency} onChange={(e) => setPrefs({ ...prefs, currency: e.target.value })} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" data-testid="pref-currency">
+                    <select value={prefs.currency} onChange={(e) => setPrefs({ ...prefs, currency: e.target.value })} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary" data-testid="pref-currency">
                       {["USD", "EUR", "GBP", "INR", "AED"].map((c) => <option key={c}>{c}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="text-eyebrow text-slate-500">Language</label>
-                    <select value={prefs.language} onChange={(e) => setPrefs({ ...prefs, language: e.target.value })} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" data-testid="pref-language">
+                    <select value={prefs.language} onChange={(e) => setPrefs({ ...prefs, language: e.target.value })} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary" data-testid="pref-language">
                       {["English", "Français", "Deutsch", "日本語", "हिन्दी"].map((c) => <option key={c}>{c}</option>)}
                     </select>
                   </div>
                 </div>
               </div>
-              <button onClick={savePrefs} className="px-6 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="prefs-save">Save preferences</button>
+              <button onClick={savePrefs} className="px-6 py-3 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm" data-testid="prefs-save">Save preferences</button>
             </section>
           )}
 
@@ -1052,8 +1052,8 @@ export default function Dashboard() {
               ) : (
                 <ul>
                   {searchResults.map((r, i) => (
-                    <li key={i} className="px-5 py-3 hover:bg-[#FAFAF8] flex items-center gap-3 cursor-pointer border-t border-slate-100">
-                      <span className="text-[10px] tracking-widest uppercase text-[#C9A227] w-24">{r.type}</span>
+                    <li key={i} className="px-5 py-3 hover:bg-brand-surface flex items-center gap-3 cursor-pointer border-t border-slate-100">
+                      <span className="text-[10px] tracking-widest uppercase text-brand-accent w-24">{r.type}</span>
                       <span className="text-sm text-slate-900">{r.label}</span>
                     </li>
                   ))}
@@ -1070,12 +1070,12 @@ export default function Dashboard() {
 const FieldSm = ({ label, value, onChange, testid, type = "text" }) => (
   <div>
     <label className="text-eyebrow text-slate-500">{label}</label>
-    <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" data-testid={testid} />
+    <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary" data-testid={testid} />
   </div>
 );
 
 const Toggle = ({ checked, onChange, testid }) => (
-  <button onClick={() => onChange(!checked)} className={`w-11 h-6 rounded-full relative transition-colors ${checked ? "bg-[#4F46E5]" : "bg-slate-200"}`} data-testid={testid}>
+  <button onClick={() => onChange(!checked)} className={`w-11 h-6 rounded-full relative transition-colors ${checked ? "bg-brand-primary" : "bg-slate-200"}`} data-testid={testid}>
     <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${checked ? "left-[22px]" : "left-0.5"}`}></span>
   </button>
 );
@@ -1093,7 +1093,7 @@ const ModalShell = ({ title, onClose, children, testid }) => (
       <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid={`${testid}-close`}>
         <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
       </button>
-      <p className="text-eyebrow text-[#C9A227]">Reservation</p>
+      <p className="text-eyebrow text-brand-accent">Reservation</p>
       <h3 className="mt-1 font-serif text-2xl text-slate-900">{title}</h3>
       <div className="mt-5">{children}</div>
     </div>
@@ -1111,13 +1111,13 @@ const RescheduleModal = ({ item, onClose, onConfirm }) => {
         <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="reschedule-close">
           <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
         </button>
-        <p className="text-eyebrow text-[#C9A227]">Reschedule {kindLabel}</p>
+        <p className="text-eyebrow text-brand-accent">Reschedule {kindLabel}</p>
         <h3 className="mt-1 font-serif text-2xl text-slate-900">{item.item.name || item.item.title}</h3>
         <p className="text-xs text-slate-500 mt-1">Current: {item.item.when}</p>
 
         <div className="mt-5">
           <label className="text-eyebrow text-slate-500">New date</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="reschedule-date" />
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary font-mono" data-testid="reschedule-date" />
         </div>
         <div className="mt-4">
           <label className="text-eyebrow text-slate-500">New time</label>
@@ -1126,7 +1126,7 @@ const RescheduleModal = ({ item, onClose, onConfirm }) => {
               <button
                 key={t}
                 onClick={() => setTime(t)}
-                className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === t ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`}
+                className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === t ? "bg-brand-primary text-white" : "bg-brand-surface text-slate-700 hover:bg-slate-100"}`}
                 data-testid={`reschedule-slot-${t}`}
               >{t}</button>
             ))}
@@ -1140,7 +1140,7 @@ const RescheduleModal = ({ item, onClose, onConfirm }) => {
               const label = `${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
               onConfirm(label);
             }}
-            className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm"
+            className="px-5 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm"
             data-testid="reschedule-confirm"
           >Confirm reschedule</button>
         </div>
@@ -1161,30 +1161,30 @@ const ModifyBookingModal = ({ stay, onClose, onApply }) => {
         <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="modify-close">
           <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
         </button>
-        <p className="text-eyebrow text-[#C9A227]">Reservation</p>
+        <p className="text-eyebrow text-brand-accent">Reservation</p>
         <h3 className="mt-1 font-serif text-2xl text-slate-900">Modify Booking</h3>
         <p className="text-sm text-slate-500 mt-1">Free of charge up to 48 hours before arrival.</p>
 
         <div className="mt-5 space-y-4">
           <div>
             <label className="text-eyebrow text-slate-500">Suite</label>
-            <select value={suite} onChange={(e) => setSuite(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" data-testid="mod-suite">
+            <select value={suite} onChange={(e) => setSuite(e.target.value)} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary" data-testid="mod-suite">
               {rooms.map((r) => <option key={r.id}>{r.name}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-eyebrow text-slate-500">New check-in</label>
-              <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="mod-checkin" />
+              <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary font-mono" data-testid="mod-checkin" />
             </div>
             <div>
               <label className="text-eyebrow text-slate-500">New check-out</label>
-              <input type="date" value={checkOut} min={checkIn} onChange={(e) => setCheckOut(e.target.value)} className={`mt-2 w-full bg-[#FAFAF8] border rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono ${err ? "border-rose-400" : "border-slate-200"}`} data-testid="mod-checkout" />
+              <input type="date" value={checkOut} min={checkIn} onChange={(e) => setCheckOut(e.target.value)} className={`mt-2 w-full bg-brand-surface border rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary font-mono ${err ? "border-rose-400" : "border-slate-200"}`} data-testid="mod-checkout" />
             </div>
           </div>
           <div>
             <label className="text-eyebrow text-slate-500">Notes for concierge</label>
-            <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]" data-testid="mod-notes" />
+            <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary" data-testid="mod-notes" />
           </div>
         </div>
 
@@ -1193,7 +1193,7 @@ const ModifyBookingModal = ({ stay, onClose, onApply }) => {
           <button
             onClick={() => onApply({ suite, checkIn, checkOut })}
             disabled={err}
-            className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-40 text-white text-sm"
+            className="px-5 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-40 text-white text-sm"
             data-testid="mod-submit"
           >Save changes</button>
         </div>
@@ -1211,7 +1211,7 @@ const EarlyCheckinModal = ({ onClose, onApply }) => {
         <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="early-close">
           <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
         </button>
-        <p className="text-eyebrow text-[#C9A227]">Arrival</p>
+        <p className="text-eyebrow text-brand-accent">Arrival</p>
         <h3 className="mt-1 font-serif text-2xl text-slate-900">Request Early Check-in</h3>
         <p className="text-sm text-slate-500 mt-1">Preferred arrival window:</p>
 
@@ -1220,7 +1220,7 @@ const EarlyCheckinModal = ({ onClose, onApply }) => {
             <button
               key={t}
               onClick={() => setSlot(t)}
-              className={`py-2.5 rounded-[10px] text-xs font-mono transition-all ${slot === t ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`}
+              className={`py-2.5 rounded-[10px] text-xs font-mono transition-all ${slot === t ? "bg-brand-primary text-white" : "bg-brand-surface text-slate-700 hover:bg-slate-100"}`}
               data-testid={`early-slot-${t}`}
             >{t}</button>
           ))}
@@ -1228,7 +1228,7 @@ const EarlyCheckinModal = ({ onClose, onApply }) => {
         <p className="mt-4 text-xs text-slate-500">Complimentary early check-in is subject to housekeeping. Guaranteed 4-hour early check-in from $90.</p>
         <div className="mt-6 flex items-center gap-3 justify-end">
           <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
-          <button onClick={() => onApply(slot)} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="early-submit">Confirm {slot}</button>
+          <button onClick={() => onApply(slot)} className="px-5 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm" data-testid="early-submit">Confirm {slot}</button>
         </div>
       </div>
     </div>
@@ -1241,10 +1241,10 @@ const PayBalanceModal = ({ amount, onClose, onConfirm }) => (
       <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="pay-balance-close">
         <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
       </button>
-      <p className="text-eyebrow text-[#C9A227]">Settle balance</p>
+      <p className="text-eyebrow text-brand-accent">Settle balance</p>
       <h3 className="mt-1 font-serif text-2xl text-slate-900">Pay outstanding</h3>
       <p className="text-sm text-slate-500 mt-2">Charge to your card on file. This clears the remaining balance and all in-stay extras.</p>
-      <div className="mt-6 p-5 rounded-[16px] bg-[#FAFAF8] border border-slate-100 flex items-baseline justify-between">
+      <div className="mt-6 p-5 rounded-[16px] bg-brand-surface border border-slate-100 flex items-baseline justify-between">
         <div>
           <p className="text-eyebrow text-slate-500">Amount</p>
           <p className="text-xs text-slate-500 mt-1">Visa •••• 4242</p>
@@ -1253,7 +1253,7 @@ const PayBalanceModal = ({ amount, onClose, onConfirm }) => (
       </div>
       <div className="mt-6 flex items-center gap-3 justify-end">
         <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
-        <button onClick={onConfirm} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="pay-balance-confirm">
+        <button onClick={onConfirm} className="px-5 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm" data-testid="pay-balance-confirm">
           <i className="fa-solid fa-lock text-[10px] mr-1.5"></i>Pay ${amount.toLocaleString()}
         </button>
       </div>
@@ -1315,8 +1315,8 @@ const FastCheckoutModal = ({ stay, extras, extrasTotal, balanceDue, isFullyPaid,
 
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* LEFT — QR panel */}
-          <div className="bg-[#0F172A] text-white p-8 md:p-10 md:rounded-l-[24px] flex flex-col">
-            <p className="text-eyebrow text-[#E6C868]">Fast Check-out</p>
+          <div className="bg-brand-ink text-white p-8 md:p-10 md:rounded-l-[24px] flex flex-col">
+            <p className="text-eyebrow text-brand-accent-hover">Fast Check-out</p>
             <h3 className="mt-1 font-serif text-3xl">Scan at Front Desk</h3>
             <p className="text-sm text-white/70 mt-2">
               Show this code at the concierge desk. Zero queue, zero paperwork &mdash; your keys go back and your folio closes instantly.
@@ -1329,11 +1329,11 @@ const FastCheckoutModal = ({ stay, extras, extrasTotal, balanceDue, isFullyPaid,
 
             <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
               <div className="glass-dark p-3 rounded-[12px]">
-                <p className="text-[10px] tracking-widest uppercase text-[#E6C868]">Suite</p>
+                <p className="text-[10px] tracking-widest uppercase text-brand-accent-hover">Suite</p>
                 <p className="mt-1 text-white/90">{stay.suite}</p>
               </div>
               <div className="glass-dark p-3 rounded-[12px]">
-                <p className="text-[10px] tracking-widest uppercase text-[#E6C868]">Departure</p>
+                <p className="text-[10px] tracking-widest uppercase text-brand-accent-hover">Departure</p>
                 <p className="mt-1 text-white/90 font-mono">{new Date(stay.checkOut).toLocaleDateString("en-US", { month: "short", day: "numeric" })} · 12:00</p>
               </div>
             </div>
@@ -1351,7 +1351,7 @@ const FastCheckoutModal = ({ stay, extras, extrasTotal, balanceDue, isFullyPaid,
 
           {/* RIGHT — Folio summary + actions */}
           <div className="p-8 md:p-10">
-            <p className="text-eyebrow text-[#C9A227]">Folio summary</p>
+            <p className="text-eyebrow text-brand-accent">Folio summary</p>
             <h3 className="mt-1 font-serif text-2xl text-slate-900">Your final bill</h3>
             <p className="text-sm text-slate-500 mt-1">{nights} {nights === 1 ? "night" : "nights"} &middot; {stay.guests}</p>
 
@@ -1388,8 +1388,8 @@ const FastCheckoutModal = ({ stay, extras, extrasTotal, balanceDue, isFullyPaid,
               </div>
             )}
 
-            <div className="mt-6 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-center gap-3">
-              <i className="fa-solid fa-shield-halved text-[#4F46E5]"></i>
+            <div className="mt-6 p-4 rounded-[14px] bg-brand-surface border border-slate-100 flex items-center gap-3">
+              <i className="fa-solid fa-shield-halved text-brand-primary"></i>
               <div className="text-xs text-slate-600 leading-relaxed">
                 Charging <span className="font-mono text-slate-900">Visa &bull;&bull;&bull;&bull; 4242</span> on file. You can review the folio at Front Desk before you leave.
               </div>
@@ -1399,7 +1399,7 @@ const FastCheckoutModal = ({ stay, extras, extrasTotal, balanceDue, isFullyPaid,
               <button
                 onClick={onApproveCharge}
                 disabled={chargesSettled}
-                className="flex-1 px-5 py-3 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:bg-emerald-600 disabled:opacity-100 text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]"
+                className="flex-1 px-5 py-3 rounded-full bg-brand-primary hover:bg-brand-primary-hover disabled:bg-emerald-600 disabled:opacity-100 text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]"
                 data-testid="approve-room-charge-btn"
               >
                 {chargesSettled ? (
@@ -1448,7 +1448,7 @@ const AddExtrasModal = ({ onClose, onAdd }) => {
         <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="add-extras-close">
           <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
         </button>
-        <p className="text-eyebrow text-[#C9A227]">In-stay extras</p>
+        <p className="text-eyebrow text-brand-accent">In-stay extras</p>
         <h3 className="mt-1 font-serif text-2xl text-slate-900">Add to your folio</h3>
         <p className="text-sm text-slate-500 mt-1">Charged to your suite. Settled at check-out.</p>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1456,10 +1456,10 @@ const AddExtrasModal = ({ onClose, onAdd }) => {
             <button
               key={c.label}
               onClick={() => onAdd(c.label, c.amount)}
-              className="text-left p-4 rounded-[14px] bg-[#FAFAF8] hover:bg-white border border-transparent hover:border-slate-200 transition-all flex items-center gap-4"
+              className="text-left p-4 rounded-[14px] bg-brand-surface hover:bg-white border border-transparent hover:border-slate-200 transition-all flex items-center gap-4"
               data-testid={`extra-${c.icon}`}
             >
-              <span className="w-10 h-10 rounded-full bg-[#C9A227]/10 text-[#C9A227] grid place-items-center">
+              <span className="w-10 h-10 rounded-full bg-brand-accent/10 text-brand-accent grid place-items-center">
                 <i className={`fa-solid fa-${c.icon} text-sm`}></i>
               </span>
               <div className="flex-1 min-w-0">
@@ -1490,7 +1490,7 @@ const BookSpaModal = ({ stay, onClose, onConfirm }) => {
         <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="book-spa-close">
           <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
         </button>
-        <p className="text-eyebrow text-[#C9A227]">Book from your stay</p>
+        <p className="text-eyebrow text-brand-accent">Book from your stay</p>
         <h3 className="mt-1 font-serif text-2xl text-slate-900">Book Spa Treatment</h3>
         <p className="text-sm text-slate-500 mt-1">Charged to your folio · settled at check-out.</p>
 
@@ -1503,10 +1503,10 @@ const BookSpaModal = ({ stay, onClose, onConfirm }) => {
                 <button
                   key={x.id}
                   onClick={() => setTreatmentId(x.id)}
-                  className={`w-full text-left p-4 rounded-[14px] border flex items-center gap-4 transition-all ${on ? "border-[#4F46E5] bg-indigo-50/30 ring-2 ring-[#4F46E5]/10" : "border-slate-200 hover:border-slate-300 bg-white"}`}
+                  className={`w-full text-left p-4 rounded-[14px] border flex items-center gap-4 transition-all ${on ? "border-brand-primary bg-indigo-50/30 ring-2 ring-brand-primary/10" : "border-slate-200 hover:border-slate-300 bg-white"}`}
                   data-testid={`spa-pick-${x.id}`}
                 >
-                  <span className="w-10 h-10 rounded-full bg-[#C9A227]/10 text-[#C9A227] grid place-items-center flex-shrink-0"><i className="fa-solid fa-spa text-sm"></i></span>
+                  <span className="w-10 h-10 rounded-full bg-brand-accent/10 text-brand-accent grid place-items-center flex-shrink-0"><i className="fa-solid fa-spa text-sm"></i></span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-900">{x.name}</p>
                     <p className="text-xs text-slate-500">{x.duration} · with {x.therapist}</p>
@@ -1521,19 +1521,19 @@ const BookSpaModal = ({ stay, onClose, onConfirm }) => {
         <div className="mt-5 grid grid-cols-2 gap-4">
           <div>
             <label className="text-eyebrow text-slate-500">Date</label>
-            <input type="date" value={date} min={stay.checkIn} max={stay.checkOut} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="spa-date" />
+            <input type="date" value={date} min={stay.checkIn} max={stay.checkOut} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary font-mono" data-testid="spa-date" />
           </div>
           <div>
             <label className="text-eyebrow text-slate-500">Time</label>
             <div className="mt-2 grid grid-cols-4 gap-2">
               {slots.map((s) => (
-                <button key={s} onClick={() => setTime(s)} className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === s ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`} data-testid={`spa-slot-${s}`}>{s}</button>
+                <button key={s} onClick={() => setTime(s)} className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === s ? "bg-brand-primary text-white" : "bg-brand-surface text-slate-700 hover:bg-slate-100"}`} data-testid={`spa-slot-${s}`}>{s}</button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="mt-5 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-baseline justify-between">
+        <div className="mt-5 p-4 rounded-[14px] bg-brand-surface border border-slate-100 flex items-baseline justify-between">
           <div>
             <p className="text-eyebrow text-slate-500">Charged to folio</p>
             <p className="text-xs text-slate-500 mt-1">{t.name} · {t.duration}</p>
@@ -1543,7 +1543,7 @@ const BookSpaModal = ({ stay, onClose, onConfirm }) => {
 
         <div className="mt-6 flex items-center gap-3 justify-end">
           <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
-          <button onClick={() => onConfirm({ treatmentId, date, time })} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="spa-confirm">Confirm booking</button>
+          <button onClick={() => onConfirm({ treatmentId, date, time })} className="px-5 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm" data-testid="spa-confirm">Confirm booking</button>
         </div>
       </div>
     </div>
@@ -1569,7 +1569,7 @@ const BookDinnerModal = ({ stay, onClose, onConfirm }) => {
         <button onClick={onClose} className="absolute top-4 right-4 w-9 h-9 rounded-full hover:bg-slate-50 grid place-items-center" data-testid="book-dinner-close">
           <i className="fa-solid fa-xmark text-slate-500 text-sm"></i>
         </button>
-        <p className="text-eyebrow text-[#C9A227]">Book from your stay</p>
+        <p className="text-eyebrow text-brand-accent">Book from your stay</p>
         <h3 className="mt-1 font-serif text-2xl text-slate-900">Reserve a Table</h3>
         <p className="text-sm text-slate-500 mt-1">Charged to your folio · settled at check-out.</p>
 
@@ -1582,10 +1582,10 @@ const BookDinnerModal = ({ stay, onClose, onConfirm }) => {
                 <button
                   key={r.name}
                   onClick={() => setRestaurant(r.name)}
-                  className={`w-full text-left p-4 rounded-[14px] border flex items-center gap-4 transition-all ${on ? "border-[#4F46E5] bg-indigo-50/30 ring-2 ring-[#4F46E5]/10" : "border-slate-200 hover:border-slate-300 bg-white"}`}
+                  className={`w-full text-left p-4 rounded-[14px] border flex items-center gap-4 transition-all ${on ? "border-brand-primary bg-indigo-50/30 ring-2 ring-brand-primary/10" : "border-slate-200 hover:border-slate-300 bg-white"}`}
                   data-testid={`dinner-pick-${r.name.split(" ")[0].toLowerCase()}`}
                 >
-                  <span className="w-10 h-10 rounded-full bg-[#C9A227]/10 text-[#C9A227] grid place-items-center flex-shrink-0"><i className="fa-solid fa-utensils text-sm"></i></span>
+                  <span className="w-10 h-10 rounded-full bg-brand-accent/10 text-brand-accent grid place-items-center flex-shrink-0"><i className="fa-solid fa-utensils text-sm"></i></span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-900">{r.name}</p>
                     <p className="text-xs text-slate-500">{r.desc}</p>
@@ -1600,13 +1600,13 @@ const BookDinnerModal = ({ stay, onClose, onConfirm }) => {
         <div className="mt-5 grid grid-cols-2 gap-4">
           <div>
             <label className="text-eyebrow text-slate-500">Date</label>
-            <input type="date" value={date} min={stay.checkIn} max={stay.checkOut} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono" data-testid="dinner-date" />
+            <input type="date" value={date} min={stay.checkIn} max={stay.checkOut} onChange={(e) => setDate(e.target.value)} className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary font-mono" data-testid="dinner-date" />
           </div>
           <div>
             <label className="text-eyebrow text-slate-500">Time</label>
             <div className="mt-2 grid grid-cols-4 gap-2">
               {slots.map((s) => (
-                <button key={s} onClick={() => setTime(s)} className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === s ? "bg-[#4F46E5] text-white" : "bg-[#FAFAF8] text-slate-700 hover:bg-slate-100"}`} data-testid={`dinner-slot-${s}`}>{s}</button>
+                <button key={s} onClick={() => setTime(s)} className={`py-2 rounded-[10px] text-xs font-mono transition-all ${time === s ? "bg-brand-primary text-white" : "bg-brand-surface text-slate-700 hover:bg-slate-100"}`} data-testid={`dinner-slot-${s}`}>{s}</button>
               ))}
             </div>
           </div>
@@ -1614,14 +1614,14 @@ const BookDinnerModal = ({ stay, onClose, onConfirm }) => {
 
         <div className="mt-5">
           <label className="text-eyebrow text-slate-500">Guests</label>
-          <div className="mt-2 flex items-center justify-between p-3 bg-[#FAFAF8] rounded-[14px] border border-slate-100 max-w-xs">
+          <div className="mt-2 flex items-center justify-between p-3 bg-brand-surface rounded-[14px] border border-slate-100 max-w-xs">
             <button onClick={() => setGuests(Math.max(1, guests - 1))} className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-700" data-testid="dinner-guests-minus">−</button>
             <span className="font-mono" data-testid="dinner-guests-value">{guests} guest{guests > 1 ? "s" : ""}</span>
             <button onClick={() => setGuests(guests + 1)} className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-700" data-testid="dinner-guests-plus">+</button>
           </div>
         </div>
 
-        <div className="mt-5 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-baseline justify-between">
+        <div className="mt-5 p-4 rounded-[14px] bg-brand-surface border border-slate-100 flex items-baseline justify-between">
           <div>
             <p className="text-eyebrow text-slate-500">Charged to folio</p>
             <p className="text-xs text-slate-500 mt-1">{restaurant} · {guests} guest{guests > 1 ? "s" : ""}</p>
@@ -1631,7 +1631,7 @@ const BookDinnerModal = ({ stay, onClose, onConfirm }) => {
 
         <div className="mt-6 flex items-center gap-3 justify-end">
           <button onClick={onClose} className="px-5 py-2.5 rounded-full border border-slate-200 hover:bg-slate-50 text-sm">Cancel</button>
-          <button onClick={() => onConfirm({ restaurant, date, time, guests })} className="px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm" data-testid="dinner-confirm">Reserve table</button>
+          <button onClick={() => onConfirm({ restaurant, date, time, guests })} className="px-5 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm" data-testid="dinner-confirm">Reserve table</button>
         </div>
       </div>
     </div>
@@ -1658,7 +1658,7 @@ const WishlistSection = () => {
 
   return (
     <section className="bg-white rounded-[28px] border border-slate-200 p-8 md:p-10" data-testid="wishlist-section">
-      <p className="text-eyebrow text-[#C9A227]">Saved</p>
+      <p className="text-eyebrow text-brand-accent">Saved</p>
       <h3 className="mt-1 font-serif text-3xl text-slate-900">Your wishlist</h3>
       <p className="text-sm text-slate-500 mt-1">Suites and experiences you've hearted.</p>
       {items.length === 0 ? (
@@ -1668,7 +1668,7 @@ const WishlistSection = () => {
           </svg>
           <p className="mt-4 font-serif text-2xl text-slate-900">Nothing saved yet</p>
           <p className="mt-1 text-sm text-slate-500">Tap the heart on any suite or experience to save it here.</p>
-          <Link to="/rooms" className="mt-5 inline-flex px-5 py-2.5 rounded-full bg-[#4F46E5] hover:bg-[#4338CA] text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]">Browse suites</Link>
+          <Link to="/rooms" className="mt-5 inline-flex px-5 py-2.5 rounded-full bg-brand-primary hover:bg-brand-primary-hover text-white text-sm shadow-[0_10px_28px_rgba(79,70,229,0.28)]">Browse suites</Link>
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1678,7 +1678,7 @@ const WishlistSection = () => {
                 <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover" />
               </div>
               <div className="p-4">
-                <p className="text-[10px] tracking-widest uppercase text-[#C9A227]">{it.type}</p>
+                <p className="text-[10px] tracking-widest uppercase text-brand-accent">{it.type}</p>
                 <p className="mt-1 font-serif text-lg text-slate-900 truncate">{it.name}</p>
                 <div className="mt-3 flex items-center justify-between">
                   <span className="font-mono text-sm text-slate-900">{formatPrice(it.price)}</span>

@@ -6,6 +6,7 @@ import { auditLog, AUDIT_ACTION_LABELS } from "@/admin/adminMockData";
 import { ROLES, roleLabel, roleColor } from "@/admin/roles";
 import { TIERS, getTier, setTier as persistTier } from "@/admin/tier";
 import { ProBadge } from "@/admin/components/TierGate";
+import { useTenant } from "@/tenants/TenantProvider";
 
 const ROLE_FILTERS = ["all", ...ROLES.map((r) => r.key)];
 const ACTION_FILTERS = ["all", ...Object.keys(AUDIT_ACTION_LABELS)];
@@ -17,7 +18,9 @@ const RANGE_FILTERS = [
 ];
 
 export default function Settings() {
-  const [prop, setProp] = useState({ name: "Aura Hotels", tagline: "Timeless Heritage & Luxury", currency: "INR", timezone: "Asia/Kolkata", language: "English", taxRate: 18 });
+  const { tenant } = useTenant();
+  const slug = tenant?.slug || "aura";
+  const [prop, setProp] = useState({ name: tenant?.brandName || "Aura Hotels", tagline: tenant?.tagline || "Timeless Heritage & Luxury", currency: "INR", timezone: "Asia/Kolkata", language: "English", taxRate: 18 });
   const [ints, setInts] = useState({ stripe: true, gmail: true, whatsapp: false, google_analytics: true, booking_com: true });
   const [tier, setTier] = useState(getTier());
 
@@ -90,9 +93,9 @@ export default function Settings() {
               </div>
             </div>
             <div className="mt-5 space-y-3">
-              <ServiceClosurePanel tenantSlug="aura" service="spa" />
-              <ServiceClosurePanel tenantSlug="aura" service="dining" />
-              <ServiceClosurePanel tenantSlug="aura" service="experiences" />
+              <ServiceClosurePanel tenantSlug={slug} service="spa" />
+              <ServiceClosurePanel tenantSlug={slug} service="dining" />
+              <ServiceClosurePanel tenantSlug={slug} service="experiences" />
             </div>
           </div>
 

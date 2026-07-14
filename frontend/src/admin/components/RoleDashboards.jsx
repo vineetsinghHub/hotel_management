@@ -12,6 +12,18 @@ import {
 } from "@/admin/adminMockData";
 import { roleLabel } from "@/admin/roles";
 import { isPro, TIERS } from "@/admin/tier";
+import useTenantPath from "@/hooks/useTenantPath";
+
+// Small wrapper that transparently rewrites `to="/admin/xxx"` into
+// `to="/t/:slug/admin/xxx"` using the active tenant. Keeps every existing
+// Link across the role dashboards working without a mechanical rewrite.
+const TLink = ({ to, ...rest }) => {
+  const t = useTenantPath();
+  const resolved = typeof to === "string" && to.startsWith("/admin/")
+    ? t(to.slice(1))            // "/admin/foo" → "admin/foo" → "/t/:slug/admin/foo"
+    : to;
+  return <Link to={resolved} {...rest} />;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared building blocks
@@ -69,7 +81,7 @@ export const FrontDeskDashboard = () => {
               <p className="text-eyebrow text-[#C9A227]">Arriving today</p>
               <p className="mt-1 text-sm text-slate-500">{arriving.length} reservations · sorted by ETA</p>
             </div>
-            <Link to="/admin/front-desk" className="text-xs text-[#4F46E5] hover:underline">Open Front Desk →</Link>
+            <TLink to="/admin/front-desk" className="text-xs text-[#4F46E5] hover:underline">Open Front Desk →</TLink>
           </div>
           <ul className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
             {arriving.map((a) => (
@@ -121,10 +133,10 @@ export const FrontDeskDashboard = () => {
             { l: "Check-in / out", to: "/admin/front-desk", i: "concierge-bell" },
             { l: "Room Status", to: "/admin/housekeeping", i: "broom" },
           ].map((a) => (
-            <Link key={a.l} to={a.to} className="p-4 rounded-[14px] bg-white/10 hover:bg-white/15 backdrop-blur flex items-center gap-3" data-testid={`fd-action-${a.i}`}>
+            <TLink key={a.l} to={a.to} className="p-4 rounded-[14px] bg-white/10 hover:bg-white/15 backdrop-blur flex items-center gap-3" data-testid={`fd-action-${a.i}`}>
               <i className={`fa-solid fa-${a.i} text-[#E6C868]`}></i>
               <span className="text-sm">{a.l}</span>
-            </Link>
+            </TLink>
           ))}
         </div>
       </section>
@@ -165,7 +177,7 @@ export const HousekeepingDashboard = () => {
               <p className="text-eyebrow text-[#C9A227]">Priority queue</p>
               <p className="mt-1 text-sm text-slate-500">{priority.length} rooms need immediate attention</p>
             </div>
-            <Link to="/admin/housekeeping" className="text-xs text-[#4F46E5] hover:underline">Open Housekeeping →</Link>
+            <TLink to="/admin/housekeeping" className="text-xs text-[#4F46E5] hover:underline">Open Housekeeping →</TLink>
           </div>
           <ul className="divide-y divide-slate-100 max-h-[420px] overflow-y-auto">
             {priority.map((r) => {
@@ -259,7 +271,7 @@ export const FBDashboard = () => {
               </li>
             ))}
           </ul>
-          <Link to="/admin/restaurant" className="mt-4 block text-center text-xs text-[#4F46E5] hover:underline">Open Restaurant →</Link>
+          <TLink to="/admin/restaurant" className="mt-4 block text-center text-xs text-[#4F46E5] hover:underline">Open Restaurant →</TLink>
         </div>
       </section>
     </div>
@@ -284,7 +296,7 @@ export const SpaDashboard = () => (
           <p className="text-eyebrow text-[#C9A227]">Today's schedule</p>
           <p className="mt-1 text-sm text-slate-500">{spaAppointments.length} treatments booked</p>
         </div>
-        <Link to="/admin/spa" className="text-xs text-[#4F46E5] hover:underline">Open Spa →</Link>
+        <TLink to="/admin/spa" className="text-xs text-[#4F46E5] hover:underline">Open Spa →</TLink>
       </div>
       <ul className="divide-y divide-slate-100">
         {spaAppointments.map((s) => {
@@ -344,7 +356,7 @@ export const MarketingDashboard = () => {
             })}
           </tbody>
         </table>
-        <Link to="/admin/marketing" className="mt-4 block text-center text-xs text-[#4F46E5] hover:underline">Open Marketing →</Link>
+        <TLink to="/admin/marketing" className="mt-4 block text-center text-xs text-[#4F46E5] hover:underline">Open Marketing →</TLink>
       </section>
     </div>
   );
@@ -369,7 +381,7 @@ export const AccountingDashboard = () => {
         <div className="lg:col-span-2 bg-white rounded-[16px] border border-slate-200">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <p className="text-eyebrow text-[#C9A227]">Recent invoices</p>
-            <Link to="/admin/invoices" className="text-xs text-[#4F46E5] hover:underline">Open Invoices →</Link>
+            <TLink to="/admin/invoices" className="text-xs text-[#4F46E5] hover:underline">Open Invoices →</TLink>
           </div>
           <table className="w-full text-sm">
             <thead className="text-[10px] tracking-widest uppercase text-slate-400">

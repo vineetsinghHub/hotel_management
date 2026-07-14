@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AdminQuickCreateModal from "@/admin/components/AdminQuickCreateModal";
 import { getAdminUser } from "@/admin/adminAuth";
 import { hasAccess } from "@/admin/roles";
+import useTenantPath from "@/hooks/useTenantPath";
 import {
   staffThreads as seedStaffThreads,
   getUnreadMessages,
@@ -75,6 +76,7 @@ export const AdminFloatingActions = () => {
   const [threadDraft, setThreadDraft] = useState("");
   const [unread, setUnreadState] = useState(getUnreadMessages());
   const nav = useNavigate();
+  const t = useTenantPath();
 
   useEffect(() => {
     const off = subscribeUnreadMessages(setUnreadState);
@@ -281,7 +283,7 @@ export const AdminFloatingActions = () => {
                       </button>
                     </div>
                     <button
-                      onClick={() => { setOpen(false); nav("/admin/messages"); }}
+                      onClick={() => { setOpen(false); nav(t("admin/messages")); }}
                       className="mx-4 mb-3 text-[11px] text-[#4F46E5] hover:underline text-left"
                       data-testid="fab-open-message-center"
                     >

@@ -1,0 +1,20 @@
+{
+  "name": "aura-hotels-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aura Hotels multi-tenant hospitality platform — monorepo root. See MONOREPO_MIGRATION.md for phased extraction plan.",
+  "workspaces": [
+    "frontend",
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "yarn workspace frontend start",
+    "build": "yarn workspace frontend build",
+    "lint": "yarn workspace frontend lint",
+    "test": "yarn workspace frontend test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

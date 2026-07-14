@@ -9,36 +9,41 @@ import { ProBadge } from "@/admin/components/TierGate";
 import AdminOnboardingTour from "@/admin/components/AdminOnboardingTour";
 import AdminQuickCreateModal from "@/admin/components/AdminQuickCreateModal";
 import AdminFloatingActions from "@/admin/components/AdminFloatingActions";
+import { useTenant } from "@/tenants/TenantProvider";
+import useTenantPath from "@/hooks/useTenantPath";
 
+// Group definitions — the `to` field is now a relative key so we can
+// prefix each link with the active tenant path (/t/:slug/admin/…) at
+// render time via useTenantPath().
 const groups = [
   { label: "Operations", items: [
-    { k: "dashboard", to: "/admin/dashboard", label: "Dashboard", icon: "gauge" },
-    { k: "front-desk", to: "/admin/front-desk", label: "Front Desk", icon: "concierge-bell", badge: 30 },
-    { k: "reservations", to: "/admin/reservations", label: "Reservations", icon: "calendar-days" },
-    { k: "rooms", to: "/admin/rooms", label: "Rooms", icon: "bed" },
-    { k: "guests", to: "/admin/guests", label: "Guests", icon: "user-group" },
-    { k: "housekeeping", to: "/admin/housekeeping", label: "Housekeeping", icon: "broom", badge: 13 },
+    { k: "dashboard", to: "admin/dashboard", label: "Dashboard", icon: "gauge" },
+    { k: "front-desk", to: "admin/front-desk", label: "Front Desk", icon: "concierge-bell", badge: 30 },
+    { k: "reservations", to: "admin/reservations", label: "Reservations", icon: "calendar-days" },
+    { k: "rooms", to: "admin/rooms", label: "Rooms", icon: "bed" },
+    { k: "guests", to: "admin/guests", label: "Guests", icon: "user-group" },
+    { k: "housekeeping", to: "admin/housekeeping", label: "Housekeeping", icon: "broom", badge: 13 },
   ]},
   { label: "Services", items: [
-    { k: "restaurant", to: "/admin/restaurant", label: "Restaurant", icon: "utensils" },
-    { k: "spa", to: "/admin/spa", label: "Spa", icon: "spa" },
-    { k: "events", to: "/admin/events", label: "Events", icon: "calendar-heart" },
-    { k: "inventory", to: "/admin/inventory", label: "Inventory", icon: "boxes-stacked" },
+    { k: "restaurant", to: "admin/restaurant", label: "Restaurant", icon: "utensils", moduleKey: "dining" },
+    { k: "spa", to: "admin/spa", label: "Spa", icon: "spa", moduleKey: "spa" },
+    { k: "events", to: "admin/events", label: "Events", icon: "calendar-heart", moduleKey: "events" },
+    { k: "inventory", to: "admin/inventory", label: "Inventory", icon: "boxes-stacked" },
   ]},
   { label: "Business", items: [
-    { k: "staff", to: "/admin/staff", label: "Staff", icon: "id-badge" },
-    { k: "invoices", to: "/admin/invoices", label: "Invoices", icon: "file-invoice-dollar" },
-    { k: "marketing", to: "/admin/marketing", label: "Marketing", icon: "bullhorn" },
-    { k: "messages", to: "/admin/messages", label: "Messages", icon: "comments" },
-    { k: "reviews", to: "/admin/reviews", label: "Reviews", icon: "star" },
+    { k: "staff", to: "admin/staff", label: "Staff", icon: "id-badge" },
+    { k: "invoices", to: "admin/invoices", label: "Invoices", icon: "file-invoice-dollar" },
+    { k: "marketing", to: "admin/marketing", label: "Marketing", icon: "bullhorn" },
+    { k: "messages", to: "admin/messages", label: "Messages", icon: "comments" },
+    { k: "reviews", to: "admin/reviews", label: "Reviews", icon: "star" },
   ]},
   { label: "Revenue", items: [
-    { k: "rate-channel", to: "/admin/rate-channel", label: "Rate & Channel", icon: "money-bill-trend-up" },
+    { k: "rate-channel", to: "admin/rate-channel", label: "Rate & Channel", icon: "money-bill-trend-up" },
   ]},
   { label: "Insights", items: [
-    { k: "reports", to: "/admin/reports", label: "Reports", icon: "chart-line" },
-    { k: "notifications", to: "/admin/notifications", label: "Notifications", icon: "bell" },
-    { k: "settings", to: "/admin/settings", label: "Settings", icon: "gear" },
+    { k: "reports", to: "admin/reports", label: "Reports", icon: "chart-line" },
+    { k: "notifications", to: "admin/notifications", label: "Notifications", icon: "bell" },
+    { k: "settings", to: "admin/settings", label: "Settings", icon: "gear" },
   ]},
 ];
 
@@ -49,33 +54,52 @@ export const AdminLayout = ({ pageTitle, children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { isPro } = useTier();
+  const { tenant } = useTenant();
+  const t = useTenantPath();
 
-  const doLogout = () => { clearAdminUser(); toast.success("Signed out"); nav("/admin/login"); };
+  const doLogout = () => { clearAdminUser(); toast.success("Signed out"); nav(t("admin/login")); };
+
+  // Filter out sidebar items whose corresponding guest module is disabled
+  // on the active tenant. Basic PMS functions (Dashboard, Front Desk, etc.)
+  // never have a moduleKey and are always visible.
+  const isModuleEnabled = (moduleKey) => {
+    if (!moduleKey) return true;
+    if (!tenant || !tenant.enabledModules) return true;
+    return tenant.enabledModules[moduleKey] !== false;
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAF8] flex" data-testid="admin-layout">
       {/* Sidebar */}
       <aside className={`flex flex-col w-64 bg-white border-r border-slate-200 fixed inset-y-0 left-0 z-40 transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`} data-testid="admin-sidebar">
         <div className="px-5 py-5 border-b border-slate-100 flex items-center gap-2">
-          <span className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#4F46E5] to-[#312E81] text-white grid place-items-center font-serif text-lg">A</span>
+          <span
+            className="w-9 h-9 rounded-[10px] text-white grid place-items-center font-serif text-lg"
+            style={{ background: tenant?.theme?.["brand-primary"] || "linear-gradient(to bottom right, #4F46E5, #312E81)" }}
+          >
+            {tenant?.brandName?.[0] || "A"}
+          </span>
           <div className="leading-tight">
-            <p className="font-serif text-slate-900 text-sm">Aura Console</p>
-            <p className="text-[10px] tracking-widest uppercase text-slate-400">Heritage Palace</p>
+            <p className="font-serif text-slate-900 text-sm">{tenant?.brandName || "Aura"} Console</p>
+            <p className="text-[10px] tracking-widest uppercase text-slate-400">{tenant?.city || "Heritage Palace"}</p>
           </div>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-3">
           {groups.map((g) => {
-            const visible = g.items.filter((it) => user && hasAccess(it.k, user.role));
+            const visible = g.items.filter((it) => (
+              user && hasAccess(it.k, user.role) && isModuleEnabled(it.moduleKey)
+            ));
             if (visible.length === 0) return null;
             return (
               <div key={g.label} className="mb-3">
                 <p className="px-5 mb-1 text-[9px] tracking-[0.22em] uppercase text-slate-400 font-medium">{g.label}</p>
                 {visible.map((it) => {
-                  const active = loc.pathname === it.to;
+                  const to = t(it.to);
+                  const active = loc.pathname === to;
                   const proBadge = isProModule(it.k) && !isPro;
                   return (
-                    <Link key={it.k} to={it.to} onClick={() => setMobileOpen(false)}
+                    <Link key={it.k} to={to} onClick={() => setMobileOpen(false)}
                       className={`mx-3 px-3 py-2 rounded-[10px] text-sm flex items-center gap-3 transition-all ${active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
                       data-testid={`nav-${it.k}`}
                     >
@@ -114,8 +138,8 @@ export const AdminLayout = ({ pageTitle, children }) => {
             </button>
             {profileOpen && (
               <div className="absolute bottom-full left-3 right-3 mb-1 bg-white border border-slate-200 rounded-[12px] shadow-[0_12px_32px_rgba(15,23,42,0.10)] py-2" data-testid="profile-menu">
-                <Link to="/admin/settings" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile & settings</Link>
-                <a href="/" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Guest site ↗</a>
+                <Link to={t("admin/settings")} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile & settings</Link>
+                <Link to={t("")} className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">Guest site ↗</Link>
                 <button onClick={doLogout} className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50" data-testid="logout-btn">Sign out</button>
               </div>
             )}

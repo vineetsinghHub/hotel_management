@@ -1,37 +1,48 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { mockLogin, seedUsers } from "@/admin/adminAuth";
 import { roleLabel, roleColor, landingFor } from "@/admin/roles";
+import { getTenant } from "@/tenants/tenantRegistry";
 
 export default function AdminLogin() {
   const nav = useNavigate();
+  const { slug: slugParam } = useParams();
+  const slug = slugParam || "aura";
+  const tenant = getTenant(slug);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  const tenantify = (path) => path.startsWith("/admin/") ? `/t/${slug}${path}` : path;
 
   const submit = (e) => {
     e?.preventDefault();
     const u = mockLogin(email);
     if (!u) { setError("No user with that email. Try one of the demo accounts below."); return; }
     toast.success(`Welcome, ${u.name}`, { description: roleLabel(u.role) });
-    nav(landingFor(u.role));
+    nav(tenantify(landingFor(u.role)));
   };
 
-  const quickLogin = (u) => { setEmail(u.email); setTimeout(() => { mockLogin(u.email); toast.success(`Signed in as ${u.name}`); nav(landingFor(u.role)); }, 100); };
+  const quickLogin = (u) => { setEmail(u.email); setTimeout(() => { mockLogin(u.email); toast.success(`Signed in as ${u.name}`); nav(tenantify(landingFor(u.role))); }, 100); };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] grid lg:grid-cols-2" data-testid="admin-login">
+    <div className="min-h-screen bg-brand-surface grid lg:grid-cols-2" data-testid="admin-login">
       {/* Left visual */}
       <div className="relative hidden lg:block">
         <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1600&q=85" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 via-slate-900/45 to-slate-900/80"></div>
         <div className="relative h-full flex flex-col justify-between p-12 text-white">
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-[12px] bg-white/10 backdrop-blur border border-white/20 grid place-items-center font-serif text-xl">A</span>
+            <span
+              className="w-10 h-10 rounded-[12px] backdrop-blur border border-white/20 grid place-items-center font-serif text-xl"
+              style={{ backgroundColor: tenant?.theme?.["brand-primary"] ? "rgba(255,255,255,0.10)" : "rgba(255,255,255,0.10)" }}
+            >
+              {tenant?.brandName?.[0] || "A"}
+            </span>
             <div>
-              <p className="font-serif text-lg">Aura Console</p>
-              <p className="text-[10px] tracking-widest uppercase text-white/60">Heritage Palace · Property Management</p>
+              <p className="font-serif text-lg">{tenant?.brandName || "Aura"} Console</p>
+              <p className="text-[10px] tracking-widest uppercase text-white/60">{tenant?.city || "Heritage Palace"} · Property Management</p>
             </div>
           </div>
           <div>

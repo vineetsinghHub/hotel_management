@@ -66,7 +66,7 @@ export default function Booking() {
   const lastNameError = !form.lastName;
 
   return (
-    <div className="bg-[#FAFAF8] min-h-screen" data-testid="booking-page">
+    <div className="bg-brand-surface min-h-screen" data-testid="booking-page">
       <Navbar />
 
       <div className="pt-32 pb-24 px-6 md:px-10">
@@ -88,7 +88,7 @@ export default function Booking() {
               { n: 3, l: "Confirmation" },
             ].map((s, i) => (
               <div key={s.n} className="flex items-center gap-3 flex-1">
-                <div className={`w-8 h-8 rounded-full grid place-items-center text-xs font-mono ${s.active ? "bg-[#4F46E5] text-white" : "bg-white border border-slate-200 text-slate-500"}`}>{s.n}</div>
+                <div className={`w-8 h-8 rounded-full grid place-items-center text-xs font-mono ${s.active ? "bg-brand-primary text-white" : "bg-white border border-slate-200 text-slate-500"}`}>{s.n}</div>
                 <p className={`text-sm ${s.active ? "text-slate-900 font-medium" : "text-slate-500"}`}>{s.l}</p>
                 {i < 2 && <div className="flex-1 h-px bg-slate-200 ml-2"></div>}
               </div>
@@ -102,7 +102,7 @@ export default function Booking() {
               <div className="bg-white rounded-[24px] border border-slate-200 p-8" data-testid="your-stay-card">
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <p className="text-eyebrow text-[#C9A227]">Your Stay</p>
+                    <p className="text-eyebrow text-brand-accent">Your Stay</p>
                     <h2 className="mt-2 font-serif text-3xl text-slate-900">Review & modify</h2>
                   </div>
                   <Link to="/rooms" className="text-xs text-slate-500 hover:text-slate-900 flex items-center gap-1.5">
@@ -121,7 +121,7 @@ export default function Booking() {
                           key={r.id}
                           onClick={() => setRoomId(r.id)}
                           className={`text-left rounded-[16px] border transition-all overflow-hidden flex items-center gap-4 p-3 ${
-                            isOn ? "border-[#4F46E5] ring-2 ring-[#4F46E5]/15 bg-indigo-50/30" : "border-slate-200 hover:border-slate-300 bg-white"
+                            isOn ? "border-brand-primary ring-2 ring-brand-primary/15 bg-indigo-50/30" : "border-slate-200 hover:border-slate-300 bg-white"
                           }`}
                           data-testid={`stay-room-${r.id}`}
                         >
@@ -129,7 +129,7 @@ export default function Booking() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <h3 className="font-serif text-lg text-slate-900 truncate">{r.name}</h3>
-                              {isOn && <i className="fa-solid fa-check text-[#4F46E5] text-xs"></i>}
+                              {isOn && <i className="fa-solid fa-check text-brand-primary text-xs"></i>}
                             </div>
                             <p className="text-xs text-slate-500 truncate">{r.view} · Up to {r.guests} guests · {r.size} ft²</p>
                             <p className="mt-1 font-mono text-sm text-slate-900">${r.price}<span className="text-xs text-slate-500"> / night</span></p>
@@ -149,7 +149,7 @@ export default function Booking() {
                       value={checkIn}
                       min={toISODate(new Date())}
                       onChange={(e) => setCheckIn(e.target.value)}
-                      className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono"
+                      className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary font-mono"
                       data-testid="stay-checkin"
                     />
                     <p className="text-[11px] text-slate-500 mt-1.5">{weekday(inDate)} · from 14:00</p>
@@ -161,7 +161,7 @@ export default function Booking() {
                       value={checkOut}
                       min={checkIn}
                       onChange={(e) => setCheckOut(e.target.value)}
-                      className={`mt-2 w-full bg-[#FAFAF8] border rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5] font-mono ${dateError ? "border-rose-400 bg-rose-50/50" : "border-slate-200"}`}
+                      className={`mt-2 w-full bg-brand-surface border rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary font-mono ${dateError ? "border-rose-400 bg-rose-50/50" : "border-slate-200"}`}
                       data-testid="stay-checkout"
                     />
                     <p className={`text-[11px] mt-1.5 ${dateError ? "text-rose-500" : "text-slate-500"}`}>
@@ -179,7 +179,7 @@ export default function Booking() {
                       { l: "Children", d: "Ages 2–12", v: children, set: setChildren, min: 0, k: "children" },
                       { l: "Rooms", d: "Suites needed", v: roomsCount, set: setRoomsCount, min: 1, k: "rooms" },
                     ].map((row) => (
-                      <div key={row.l} className="flex items-center justify-between p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100">
+                      <div key={row.l} className="flex items-center justify-between p-4 rounded-[14px] bg-brand-surface border border-slate-100">
                         <div>
                           <p className="text-sm text-slate-900 font-medium">{row.l}</p>
                           <p className="text-[11px] text-slate-500">{row.d}</p>
@@ -213,7 +213,7 @@ export default function Booking() {
               <div className="bg-white rounded-[24px] border border-slate-200 p-8" data-testid="guest-details-card">
                 <div className="flex items-baseline justify-between">
                   <div>
-                    <p className="text-eyebrow text-[#C9A227]">Step 1</p>
+                    <p className="text-eyebrow text-brand-accent">Step 1</p>
                     <h2 className="mt-2 font-serif text-3xl text-slate-900">Guest Details</h2>
                   </div>
                   <span className="text-xs text-slate-500">Reservation held for <span className="font-mono text-slate-900">14:59</span></span>
@@ -237,7 +237,7 @@ export default function Booking() {
                       value={form.requests}
                       onChange={(e) => setForm({ ...form, requests: e.target.value })}
                       rows={3}
-                      className="mt-2 w-full bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]"
+                      className="mt-2 w-full bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary"
                       data-testid="input-requests"
                     />
                   </div>
@@ -247,7 +247,7 @@ export default function Booking() {
               {/* Upsells */}
               <div className="bg-white rounded-[24px] border border-slate-200 p-8" data-testid="upsells-card">
                 <div>
-                  <p className="text-eyebrow text-[#C9A227]">Curate your stay</p>
+                  <p className="text-eyebrow text-brand-accent">Curate your stay</p>
                   <h2 className="mt-2 font-serif text-3xl text-slate-900">Enhancements</h2>
                   <p className="mt-2 text-sm text-slate-500">Refined additions to elevate your visit — selectable now or later.</p>
                 </div>
@@ -259,14 +259,14 @@ export default function Booking() {
                         key={u.id}
                         onClick={() => toggle(u.id)}
                         className={`text-left rounded-[18px] border transition-all overflow-hidden group ${
-                          isOn ? "border-[#4F46E5] ring-2 ring-[#4F46E5]/15 shadow-[0_10px_28px_rgba(79,70,229,0.15)]" : "border-slate-200 hover:border-slate-300"
+                          isOn ? "border-brand-primary ring-2 ring-brand-primary/15 shadow-[0_10px_28px_rgba(79,70,229,0.15)]" : "border-slate-200 hover:border-slate-300"
                         }`}
                         data-testid={`upsell-${u.id}`}
                       >
                         <div className="relative aspect-[4/3] overflow-hidden">
                           <img src={u.image} alt={u.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                           {isOn && (
-                            <span className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#4F46E5] text-white grid place-items-center">
+                            <span className="absolute top-3 right-3 w-8 h-8 rounded-full bg-brand-primary text-white grid place-items-center">
                               <i className="fa-solid fa-check text-xs"></i>
                             </span>
                           )}
@@ -319,7 +319,7 @@ export default function Booking() {
                   type="checkbox"
                   checked={terms}
                   onChange={(e) => setTerms(e.target.checked)}
-                  className="mt-1 w-4 h-4 accent-[#4F46E5]"
+                  className="mt-1 w-4 h-4 accent-brand-primary"
                 />
                 <span>I have read and accept the booking policies, terms and privacy notice.</span>
               </label>
@@ -327,7 +327,7 @@ export default function Booking() {
               {/* Payment plan */}
               <div className="bg-white rounded-[24px] border border-slate-200 p-8" data-testid="payment-plan-card">
                 <div>
-                  <p className="text-eyebrow text-[#C9A227]">Payment Plan</p>
+                  <p className="text-eyebrow text-brand-accent">Payment Plan</p>
                   <h2 className="mt-2 font-serif text-3xl text-slate-900">How would you like to pay?</h2>
                   <p className="mt-2 text-sm text-slate-500">Reserve your suite now with a deposit and settle the balance — plus any in-stay extras — at check-out.</p>
                 </div>
@@ -344,13 +344,13 @@ export default function Booking() {
                         key={p.id}
                         onClick={() => setPlan(p.id)}
                         className={`text-left rounded-[18px] border p-5 transition-all ${
-                          isOn ? "border-[#4F46E5] ring-2 ring-[#4F46E5]/15 bg-indigo-50/30" : "border-slate-200 hover:border-slate-300 bg-white"
+                          isOn ? "border-brand-primary ring-2 ring-brand-primary/15 bg-indigo-50/30" : "border-slate-200 hover:border-slate-300 bg-white"
                         }`}
                         data-testid={`plan-${p.id}`}
                       >
                         <div className="flex items-center justify-between">
                           <p className="font-serif text-lg text-slate-900">{p.title}</p>
-                          <span className={`w-5 h-5 rounded-full grid place-items-center ${isOn ? "bg-[#4F46E5]" : "border border-slate-300"}`}>
+                          <span className={`w-5 h-5 rounded-full grid place-items-center ${isOn ? "bg-brand-primary" : "border border-slate-300"}`}>
                             {isOn && <i className="fa-solid fa-check text-white text-[9px]"></i>}
                           </span>
                         </div>
@@ -362,8 +362,8 @@ export default function Booking() {
                   })}
                 </div>
                 {plan !== "full" && (
-                  <div className="mt-5 p-4 rounded-[14px] bg-[#FAFAF8] border border-slate-100 flex items-start gap-3" data-testid="plan-balance-note">
-                    <i className="fa-solid fa-circle-info text-[#C9A227] mt-0.5"></i>
+                  <div className="mt-5 p-4 rounded-[14px] bg-brand-surface border border-slate-100 flex items-start gap-3" data-testid="plan-balance-note">
+                    <i className="fa-solid fa-circle-info text-brand-accent mt-0.5"></i>
                     <div className="text-sm text-slate-700">
                       Balance of <span className="font-mono text-slate-900">${balanceLater.toLocaleString()}</span> plus any in-stay extras (dining, spa, mini-bar, laundry) will be settled at check-out. A card is held on file — nothing is charged until departure.
                     </div>
@@ -380,24 +380,24 @@ export default function Booking() {
                   <span className="absolute top-4 left-4 glass-dark text-white text-[10px] tracking-[0.2em] uppercase px-3 py-1.5 rounded-full">{room.tag}</span>
                 </div>
                 <div className="p-6">
-                  <p className="text-eyebrow text-[#C9A227]">Your Reservation</p>
+                  <p className="text-eyebrow text-brand-accent">Your Reservation</p>
                   <h3 className="mt-2 font-serif text-2xl text-slate-900">{room.name}</h3>
                   <p className="text-xs text-slate-500 mt-1">{room.view} · {room.bed}</p>
 
                   <div className="mt-5 grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-[14px] bg-[#FAFAF8]">
+                    <div className="p-3 rounded-[14px] bg-brand-surface">
                       <p className="text-[10px] tracking-widest uppercase text-slate-400">Check-in</p>
                       <p className="font-serif text-lg text-slate-900 mt-1" data-testid="summary-checkin">{fmtShort(inDate)}</p>
                       <p className="text-[10px] text-slate-500">{weekday(inDate)} · 14:00</p>
                     </div>
-                    <div className="p-3 rounded-[14px] bg-[#FAFAF8]">
+                    <div className="p-3 rounded-[14px] bg-brand-surface">
                       <p className="text-[10px] tracking-widest uppercase text-slate-400">Check-out</p>
                       <p className="font-serif text-lg text-slate-900 mt-1" data-testid="summary-checkout">{fmtShort(outDate)}</p>
                       <p className="text-[10px] text-slate-500">{weekday(outDate)} · 12:00</p>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between p-3 rounded-[14px] bg-[#FAFAF8]">
+                  <div className="mt-4 flex items-center justify-between p-3 rounded-[14px] bg-brand-surface">
                     <span className="text-sm text-slate-600">Guests</span>
                     <span className="text-sm font-mono text-slate-900" data-testid="summary-guests">
                       {adults} Adult{adults > 1 ? "s" : ""}{children > 0 ? ` · ${children} Child${children > 1 ? "ren" : ""}` : ""} · {roomsCount} Suite{roomsCount > 1 ? "s" : ""}
@@ -460,7 +460,7 @@ export default function Booking() {
                       nav("/payment");
                     }}
                     disabled={!terms || lastNameError || overCapacity || dateError}
-                    className="mt-6 w-full bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm py-4 rounded-full shadow-[0_10px_28px_rgba(79,70,229,0.32)]"
+                    className="mt-6 w-full bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm py-4 rounded-full shadow-[0_10px_28px_rgba(79,70,229,0.32)]"
                     data-testid="book-now-btn"
                   >
                     {plan === "full" ? `Book Now · Pay $${grand.toLocaleString()}` : `Reserve · Pay $${payNow.toLocaleString()} now`}
@@ -487,8 +487,8 @@ const Field = ({ label, value, onChange, error, hint, testid, type = "text" }) =
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`mt-2 w-full bg-[#FAFAF8] border rounded-[14px] px-4 py-3 text-sm outline-none transition-colors ${
-        error ? "border-rose-400 bg-rose-50/50 focus:border-rose-500" : "border-slate-200 focus:border-[#4F46E5]"
+      className={`mt-2 w-full bg-brand-surface border rounded-[14px] px-4 py-3 text-sm outline-none transition-colors ${
+        error ? "border-rose-400 bg-rose-50/50 focus:border-rose-500" : "border-slate-200 focus:border-brand-primary"
       }`}
       data-testid={testid}
     />
@@ -504,7 +504,7 @@ const Select = ({ label, value, options, onChange, testid }) => (
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-2 w-full appearance-none bg-[#FAFAF8] border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-[#4F46E5]"
+        className="mt-2 w-full appearance-none bg-brand-surface border border-slate-200 rounded-[14px] px-4 py-3 text-sm outline-none focus:border-brand-primary"
         data-testid={testid}
       >
         {options.map((o) => <option key={o}>{o}</option>)}

@@ -2,15 +2,18 @@ import AdminLayout from "@/admin/components/AdminLayout";
 import ServiceClosurePanel from "@/admin/components/ServiceClosurePanel";
 import { spaAppointments, statusColor } from "@/admin/adminMockData";
 import { useServiceStatus } from "@/lib/serviceStatusStore";
+import { useTenant } from "@/tenants/TenantProvider";
 
 export default function AdminSpa() {
-  const status = useServiceStatus("aura", "spa");
+  const { tenant } = useTenant();
+  const slug = tenant?.slug || "aura";
+  const status = useServiceStatus(slug, "spa");
   const closed = status.status === "closed";
 
   return (
     <AdminLayout pageTitle="Spa Operations">
       <div className="mb-6">
-        <ServiceClosurePanel tenantSlug="aura" service="spa" />
+        <ServiceClosurePanel tenantSlug={slug} service="spa" />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">

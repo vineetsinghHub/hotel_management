@@ -4,7 +4,10 @@ import AdminLayout from "@/admin/components/AdminLayout";
 import ReadOnlyBanner, { useReadOnly } from "@/admin/components/ReadOnlyBanner";
 import ServiceClosurePanel from "@/admin/components/ServiceClosurePanel";
 import { menuItems } from "@/admin/adminMockData";
+import { useTenant } from "@/tenants/TenantProvider";
 export default function Restaurant() {
+  const { tenant } = useTenant();
+  const slug = tenant?.slug || "aura";
   const [items, setItems] = useState(menuItems);
   const [cat, setCat] = useState("All");
   const readOnly = useReadOnly();
@@ -19,7 +22,7 @@ export default function Restaurant() {
     <AdminLayout pageTitle="Restaurant · Menu">
       <ReadOnlyBanner />
       <div className="mb-6">
-        <ServiceClosurePanel tenantSlug="aura" service="dining" />
+        <ServiceClosurePanel tenantSlug={slug} service="dining" />
       </div>
       <div className="flex flex-wrap items-center gap-2 mb-6">
         {cats.map((c) => <button key={c} onClick={() => setCat(c)} className={`px-4 py-2 rounded-full text-xs ${cat === c ? "bg-slate-900 text-white" : "bg-white border border-slate-200"}`} data-testid={`cat-${c}`}>{c}</button>)}
