@@ -5,6 +5,7 @@ import { useApp } from "@aura/shared/context/AppContext";
 import { useGuestAuth } from "@aura/shared/lib/guestAuth";
 import { useTenant } from "@aura/shared/tenants/TenantProvider";
 import GuestAuthModal from "@aura/b2c-engine/components/GuestAuthModal";
+import { CurrencyLanguagePill } from "@aura/b2c-engine/components/CurrencyLanguagePill";
 
 const allLinks = [
   { path: "", key: "nav.home", module: null },
@@ -88,6 +89,10 @@ export const Navbar = ({ transparent = false }) => {
             })}
           </nav>
           <div className="flex items-center gap-3">
+            {/* Currency / language / theme pill (moved here from floating position) */}
+            <div className="hidden md:block">
+              <CurrencyLanguagePill inline />
+            </div>
             {isAuthed ? (
               <div className="relative">
                 <button

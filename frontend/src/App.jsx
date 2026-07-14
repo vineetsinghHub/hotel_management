@@ -7,7 +7,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 
 import { AppProvider } from "@aura/shared/context/AppContext";
 import ErrorBoundary from "@aura/b2c-engine/components/ErrorBoundary";
-import CurrencyLanguagePill from "@aura/b2c-engine/components/CurrencyLanguagePill";
 import { queryClient } from "@aura/shared/lib/queryClient";
 import { TenantProvider } from "@aura/shared/tenants/TenantProvider";
 import TenantSwitcher from "@aura/shared/tenants/TenantSwitcher";
@@ -169,7 +168,6 @@ function App() {
                   <Route path="/super-admin/audit" element={<ProtectedSuperAdmin><SuperAudit /></ProtectedSuperAdmin>} />
                 </Routes>
               </main>
-              <GuestOnlyPill />
             </BrowserRouter>
           </div>
         </AppProvider>
@@ -177,12 +175,5 @@ function App() {
     </ErrorBoundary>
   );
 }
-
-// Only mount the pill on guest-site routes (not /admin/* or /super-admin/*)
-const GuestOnlyPill = () => {
-  const p = typeof window !== "undefined" ? window.location.pathname : "";
-  if (p.startsWith("/admin") || p.startsWith("/super-admin")) return null;
-  return <CurrencyLanguagePill />;
-};
 
 export default App;

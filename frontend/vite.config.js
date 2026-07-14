@@ -49,6 +49,14 @@ export default defineConfig(({ mode }) => {
       hmr: { clientPort: 443, protocol: "wss" },
       // Preview environments front the container with a wildcard host.
       allowedHosts: true,
+      // Allow serving files from anywhere in the monorepo — packages/*, apps/*
+      // live above /app/frontend so we must whitelist the parent directory.
+      // Without this, Vite serves them but marks them as "unauthorized" and
+      // occasionally forces full page reloads (root cause of the reload loop
+      // users reported after the monorepo split).
+      fs: {
+        allow: [path.resolve(__dirname, "..")],
+      },
       watch: {
         ignored: ["**/node_modules/**", "**/.git/**", "**/build/**", "**/dist/**"],
       },

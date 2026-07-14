@@ -41,6 +41,14 @@ export const ConciergeChat = () => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, typing, open]);
 
+  // Cross-component "open concierge" hook — Dashboard's Quick Action button
+  // dispatches `aura:open-concierge` and we pop the panel open here.
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener("aura:open-concierge", onOpen);
+    return () => window.removeEventListener("aura:open-concierge", onOpen);
+  }, []);
+
   const send = (payload) => {
     if (!payload.trim()) return;
     const mine = { id: `m${Date.now()}`, from: "me", text: payload, time: "now" };

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { PropertyMark } from "@aura/ui-core/PropertyMark";
 import { rooms, experiences, spaTreatments } from "@aura/shared/data/mockData";
+import { useGuestAuth } from "@aura/shared/lib/guestAuth";
+import useTenantPath from "@aura/shared/hooks/useTenantPath";
 import RoomServiceSection from "@aura/b2c-engine/components/guest/RoomServiceSection";
 import DigitalKey from "@aura/b2c-engine/components/guest/DigitalKey";
 import ReviewPrompt from "@aura/b2c-engine/components/guest/ReviewPrompt";
@@ -60,10 +62,14 @@ const initialExperiences = [
 ];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+  const withTenant = useTenantPath();
+  const { user: guestUser, signOut } = useGuestAuth();
   const [active, setActive] = useState("dashboard");
   const [countdown, setCountdown] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [notifs, setNotifs] = useState(initialNotifications);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [modifyOpen, setModifyOpen] = useState(false);
   const [earlyOpen, setEarlyOpen] = useState(false);
@@ -139,7 +145,35 @@ export default function Dashboard() {
   const dismissNotif = (id) => setNotifs((s) => s.filter((n) => n.id !== id));
 
   // Quick actions
-  const quickAction = (label) => toast.success(`${label} request sent`, { description: "Our concierge will reach out within moments." });
+  // Quick action → actually navigate to the right section or fire a proper flow
+  // instead of a fire-and-forget toast (fixes "quick actions don't work" bug).
+  const quickAction = (label) => {
+    switch (label) {
+      case "Concierge": {
+        // Open the floating ConciergeChat FAB (dispatched by the global widget).
+        window.dispatchEvent(new CustomEvent("aura:open-concierge"));
+        toast.success("Concierge opened", { description: "Ask us anything." });
+        break;
+      }
+      case "Room Service":
+        setActive("roomservice");
+        toast.success("Room service", { description: "Browse the in-suite menu below." });
+        break;
+      case "Car Service":
+        toast.success("Car service requested", {
+          description: "Your butler will confirm pickup within 10 minutes.",
+          action: { label: "Track", onClick: () => setActive("itinerary") },
+        });
+        break;
+      case "Pool Access":
+        toast.success("Pool wristband dispatched", {
+          description: "A butler will deliver your digital pass shortly.",
+        });
+        break;
+      default:
+        toast.success(`${label} request sent`, { description: "Our concierge will reach out shortly." });
+    }
+  };
   const downloadInvoice = (id) => toast.success(`Invoice ${id} downloaded`, { description: "PDF saved to your device." });
   const emailInvoice = (id) => toast.success(`Invoice ${id} emailed`, { description: `Sent to ${profile.email}` });
   const exportHistory = () => toast.success("Booking history exported", { description: "CSV file saved to your device." });
@@ -331,12 +365,65 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="" className="w-9 h-9 rounded-full object-cover" />
-              <div className="hidden md:block">
-                <p className="text-sm text-slate-900 font-medium">Aarav Mehta</p>
-                <p className="text-[10px] text-slate-500 font-mono">AH-092841</p>
-              </div>
+            <div className="relative pl-3 border-l border-slate-200">
+              <button
+                onClick={() => setAccountMenuOpen((v) => !v)}
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                data-testid="top-account"
+                aria-expanded={accountMenuOpen}
+              >
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="" className="w-9 h-9 rounded-full object-cover" />
+                <div className="hidden md:block text-left">
+                  <p className="text-sm text-slate-900 font-medium">Aarav Mehta</p>
+                  <p className="text-[10px] text-slate-500 font-mono">AH-092841</p>
+                </div>
+                <i className={`fa-solid fa-chevron-${accountMenuOpen ? "up" : "down"} text-[9px] text-slate-500 hidden md:inline`}></i>
+              </button>
+              {accountMenuOpen && (
+                <div
+                  className="absolute right-0 top-full mt-2 w-60 bg-white border border-slate-200 rounded-[14px] shadow-[0_20px_50px_rgba(15,23,42,0.10)] py-1.5 z-40"
+                  data-testid="top-account-menu"
+                >
+                  <div className="px-4 py-3 border-b border-slate-100">
+                    <p className="text-sm font-medium text-slate-900">Aarav Mehta</p>
+                    <p className="text-[11px] text-slate-500">{guestUser?.email || "aarav@aurahotels.com"}</p>
+                  </div>
+                  <button
+                    onClick={() => { setActive("profile"); setAccountMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                    data-testid="account-menu-profile"
+                  >
+                    <i className="fa-regular fa-user text-[11px] w-4 text-slate-500"></i>Profile
+                  </button>
+                  <button
+                    onClick={() => { setActive("settings"); setAccountMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                    data-testid="account-menu-preferences"
+                  >
+                    <i className="fa-solid fa-sliders text-[11px] w-4 text-slate-500"></i>Preferences
+                  </button>
+                  <button
+                    onClick={() => { setActive("bookings"); setAccountMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                    data-testid="account-menu-reservations"
+                  >
+                    <i className="fa-solid fa-calendar-days text-[11px] w-4 text-slate-500"></i>My reservations
+                  </button>
+                  <div className="border-t border-slate-100 my-1"></div>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setAccountMenuOpen(false);
+                      toast.success("Signed out", { description: "Come back soon." });
+                      navigate(withTenant(""));
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                    data-testid="account-menu-signout"
+                  >
+                    <i className="fa-solid fa-arrow-right-from-bracket text-[11px] w-4"></i>Sign out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
