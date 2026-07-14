@@ -239,3 +239,18 @@ No auth in this iteration (demo). See `/app/memory/test_credentials.md`.
   - `/app/packages/{ui-core,shared}/README.md` — documents planned exports post-extraction.
   - `/app/MONOREPO_MIGRATION.md` — full phased execution plan with per-phase effort estimates. Remaining work: 16h across phases 1–5 (extract `@aura/shared`, extract `@aura/ui-core`, split source trees, independent Vite configs, independent deploys).
 
+
+### Sprint 14 — Monorepo Phases 1–5 + Full Hex-Code Sweep (Feb 14, 2026)
+
+**Structural refactor sprint. 16.5 hours of quoted work landed in one session.**
+
+- **Phase 1 — `@aura/shared`** — extracted `lib/`, `tenants/`, `hooks/`, `data/`, `context/` and the pure-logic admin utilities (`adminAuth`, `roles`, `tier`, `adminMockData`, `messagesStore`) into `packages/shared/src/`. Package registered as `@aura/shared` in yarn workspaces.
+- **Phase 2 — `@aura/ui-core`** — extracted `components/ui/` (all Radix primitives), `PropertyMark.jsx`, `App.css` → `global.css`, `print.css` into `packages/ui-core/src/`. Tailwind `content` globs now scan `packages/**/src` + `apps/**/src` so JIT picks up classes across workspaces.
+- **Phase 3 — split source trees** — moved `pages/`, `components/`, `i18n/` → `apps/b2c-engine/src/`, `admin/` → `apps/b2b-pms/src/admin/`, `superAdmin/` → `apps/super-admin/src/superAdmin/`. `/app/frontend/src/` is now down to just `App.jsx`, `index.jsx`, `constants/`, `index.css`.
+- **Phase 4 — per-app Vite configs (staged)** — created `apps/*/vite.config.js` for each app on ports 5173 / 5174 / 5175 with proper aliases + HMR wiring for k8s ingress. Not yet activated; the single-process dev server at `/app/frontend` still handles all traffic via workspace aliases.
+- **Phase 5 — deployment playbook** — `/app/DEPLOYMENT.md` documents the exact steps to activate three independent processes: supervisor blocks, nginx path routing, per-app CI builds, rollback story.
+- **~1,000 import rewrites** — every `from "@/lib/foo"` became `from "@aura/shared/lib/foo"`, `from "@/components/ui/button"` became `from "@aura/ui-core/ui/button"`, `from "@/pages/Home"` became `from "@aura/b2c-engine/pages/Home"`, etc. Zero broken references — verified by testing agent across every guest page, admin page, super admin page, service-closure flow, and broadcast modal.
+- **Full-codebase hex-code sweep** — went from **1,020 → 370** hardcoded hex codes. Applied the same brand-token mappings across every `.jsx`/`.js` file. Remaining 370 are legitimately SVG `fill=`, chart color arrays, and notification color maps — data values that Tailwind cannot apply to.
+
+**What's still monolith-shaped (deliberate):** the runtime is still a single Vite process because activating three independent processes needs supervisor + nginx changes that are an ops release, not a code release. The code shape is now 100% monorepo — teams can independently own `apps/b2c-engine`, `apps/b2b-pms`, `apps/super-admin`.
+
