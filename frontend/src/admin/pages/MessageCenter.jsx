@@ -352,8 +352,16 @@ export default function MessageCenter() {
 
       {broadcastOpen && !isPro && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={() => setBroadcastOpen(false)} data-testid="broadcast-locked">
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-2xl">
-            <TierGate routeKey="messages" inline onUpgrade={() => setBroadcastOpen(false)} />
+          <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-[24px]">
+            <button
+              onClick={() => setBroadcastOpen(false)}
+              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-slate-900 grid place-items-center shadow-[0_4px_16px_rgba(15,23,42,0.15)] transition-all"
+              aria-label="Close"
+              data-testid="broadcast-locked-close"
+            >
+              <i className="fa-solid fa-xmark text-sm"></i>
+            </button>
+            <TierGate routeKey="messages" inline compact onUpgrade={() => setBroadcastOpen(false)} />
           </div>
         </div>
       )}

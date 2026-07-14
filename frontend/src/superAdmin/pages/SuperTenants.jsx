@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import SuperAdminLayout from "@/superAdmin/SuperAdminLayout";
 import { platformTenants, statusPill, churnPill } from "@/superAdmin/superAdminMockData";
+import TenantPreviewModal from "@/superAdmin/components/TenantPreviewModal";
 
 const columnHelper = createColumnHelper();
 
@@ -17,6 +18,7 @@ export default function SuperTenants() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [templateFilter, setTemplateFilter] = useState("all");
   const [sorting, setSorting] = useState([{ id: "mrr", desc: true }]);
+  const [previewTenant, setPreviewTenant] = useState(null);
 
   // Filter dataset before feeding it to the table.
   const data = useMemo(() =>
@@ -90,7 +92,15 @@ export default function SuperTenants() {
         const t = info.row.original;
         return (
           <div className="flex items-center gap-1">
-            <a href={`/t/${t.slug}`} target="_blank" rel="noreferrer" className="w-7 h-7 rounded-full hover:bg-white/10 grid place-items-center text-slate-400 hover:text-white" title="Preview storefront" data-testid={`preview-${t.slug}`}>
+            <button
+              onClick={(e) => { e.preventDefault(); setPreviewTenant(t); }}
+              className="w-7 h-7 rounded-full hover:bg-white/10 grid place-items-center text-slate-400 hover:text-white"
+              title="Preview as tenant (live)"
+              data-testid={`preview-${t.slug}`}
+            >
+              <i className="fa-solid fa-eye text-[10px]"></i>
+            </button>
+            <a href={`/t/${t.slug}`} target="_blank" rel="noreferrer" className="w-7 h-7 rounded-full hover:bg-white/10 grid place-items-center text-slate-400 hover:text-white" title="Open storefront in new tab" data-testid={`open-${t.slug}`}>
               <i className="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
             </a>
             <button
@@ -222,6 +232,12 @@ export default function SuperTenants() {
           </div>
         </div>
       </div>
+
+      <TenantPreviewModal
+        tenant={previewTenant}
+        open={!!previewTenant}
+        onClose={() => setPreviewTenant(null)}
+      />
     </SuperAdminLayout>
   );
 }

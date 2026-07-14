@@ -15,6 +15,8 @@ export const TenantSwitcher = () => {
   // Preview-only surface: hide in production builds and on admin/super-admin.
   if (process.env.NODE_ENV === "production" && process.env.REACT_APP_SHOW_TENANT_SWITCHER !== "true") return null;
   if (pathname.startsWith("/admin") || pathname.startsWith("/super-admin")) return null;
+  // Hide when the storefront is embedded (Super Admin "Preview as tenant" iframe).
+  if (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("embed") === "1") return null;
 
   const activeSlug = slug || "aura";
   const active = tenants.find((t) => t.slug === activeSlug) || tenants[0];

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import SuperAdminLayout from "@/superAdmin/SuperAdminLayout";
 import { TEMPLATES } from "@/tenants/tenantRegistry";
+import BrandPreview from "@/superAdmin/components/BrandPreview";
 
 // 4-step wizard for onboarding a new tenant. Purely mock — collects values
 // and pretends to provision. In production this hits `/api/tenants` POST.
@@ -91,7 +92,9 @@ export default function SuperProvision() {
         })}
       </div>
 
-      <div className="max-w-3xl mx-auto p-8 rounded-[20px] bg-white/5 border border-white/10" data-testid="provision-panel">
+      <div className={`${step === 2 ? "max-w-6xl" : "max-w-3xl"} mx-auto`}>
+        <div className={step === 2 ? "grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start" : ""}>
+          <div className="p-8 rounded-[20px] bg-white/5 border border-white/10" data-testid="provision-panel">
         {step === 0 && (
           <div className="space-y-4" data-testid="provision-step-profile">
             <p className="text-eyebrow text-[#C9A227]">Step 1 of 4</p>
@@ -231,6 +234,22 @@ export default function SuperProvision() {
             <button onClick={launch} disabled={busy} className="px-6 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-70 text-white text-sm shadow-[0_10px_28px_rgba(16,185,129,0.35)] flex items-center gap-2" data-testid="provision-launch">
               {busy ? <><i className="fa-solid fa-spinner animate-spin text-xs"></i>Provisioning…</> : <><i className="fa-solid fa-rocket text-[10px]"></i>Launch tenant</>}
             </button>
+          )}
+        </div>
+          </div>
+
+          {step === 2 && (
+            <div className="hidden lg:block">
+              <BrandPreview
+                brandName={form.brandName}
+                tagline={form.tagline || "Where every stay becomes a story"}
+                primary={form.primary}
+                accent={form.accent}
+                surface={form.surface}
+                template={form.template}
+                tier={form.tier}
+              />
+            </div>
           )}
         </div>
       </div>

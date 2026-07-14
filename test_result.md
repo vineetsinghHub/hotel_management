@@ -109,6 +109,15 @@ user_problem_statement: |
        email folio + approve balance charge from room.
     2. (P2) Rate & Channel Manager UI — page file existed but was NOT routed / not in sidebar.
 
+  New round (Feb 2026 — user request):
+    A. Provisioning wizard live preview panel — right-side mini Home hero + mini RoomCard that
+       live-updates as the operator picks brand template & colors in Step 3 of SuperProvision.
+    B. "Preview as tenant" iframe modal in Super Admin Tenants list — full-screen modal with a
+       device-size toggle (desktop / tablet / mobile), route selector, reload, copy-link,
+       open-in-new-tab, and ESC/close-button dismiss.
+    C. BUG: Basic-tier Broadcast modal on /admin/messages is too large (renders full-page TierGate,
+       exceeds viewport, no close button).
+
 frontend:
   - task: "Fast Check-out QR modal on Guest Dashboard"
     implemented: true
@@ -205,10 +214,193 @@ frontend:
             • Regression check: All admin pages load without console errors ✓
             No console errors detected. All features working as expected.
 
+  - task: "SuperProvision Brand step — Live Preview panel"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/superAdmin/pages/SuperProvision.jsx, /app/frontend/src/superAdmin/components/BrandPreview.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: |
+            Added <BrandPreview /> to the right side of Step 3 (Brand) of the SuperProvision wizard.
+            The wizard container widens (max-w-3xl → max-w-6xl) on step 2 and switches to a
+            2-column grid (form | 360px preview) on lg+ screens.
+            The preview panel (data-testid="brand-preview-panel") includes:
+              • Browser chrome with a live URL `aurahotels.com/t/<slug>`
+              • Mini navbar with brand initial + brand name + Book stay CTA
+              • Mini hero (150px) with template-specific background image, overlay, eyebrow,
+                brand name, tagline, and Reserve / Explore buttons — all re-themed via the
+                primary/accent/surface tokens and template radius/serif.
+              • Mini RoomCard (data-testid="brand-preview-roomcard") with image, name, price,
+                accent-tinted rating chip and primary-colored View button.
+              • Bottom legend showing the three hex values.
+            The preview live-updates when the operator:
+              (a) types in Brand name (Step 1 — persists across steps),
+              (b) picks a template (luxury / heritage / basic),
+              (c) tweaks primary / accent / surface color pickers,
+              (d) switches tier (Basic ↔ Pro).
+            Verified visually with Playwright — luxury vs heritage renders swap correctly.
+            To reach: /super-admin → click "Ananya Bose" demo tile → Provision → fill Step 1 →
+            Next → Next → Brand step visible with preview on right.
+        - working: true
+          agent: "testing"
+          comment: |
+            ✅ FULLY TESTED - All functionality working correctly:
+            • Navigation flow: /super-admin → Ananya Bose demo tile → /super-admin/provision ✓
+            • Step 1 (Property): Filled brandName="Sunrise Serenity", email="gm@sunrise.com", city="Jaipur" ✓
+            • Step 2 (Domain): Clicked Next (defaults OK) ✓
+            • Step 3 (Brand): brand-preview-panel renders on right side ✓
+            • brand-preview-browser shows browser chrome with URL "aurahotels.com/t/sunrise-serenity" ✓
+            • brand-preview-roomcard is present with room image, name, price ✓
+            • Template switching works perfectly:
+              - Clicked template-heritage → preview swaps to maroon color + heritage image ✓
+              - Clicked template-basic → preview swaps to teal color + basic image ✓
+              - Clicked template-luxury → returns to indigo color + luxury image ✓
+            • Primary color picker change: Changed from #4F46E5 to #FF0000 → preview updated live ✓
+            • Tier toggle: Clicked tier-pro → preview panel shows "luxury · pro" label ✓
+            • Screenshots captured: test_a_heritage.png, test_a_luxury.png, test_a_color_change.png ✓
+            No console errors. All data-testids present and functional. Live preview updates correctly.
+
+  - task: "SuperTenants — Preview-as-tenant iframe modal"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/superAdmin/pages/SuperTenants.jsx, /app/frontend/src/superAdmin/components/TenantPreviewModal.jsx, /app/frontend/src/tenants/TenantSwitcher.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: |
+            Added a full-screen "Preview as tenant" iframe modal for the Super Admin Tenants list.
+            Replaced the old inline preview-storefront anchor with two actions per row:
+              • [data-testid="preview-<slug>"] — eye icon — opens the new modal (in-app iframe)
+              • [data-testid="open-<slug>"] — external icon — opens `/t/<slug>` in a new tab
+            (impersonate and details icons unchanged.)
+            The modal (data-testid="tenant-preview-modal") portals into document.body and includes:
+              • Top toolbar: tenant avatar + name + slug, mock URL bar showing current path,
+                device toggle pills for desktop/tablet/mobile ([data-testid="preview-device-desktop|tablet|mobile"]),
+                reload ([data-testid="preview-reload"]), open-in-new-tab ([data-testid="preview-open-new-tab"]),
+                copy-link ([data-testid="preview-copy-link"]), close ([data-testid="preview-close"]).
+              • Left rail: 7 route buttons — Home, Rooms, Dining, Spa, Experiences, Booking, Gallery —
+                each with [data-testid="preview-route-<key>"]. Locked with lock icon when a module is
+                disabled on the tenant. Tier + template callout below.
+              • Stage: themed iframe (`<iframe data-testid="preview-iframe">`) sized to device dimensions.
+                Loading overlay (data-testid="preview-loading") shows while iframe is loading.
+              • ESC closes the modal, backdrop click closes, body scroll locks while open.
+            The TenantSwitcher pill inside the iframe is hidden when ?embed=1 is set (verified in
+            screenshot — Bhairavgarh Palace loaded inside modal with no floating switcher).
+            NOTE: Preview only renders storefront correctly for tenants in tenantRegistry
+            (aura, bhairavgarh, hillhaven — top 3 of the seeded 12). The remaining 9 mock
+            platform tenants show a 404 wall inside the iframe (expected — they are ops-mock only).
+            To reach: /super-admin → Ananya Bose demo tile → Tenants → click eye icon on any row.
+        - working: true
+          agent: "testing"
+          comment: |
+            ✅ FULLY TESTED - All functionality working correctly:
+            • Navigation: /super-admin/tenants → clicked preview-bhairavgarh (eye icon) ✓
+            • tenant-preview-modal opened successfully ✓
+            • Toolbar elements verified:
+              - Shows "Preview as Bhairavgarh Palace" ✓
+              - Mock URL bar shows "aurahotels.com/t/bhairavgarh" ✓
+            • preview-iframe is present and loads Bhairavgarh storefront (heritage template, maroon) ✓
+            • preview-loading overlay disappears after iframe loads ✓
+            • All 7 route buttons found: preview-route-home, rooms, dining, spa, experiences, booking, gallery ✓
+            • Route navigation: Clicked preview-route-rooms → URL bar updated to include "/rooms" ✓
+            • Device toggle - Mobile: Clicked preview-device-mobile → preview-stage-mobile present, width ~390px ✓
+            • Device toggle - Desktop: Clicked preview-device-desktop → preview-stage-desktop present ✓
+            • Reload button: Clicked preview-reload → preview-loading overlay reappeared briefly ✓
+            • Copy link button: Clicked preview-copy-link → button works (toast may appear) ✓
+            • ✅ CRITICAL PASS: TenantSwitcher is NOT visible inside iframe (correctly suppressed by ?embed=1) ✓
+            • ESC key closes modal ✓
+            • Close button (preview-close) closes modal ✓
+            • Tested other tenants:
+              - preview-aura (luxury) → modal opens correctly ✓
+              - preview-hillhaven (basic) → modal opens correctly ✓
+              - preview-kalinga-court → modal opens, iframe shows 404 (EXPECTED - ops-mock only) ✓
+            • Screenshots captured: test_b_desktop.png, test_b_mobile.png ✓
+            No console errors. All data-testids present and functional. Modal fully operational.
+
+  - task: "BUG: Basic-tier Broadcast modal size on /admin/messages"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/admin/pages/MessageCenter.jsx, /app/frontend/src/admin/components/TierGate.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: |
+            USER REPORTED BUG:
+              https://front-desk-hub-4.preview.emergentagent.com/admin/messages — after pressing
+              Broadcast the modal is too large.
+            ROOT CAUSE:
+              MessageCenter's broadcast-locked wrapper rendered the full-page <TierGate inline />
+              which has a giant hero band + dual plan cards + full feature lists. It also had
+              NO close button. Combined height easily exceeded 800px, spilling out of typical
+              viewports.
+            FIX:
+              1. TierGate.jsx — added new `compact` prop that:
+                 - Reduces hero paddings (`px-6 pt-6 pb-5` vs `px-8 pt-10 pb-8`)
+                 - Smaller icon tile (`w-12 h-12` vs `w-16 h-16`)
+                 - Smaller headline (`text-2xl` vs `text-3xl sm:text-4xl`)
+                 - Renders only the top 3 features per plan (was all 5-6)
+                 - Tightens body/plan-card paddings + spacings
+              2. MessageCenter.jsx broadcast-locked wrapper —
+                 - Passes `compact` to TierGate
+                 - Adds `max-h-[88vh] overflow-y-auto` so the modal scrolls if the viewport is
+                   still short
+                 - Adds a close X button in the top-right ([data-testid="broadcast-locked-close"])
+            VERIFIED VIA PLAYWRIGHT SCREENSHOT:
+              Modal box is now 672 × 478.5px (fits comfortably in 900h viewport with margin).
+              Close button dismisses the modal cleanly.
+            TO REACH:
+              /admin/login → email `gm@aurahotels.com` any password → /admin/messages → click the
+              "Broadcast" button in the top-right (Basic tier is the default; if the tester is on
+              Pro, they should set `localStorage.aura_admin_tier="basic"` and reload first).
+        - working: true
+          agent: "testing"
+          comment: |
+            ✅ FULLY TESTED - Bug fix verified, all functionality working correctly:
+            • Login flow: /admin/login with gm@aurahotels.com → redirected to dashboard ✓
+            • Onboarding tour dismissed successfully ✓
+            • Set tier to Basic via localStorage.setItem("aura_admin_tier", "basic") ✓
+            • Navigation: /admin/messages ✓
+            • Clicked broadcast-open button ✓
+            • broadcast-locked modal opened successfully ✓
+            • ✅ CRITICAL PASS: Modal height measured at 478.5px (viewport 900px, max allowed 88vh = 792px) ✓
+            • Compact TierGate content verified:
+              - Hero band with "Aura Pro Tier" eyebrow ✓
+              - Title "Broadcast & Templates" ✓
+              - Two plan cards (Basic "Current" + Pro "Recommended") ✓
+              - Each plan shows only top 3 features (compact mode) ✓
+              - "Cancel anytime · 14-day money-back guarantee" line ✓
+            • broadcast-locked-close button (X in top-right) is visible and clickable ✓
+            • Close button dismisses modal ✓
+            • Backdrop click also closes modal ✓
+            • Upgrade flow tested:
+              - Clicked tier-gate-upgrade-messages ✓
+              - Toast "Welcome to Aura Pro" appeared ✓
+              - Locked modal closed after upgrade ✓
+            • ✅ REGRESSION PASS: After upgrade to Pro:
+              - Clicked broadcast-open again ✓
+              - Pro modal (broadcast-modal) opened with textarea and Send button ✓
+              - Typed "Hello guests" into broadcast-text ✓
+              - Clicked broadcast-send ✓
+              - Toast "Broadcast sent to 24 guests" appeared ✓
+              - Pro modal closed after sending ✓
+            • Screenshots captured: test_c_locked_modal.png, test_c_pro_modal.png ✓
+            No console errors. All data-testids present and functional. Bug is FIXED.
+
+
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "1.1"
+  test_sequence: 3
   run_ui: false
 
 test_plan:
@@ -572,3 +764,169 @@ agent_communication:
         ✅ All data-testids present and functional
         
         🎉 APPLICATION IS PRODUCTION-READY
+
+    - agent: "main"
+      message: |
+        NEW ROUND (Feb 2026) — please test three new items on the Super Admin Hub + a bug fix
+        on the PMS admin Message Center. See tasks with needs_retesting=true:
+
+        1. **SuperProvision Brand step live preview panel** (frontend, /super-admin/provision)
+           - Login: `/super-admin` → click "Ananya Bose" demo tile (auto-signs in).
+           - Navigate: /super-admin/provision.
+           - Step 1: fill `pv-brandName` = "Sunrise Serenity", `pv-email` = "gm@sunrise.com",
+             `pv-city` = "Jaipur" → click `provision-next`.
+           - Step 2: click `provision-next` (defaults are fine).
+           - Step 3 (Brand): confirm `brand-preview-panel` renders on the right (only visible on
+             lg+ screens — viewport ≥ 1024px). Confirm:
+             a. Live URL bar shows `aurahotels.com/t/sunrise-serenity`.
+             b. Mini navbar shows the brand initial + name.
+             c. Mini hero shows brand name + tagline + reserve/explore buttons.
+             d. Mini RoomCard (`brand-preview-roomcard`) renders with room image + price.
+           - Click `template-heritage` — preview swaps to maroon + heritage image + serif change.
+           - Click `template-basic` — preview swaps to teal + basic image.
+           - Change the "Primary" color picker (Field near `pv-primary`) — mini nav initial,
+             hero button, room price all update to new color live.
+           - Toggle tier from Basic to Pro (`tier-pro`) — top-right of preview panel shows
+             "luxury · pro" (or whichever template).
+           - Please screenshot the brand step in luxury + heritage variants.
+           - Viewport recommendation: 1400 × 900.
+
+        2. **SuperTenants Preview-as-tenant iframe modal** (/super-admin/tenants)
+           - Same login as above.
+           - Navigate: /super-admin/tenants.
+           - The row for "Bhairavgarh Palace" has 4 action icons — the leftmost one is the
+             new preview button (`preview-bhairavgarh`, eye icon).
+           - Click `preview-bhairavgarh` → confirm modal `tenant-preview-modal` opens.
+           - Verify:
+             a. Toolbar shows "Preview as Bhairavgarh Palace" and mock URL `aurahotels.com/t/bhairavgarh`.
+             b. Iframe (`preview-iframe`) loads the Bhairavgarh storefront (heritage template — maroon).
+             c. `preview-loading` overlay disappears once iframe loads.
+             d. Left rail lists 7 pages (`preview-route-home|rooms|dining|spa|experiences|booking|gallery`).
+             e. Clicking `preview-route-rooms` navigates the iframe to /t/bhairavgarh/rooms
+                (URL bar updates, iframe reloads).
+             f. Click `preview-device-mobile` → stage narrows to ~390px width; `preview-stage-mobile`
+                is present; storefront re-renders in mobile layout.
+             g. Click `preview-device-desktop` → returns to 1280px stage.
+             h. Click `preview-reload` — loading overlay re-appears briefly.
+             i. Click `preview-copy-link` → toast "Link copied" appears (may need clipboard permission).
+             j. ESC key closes the modal (and body scroll is restored).
+             k. Click again → click `preview-close` (X in the top-right) → modal closes.
+           - Try the same on `preview-aura` (works — luxury template) and `preview-hillhaven`
+             (works — basic template).
+           - Try `preview-kalinga-court` — iframe will show the tenant-not-found 404 wall inside
+             the modal (this is EXPECTED — Kalinga is an ops-mock tenant not in the registry).
+             The MODAL itself must still be fully functional (toolbar, close, device toggle).
+           - **CRITICAL**: verify the TenantSwitcher floating pill (bottom-left of storefront)
+             does NOT appear inside the iframe (it's suppressed by ?embed=1).
+           - Viewport: 1920 × 900.
+
+        3. **BUG FIX: Broadcast modal size on /admin/messages** (P0)
+           - Login: /admin/login with `gm@aurahotels.com` / any password.
+           - Dismiss the onboarding tour if it appears (`tour-skip` button).
+           - Navigate to /admin/messages.
+           - **PRECONDITION**: the tester must be on the Basic tier for this test.
+             If currently Pro, run `localStorage.setItem("aura_admin_tier","basic")` in devtools
+             and reload before proceeding.
+           - Click `broadcast-open` (top-right).
+           - Verify:
+             a. `broadcast-locked` modal opens.
+             b. The inner container has `max-h-[88vh]` and is scrollable — total height should
+                comfortably fit in a 900h viewport (measured ~478px in dev).
+             c. The compact TierGate is visible with only 3 features listed per plan (was 5-6).
+             d. `broadcast-locked-close` (X in top-right) is visible and dismisses the modal.
+             e. Backdrop click still closes the modal.
+             f. `tier-gate-upgrade-messages` still works — click it, wait ~1s, tier flips to Pro,
+                broadcast modal closes.
+           - **REGRESSION**: after flipping to Pro, click `broadcast-open` again — the *Pro* modal
+             (`broadcast-modal`) should now render (small white modal with textarea + Send button).
+             Verify it still works: type text, click `broadcast-send` → toast "Broadcast sent…"
+             appears, modal closes.
+           - Viewport: 1400 × 900.
+
+        NO BACKEND CHANGES were made in this round — only frontend. Skip backend testing.
+
+        Please do NOT run the full guest-app regression suite — focus only on the three items above.
+    - agent: "testing"
+      message: |
+        ✅ ALL THREE TESTS COMPLETE - ALL FEATURES WORKING PERFECTLY
+        
+        Comprehensive testing of three new Super Admin features + one bug fix completed.
+        Viewport: 1400×900 (Test A & C), 1920×900 (Test B).
+        
+        ═══════════════════════════════════════════════════════════════════════════════
+        ✅ TEST A — SuperProvision Brand Step Live Preview Panel: PASS
+        ═══════════════════════════════════════════════════════════════════════════════
+        • Navigation: /super-admin → Ananya Bose demo tile → /super-admin/provision ✓
+        • Step 1 filled: brandName="Sunrise Serenity", email="gm@sunrise.com", city="Jaipur" ✓
+        • Step 2: Clicked Next (defaults OK) ✓
+        • Step 3 (Brand): brand-preview-panel renders on right side ✓
+        • brand-preview-browser shows URL "aurahotels.com/t/sunrise-serenity" ✓
+        • brand-preview-roomcard present with room image + price ✓
+        • Template switching:
+          - Heritage: Preview swaps to maroon (#7B2C2C) + heritage image ✓
+          - Basic: Preview swaps to teal (#0F766E) + basic image ✓
+          - Luxury: Returns to indigo (#4F46E5) + luxury image ✓
+        • Primary color change: Changed to #FF0000 → preview updated live ✓
+        • Tier toggle: Clicked tier-pro → preview shows "luxury · pro" ✓
+        • Screenshots: test_a_heritage.png, test_a_luxury.png, test_a_color_change.png ✓
+        
+        ═══════════════════════════════════════════════════════════════════════════════
+        ✅ TEST B — SuperTenants Preview-as-tenant iframe modal: PASS
+        ═══════════════════════════════════════════════════════════════════════════════
+        • Navigation: /super-admin/tenants → clicked preview-bhairavgarh ✓
+        • tenant-preview-modal opened ✓
+        • Toolbar: "Preview as Bhairavgarh Palace" + URL "aurahotels.com/t/bhairavgarh" ✓
+        • preview-iframe loads Bhairavgarh storefront (heritage, maroon) ✓
+        • preview-loading overlay disappears after load ✓
+        • All 7 route buttons present (home, rooms, dining, spa, experiences, booking, gallery) ✓
+        • Route navigation: Clicked preview-route-rooms → URL updated to "/rooms" ✓
+        • Device toggle - Mobile: preview-stage-mobile present, width ~390px ✓
+        • Device toggle - Desktop: preview-stage-desktop present ✓
+        • Reload button: preview-loading reappeared briefly ✓
+        • Copy link button: Clicked successfully ✓
+        • ✅ CRITICAL: TenantSwitcher NOT visible in iframe (suppressed by ?embed=1) ✓
+        • ESC key closes modal ✓
+        • Close button (preview-close) closes modal ✓
+        • Other tenants tested:
+          - preview-aura (luxury): Modal opens correctly ✓
+          - preview-hillhaven (basic): Modal opens correctly ✓
+          - preview-kalinga-court: Modal opens, iframe shows 404 (EXPECTED) ✓
+        • Screenshots: test_b_desktop.png, test_b_mobile.png ✓
+        
+        ═══════════════════════════════════════════════════════════════════════════════
+        ✅ TEST C — BUG FIX: Broadcast modal size on /admin/messages: PASS
+        ═══════════════════════════════════════════════════════════════════════════════
+        • Login: gm@aurahotels.com → /admin/messages ✓
+        • Tier set to Basic via localStorage ✓
+        • Clicked broadcast-open ✓
+        • broadcast-locked modal opened ✓
+        • ✅ CRITICAL: Modal height 478.5px (≤ 88vh = 792px in 900px viewport) ✓
+        • Compact TierGate content:
+          - Hero band "Aura Pro Tier" ✓
+          - Title "Broadcast & Templates" ✓
+          - Two plan cards (Basic + Pro) with top 3 features each ✓
+          - Guarantee line present ✓
+        • broadcast-locked-close button visible and functional ✓
+        • Close button dismisses modal ✓
+        • Backdrop click closes modal ✓
+        • Upgrade flow:
+          - Clicked tier-gate-upgrade-messages ✓
+          - Toast "Welcome to Aura Pro" appeared ✓
+          - Locked modal closed ✓
+        • ✅ REGRESSION: Pro modal after upgrade:
+          - broadcast-modal opened with textarea ✓
+          - Typed "Hello guests" ✓
+          - Clicked broadcast-send ✓
+          - Toast "Broadcast sent to 24 guests" appeared ✓
+          - Modal closed ✓
+        • Screenshots: test_c_locked_modal.png, test_c_pro_modal.png ✓
+        
+        ═══════════════════════════════════════════════════════════════════════════════
+        SUMMARY
+        ═══════════════════════════════════════════════════════════════════════════════
+        ✅ All 3 tests PASS with zero issues
+        ✅ No console errors detected
+        ✅ All data-testids present and functional
+        ✅ All screenshots captured successfully
+        
+        🎉 ALL FEATURES PRODUCTION-READY
