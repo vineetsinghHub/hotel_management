@@ -189,5 +189,19 @@ Design a full-fidelity luxury hospitality product (Aura Hotels) inspired by Aman
 - **12 platform tenants seeded** — mix of tiers, templates, statuses (2 at-risk) for realistic ops demos.
 - **TanStack Table 8.21.3 installed** — reusable pattern for future data grids.
 
+### Sprint 11 — Super Admin Sales Demo Tools + Bug Fixes (Feb 14, 2026)
+- **Provisioning Wizard live preview panel** (`SuperProvision.jsx` + new `BrandPreview.jsx`) — Step 3 (Brand) now shows a right-side mini storefront (browser chrome + navbar + hero + RoomCard + token legend) that live-updates on template / primary / accent / surface / tier changes. Turns the form into a design tool for sales calls.
+- **"Preview as tenant" iframe modal** (`SuperTenants.jsx` + new `TenantPreviewModal.jsx`) — new eye-icon action on every tenant row opens a full-screen modal with:
+  - Toolbar (avatar + mock URL bar + device toggle [desktop/tablet/mobile] + reload + copy-link + open-in-new-tab + close)
+  - Left rail with 7 route buttons (Home, Rooms, Dining, Spa, Experiences, Booking, Gallery), disabled + locked for modules a tenant doesn't have
+  - Tier + template callout
+  - Themed iframe stage sized to the selected device; loading overlay while the iframe boots
+  - ESC + backdrop dismiss; body scroll lock; `?embed=1` suppresses the storefront's TenantSwitcher pill
+- **Bug fix** — Basic-tier Broadcast modal on `/admin/messages` was way too large (full-page TierGate, ~750px tall, no close button):
+  - New `compact` prop on `TierGate` — tightens paddings, drops icon tile to 12×12, headline to 2xl, caps plan feature lists at 3
+  - MessageCenter's broadcast-locked wrapper now uses `max-h-[88vh] overflow-y-auto` + a `broadcast-locked-close` X button
+  - Verified modal renders at ~478px height in a 900px viewport (compact & scrollable)
+
+
 ## Test Credentials
 No auth in this iteration (demo). See `/app/memory/test_credentials.md`.
