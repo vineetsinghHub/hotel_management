@@ -254,3 +254,14 @@ No auth in this iteration (demo). See `/app/memory/test_credentials.md`.
 
 **What's still monolith-shaped (deliberate):** the runtime is still a single Vite process because activating three independent processes needs supervisor + nginx changes that are an ops release, not a code release. The code shape is now 100% monorepo — teams can independently own `apps/b2c-engine`, `apps/b2b-pms`, `apps/super-admin`.
 
+
+### Sprint 15 — Guest UX polish (Feb 14, 2026)
+
+Five small UX fixes bundled into one round after user testing:
+
+- **Currency/Language pill moved inline into Navbar** — `CurrencyLanguagePill` gains an `inline` prop that swaps the floating bottom-right chip (`fixed bottom-20 right-6`) for a subtle outline pill in the navbar row. Dropdown panel repositions from `bottom-14` → `top-12` when inline. `GuestOnlyPill` wrapper removed from `App.jsx` — no more floating widget.
+- **Dashboard account dropdown with sign-out** — the top-right avatar+name area on `/dashboard` is now a clickable `top-account` button that opens `top-account-menu` with 4 items: Profile, Preferences, My reservations, Sign out. Sign-out fires `useGuestAuth().signOut()`, toasts, then `navigate(withTenant(""))` sending the guest back to the landing screen. Previously guests had to leave the dashboard to sign out.
+- **Dashboard Quick Actions wired** — the 4-tile grid (Concierge / Room Service / Car Service / Pool Access) now does real things. `Concierge` dispatches a `aura:open-concierge` window event that `ConciergeChat.jsx` listens for and opens the panel; `Room Service` jumps to the in-suite menu section; `Car Service` and `Pool Access` fire the correct toasts (with a `Track` action button on Car Service).
+- **HMR / reload-loop fix** — widened Vite `server.fs.allow` to the monorepo root so files under `packages/*` and `apps/*` no longer trigger occasional full-page reloads.
+- **Preferences link wired** — the dashboard's Settings section already contained the currency + language selects; the new `account-menu-preferences` button routes to `setActive("settings")` which reveals the Preferences card. No orphaned section.
+
