@@ -219,3 +219,23 @@ No auth in this iteration (demo). See `/app/memory/test_credentials.md`.
   * All Reserve/Reserve-Table/Reserve-Experience CTAs disable and re-label to "Currently closed" with a lock icon. Time-slot pickers on `/spa` all disable/strikethrough. Modal Reserve inside `/experiences` respects the flag.
   Store fix: the OPEN_DEFAULT / EMPTY_MAP returns use frozen module-level singletons to avoid Zustand's "getSnapshot should be cached" infinite-loop trap.
 
+
+### Sprint 13 — Per-Hotel Admin Migration + Brand-Token Sweep + Monorepo Phase 0 (Feb 14, 2026)
+
+**Big-lift structural sprint. Three items shipped together.**
+
+- **Per-hotel PMS console (`/admin/*` → `/t/:slug/admin/*`)** — every hotel now has its own admin console at `/t/:slug/admin/*`. Legacy `/admin/*` routes redirect to `/t/aura/admin/*` for backward compatibility.
+  - `App.jsx` — new `AdminShell` wraps tenant-scoped admin routes inside `<TenantProvider>`. Route table generated from a shared `adminRoutes[]` config (one source of truth for both canonical and legacy mounts).
+  - `ProtectedAdmin` — reads `useParams().slug` + `useTenant()`. New `MODULE_MAP` blocks admin routes whose corresponding guest module is disabled on the tenant (`spa→spa`, `restaurant→dining`, `events→events`). Hillhaven (`spa:false, events:false`) automatically redirects `/t/hillhaven/admin/spa` and `.../events` to dashboard.
+  - `AdminLayout` — sidebar branding now reads `tenant.brandName` + `tenant.city` and uses `tenant.theme.brand-primary` for the initial tile. `isModuleEnabled(moduleKey)` hides Spa/Events/Restaurant items on tenants that don't have the module. All links built at render time via `useTenantPath()`.
+  - `AdminLogin` — hero card re-brands per tenant. `mockLogin` redirects use `tenantify(landingFor(role))`.
+  - `RoleDashboards` — introduced a lightweight `TLink` wrapper that transparently rewrites `to="/admin/xxx"` → `to="/t/:slug/admin/xxx"`. Six role dashboards + the Front Desk quick-action grid all rewritten in one shot.
+  - `AdminFloatingActions` "View messages" jump + `Navbar` "Admin" CTA + `AdminSpa`/`Restaurant`/`Settings` service-closure panels — all tenant-aware.
+  - Added `city` field to every entry in `tenantRegistry` (Aura → Mumbai, Bhairavgarh → Udaipur, Hill Haven → Munnar).
+- **Brand-token sweep** — swept ~140 hardcoded hex codes across `Booking.jsx`, `Payment.jsx`, `Dashboard.jsx`, and `AdminLogin.jsx` into `brand-*` Tailwind tokens (`bg-brand-primary`, `text-brand-accent`, `bg-brand-surface`, `ring-brand-primary/15`, `accent-brand-primary`, etc.). Booking is now token-pure (0 hex remaining); Payment/Dashboard have only SVG-attribute and Recharts color-array holdouts remaining. Verified by loading `/t/bhairavgarh/dashboard` and confirming the primary color re-themes to maroon (`#7B2C2C`).
+- **Monorepo Phase 0 foundation** — landed the workspace skeleton without moving any source files:
+  - `/app/package.json` — new workspace root with `workspaces: ["frontend", "apps/*", "packages/*"]`.
+  - `/app/apps/{b2c-engine,b2b-pms,super-admin}/README.md` — each documents which routes the app will own + gates + dependencies.
+  - `/app/packages/{ui-core,shared}/README.md` — documents planned exports post-extraction.
+  - `/app/MONOREPO_MIGRATION.md` — full phased execution plan with per-phase effort estimates. Remaining work: 16h across phases 1–5 (extract `@aura/shared`, extract `@aura/ui-core`, split source trees, independent Vite configs, independent deploys).
+

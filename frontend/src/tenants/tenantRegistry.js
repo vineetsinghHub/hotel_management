@@ -15,6 +15,7 @@ export const DEFAULT_TENANT = {
   template: "luxury",
   tier: "basic",
   locale: "en",
+  city: "Mumbai",
   currency: "INR",
   timezone: "Asia/Kolkata",
   logo: null,
@@ -63,6 +64,7 @@ export const TENANTS = {
     locale: "en",
     currency: "INR",
     timezone: "Asia/Kolkata",
+    city: "Udaipur",
     logo: null,
     favicon: "/favicon.ico",
     contact: {
@@ -106,6 +108,7 @@ export const TENANTS = {
     locale: "en",
     currency: "INR",
     timezone: "Asia/Kolkata",
+    city: "Munnar",
     logo: null,
     favicon: "/favicon.ico",
     contact: {
