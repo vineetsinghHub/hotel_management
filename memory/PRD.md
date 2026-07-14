@@ -265,3 +265,33 @@ Five small UX fixes bundled into one round after user testing:
 - **HMR / reload-loop fix** — widened Vite `server.fs.allow` to the monorepo root so files under `packages/*` and `apps/*` no longer trigger occasional full-page reloads.
 - **Preferences link wired** — the dashboard's Settings section already contained the currency + language selects; the new `account-menu-preferences` button routes to `setActive("settings")` which reveals the Preferences card. No orphaned section.
 
+
+### Sprint 16 — Template system + marketplace (Feb 14, 2026)
+
+**New concept:** *appearance* is a first-class per-tenant setting composed of a **template** (base look) + 4 independent **sub-options** (cursor, button, input, animation). Each option is tier-gated: Basic hotels get the "free" pool, Pro adds another tier, and "premium" items are à-la-carte purchases (`₹49` each).
+
+**New files (`@aura/shared/templates/`):**
+- `templateRegistry.js` — 5 built-in templates (Luxury·Classic, Heritage·Rajputana, Modern·Boutique, Minimal·Quiet, Signature·Glow) + 16 sub-options (4 cursors × 4 buttons × 4 inputs × 4 animations). Every option carries a `tier` field. `canUseOption()` helper enforces the gate.
+- `templateStore.js` — Zustand + localStorage. Persists `customTemplates` (super-admin-created), `tenantAppearance` (per-hotel selection), and `tenantUnlocks` (à-la-carte purchases keyed as `"family:optionKey"`). Fixed the getSnapshot-infinite-loop trap by returning primitive slices and composing in `useMemo`.
+- `useApplyAppearance.js` — writes `data-template`, `data-base`, `data-cursor`, `data-button`, `data-input`, `data-animation` onto `<html>` on every appearance change.
+
+**New CSS (`@aura/ui-core/templates.css`)** — one file targeting all data-attribute combinations:
+- 4 `[data-base=…]` blocks (typography + radii + shadow-elev CSS vars)
+- 4 `[data-cursor=…]` blocks (inline SVG data-URIs for luxe/sparkle, native crosshair, default)
+- 4 `[data-button=…]` blocks (pill/sharp/glow/lift — glow has a keyframe animation)
+- 4 `[data-input=…]` blocks (underline/filled/outlined/soft, targeting native input/textarea/select while excluding checkboxes/radios/etc.)
+- 4 `[data-animation=…]` blocks (off/subtle/lively/dramatic — dramatic has aura-rise entry animation)
+- `prefers-reduced-motion` override at the bottom for accessibility
+
+**New surfaces:**
+- **`/super-admin/templates`** — full CRUD list (`SuperTemplates.jsx`). Cards show published/draft + built-in status. Editor modal: name, description, base picker, preview image URL, per-family default option, publish toggle. Delete/publish/unpublish/edit actions on non-built-in cards.
+- **`/t/:slug/admin/appearance`** — per-hotel picker (`AdminAppearance.jsx`). Template gallery + 4 sub-option grids. Options render with tier badges (green "Included", indigo "Pro" with lock/check, gold "Premium" with lock/crown/"Owned"). Clicking a locked option opens `buy-modal` — Pro-tier CTA routes to Subscription; Premium CTA processes an à-la-carte unlock and applies the option in one action.
+
+**Wiring:**
+- `TenantProvider.jsx` mounts `<AppearanceBridge />` so every tenant scope automatically applies its appearance to `<html>`.
+- `App.jsx` imports `templates.css`, adds `AdminAppearance` to `adminRoutes`, adds `/super-admin/templates` route.
+- Sidebar entries: `admin/appearance` (palette icon) in AdminLayout; `super-admin/templates` in SuperAdminLayout.
+- `roles.js` grants Appearance access to Super Admin, GM, and Marketing.
+
+**Verified by testing agent:** all 4 sub-tests PASS. Live visual application confirmed via `document.documentElement.getAttribute("data-*")`. Tier gating verified in both Basic and Pro modes.
+
