@@ -66,7 +66,7 @@ export const ConciergeChat = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-36 right-6 z-[55] w-14 h-14 rounded-full bg-brand-primary text-white shadow-[0_12px_32px_rgba(79,70,229,0.35)] hover:-translate-y-0.5 transition-all press-scale grid place-items-center print:hidden"
+        className="fixed bottom-6 right-6 z-[55] w-14 h-14 rounded-full bg-brand-primary text-white shadow-[0_12px_32px_rgba(79,70,229,0.35)] hover:-translate-y-0.5 transition-all press-scale grid place-items-center print:hidden"
         aria-label="Open concierge chat"
         data-testid="concierge-open"
       >

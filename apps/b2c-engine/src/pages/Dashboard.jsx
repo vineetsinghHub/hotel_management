@@ -6,6 +6,7 @@ import { rooms, experiences, spaTreatments } from "@aura/shared/data/mockData";
 import { useGuestAuth } from "@aura/shared/lib/guestAuth";
 import useTenantPath from "@aura/shared/hooks/useTenantPath";
 import RoomServiceSection from "@aura/b2c-engine/components/guest/RoomServiceSection";
+import { CurrencyLanguagePill } from "@aura/b2c-engine/components/CurrencyLanguagePill";
 import DigitalKey from "@aura/b2c-engine/components/guest/DigitalKey";
 import ReviewPrompt from "@aura/b2c-engine/components/guest/ReviewPrompt";
 import ReferralCard from "@aura/b2c-engine/components/guest/ReferralCard";
@@ -320,6 +321,11 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Language / currency / theme pill — mirrors landing navbar so
+                guests can change locale from anywhere in the dashboard. */}
+            <div className="hidden md:block">
+              <CurrencyLanguagePill inline />
+            </div>
             <button
               onClick={() => setSearchOpen(true)}
               className="w-10 h-10 rounded-full border border-slate-200 hover:bg-white grid place-items-center"

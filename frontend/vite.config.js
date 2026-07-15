@@ -46,19 +46,28 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       // The Kubernetes ingress terminates TLS externally and forwards over
       // HTTP; allow the HMR websocket to be reached through the same host.
-      hmr: { clientPort: 443, protocol: "wss" },
-      // Preview environments front the container with a wildcard host.
-      allowedHosts: true,
-      // Allow serving files from anywhere in the monorepo — packages/*, apps/*
-      // live above /app/frontend so we must whitelist the parent directory.
-      // Without this, Vite serves them but marks them as "unauthorized" and
-      // occasionally forces full page reloads (root cause of the reload loop
-      // users reported after the monorepo split).
-      fs: {
-        allow: [path.resolve(__dirname, "..")],
+      hmr: {
+        clientPort: 443,
+        protocol: "wss",
+        // Longer timeout so intermittent proxy hiccups don't trigger a full reload
+        timeout: 60000,
+        overlay: false,
       },
+      allowedHosts: true,
+      fs: { allow: [path.resolve(__dirname, "..")] },
       watch: {
-        ignored: ["**/node_modules/**", "**/.git/**", "**/build/**", "**/dist/**"],
+        // Polling is more reliable than native inotify on the container FS
+        // and stops "phantom" file-change events that used to force full
+        // page reloads every few seconds in the preview environment.
+        usePolling: true,
+        interval: 800,
+        ignored: [
+          "**/node_modules/**",
+          "**/.git/**",
+          "**/build/**",
+          "**/dist/**",
+          "**/.emergent/**",
+        ],
       },
     },
 

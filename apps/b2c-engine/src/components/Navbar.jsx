@@ -89,8 +89,9 @@ export const Navbar = ({ transparent = false }) => {
             })}
           </nav>
           <div className="flex items-center gap-3">
-            {/* Currency / language / theme pill (moved here from floating position) */}
-            <div className="hidden md:block">
+            {/* Currency / language / theme pill — hidden below lg (1024px) to
+                prevent the account name from being squished on medium widths. */}
+            <div className="hidden lg:block">
               <CurrencyLanguagePill inline />
             </div>
             {isAuthed ? (
@@ -101,7 +102,7 @@ export const Navbar = ({ transparent = false }) => {
                   data-testid="nav-account"
                 >
                   <img src={user.avatar} alt="" className="w-7 h-7 rounded-full object-cover" />
-                  <span className="max-w-[100px] truncate">{user.name.split(" ")[0]}</span>
+                  <span className="max-w-[80px] truncate">{user.name.split(" ")[0]}</span>
                   <i className="fa-solid fa-chevron-down text-[9px]"></i>
                 </button>
                 {menuOpen && (
